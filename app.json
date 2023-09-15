@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "shalom-mobile-spa",
+    "slug": "shalom-mobile-spa",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "shalom-mobile-spa"
+}
