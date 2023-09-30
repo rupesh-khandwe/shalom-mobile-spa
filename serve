@@ -1,0 +1,17 @@
+const http = require("http");
+const express = require('express');
+const addMockServerMiddleware = require("./mock-server/mockServerMiddleware");
+
+const app = express();
+
+addMockServerMiddleware(app);
+
+app.use(express.static("build")); 
+app.get("/express-backend", function (req, res) {
+    res.sendFile("index.html", {root: "build"});
+})
+
+const port = 3001;
+http.createServer(app).listen(port, () => {
+    console.log('Running at http://localhost:${port}');
+})

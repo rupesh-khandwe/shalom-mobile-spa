@@ -1,0 +1,5 @@
+const addMock = require("./mock-server/mockServerMiddleware");
+
+module.exports = function(app) {
+  addMock(app);
+}

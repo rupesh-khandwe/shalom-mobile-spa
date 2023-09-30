@@ -1,0 +1,27 @@
+const ngApiMock = require("@ng-apimock/core");
+const devInterface = require("@ng-apimock/dev-interface");
+const serveStatic = require("serve-static");
+
+ngApiMock.processor.process({
+    echo: true,
+    src: "mock-server",
+    patterns: { // optional
+        mocks: '**/*Mock.json', // optional: default is '**/*.mock.json'
+        presets: '**/*Preset.json', // optional: default is '**/*.preset.json'
+    },
+    watches: { // optional
+        mocks: '**/*.json', // optional: no default, set if watch files regex is different from mocks pattern
+        presets: '**/*.json' // optional: no default, set if watch files regex is different from presets pattern
+    },
+    watch: true // optional: default is 'false'
+});
+
+module.exports = function(app){
+    app.use(ngApiMock.middleware)
+    //serve the mocking interface for local development
+    app.use("/mocks/", serveStatic(devInterface));
+
+    app.listen(app.get('port'), () => {
+        console.log('@ng-apimock/core running on port', app.get('port'));
+    });
+}
