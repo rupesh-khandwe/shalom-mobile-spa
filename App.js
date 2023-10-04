@@ -17,12 +17,14 @@ import {
 import HomeScreen from './src/components/HomeScreen';
 import ShalomScreen from './src/components/Shalom';
 import EventsScreen from './src/components/Events';
+import GoLiveScreen from './src/components/GoLive';
 import ChurchScreen from './src/components/Church';
 
 //Screen names
 const homeName = "Home";
 const shalomName = "Shalom";
 const eventsName = "Events";
+const goLiveName = "GoLive";
 const churchName = "Church";
 
 const BottomTab = createBottomTabNavigator();
@@ -47,6 +49,9 @@ export default function App() {
             }else if (rn === eventsName) {
               iconName = focused ? 'today' : 'today-outline';
 
+            } else if (rn === goLiveName) {
+              iconName = focused ? 'videocam' : 'videocam-outline';
+
             } else if (rn === churchName) {
               return <FontAwesome5 name="church" size={24} color={color} />;
             }
@@ -70,6 +75,7 @@ export default function App() {
         <BottomTab.Screen name={homeName} component={HomeScreen} options={{ headerTitle: (props) => <LogoTitle />, headerTitleAlign: 'left'}}/>
         <BottomTab.Screen name={shalomName} component={ShalomScreen} options={{ headerTitle: (props) => <LogoTitle />, headerTitleAlign: 'left'}}/>
         <BottomTab.Screen name={eventsName} component={EventsScreen} options={{ headerTitle: (props) => <LogoTitle />, headerTitleAlign: 'left'}}/>
+        <BottomTab.Screen name={goLiveName} component={GoLiveScreen} options={{ headerTitle: (props) => <LogoTitle />, headerTitleAlign: 'left'}}/>
         <BottomTab.Screen name={churchName} component={ChurchScreen} options={{ headerTitle: (props) => <LogoTitle />, headerTitleAlign: 'left'}}/>
 
       </BottomTab.Navigator>
