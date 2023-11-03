@@ -5,7 +5,15 @@
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "ios": {
+      "bundleIdentifier": "com.shalommobilespa.ios",
+      "buildNumber": "1.0.0"
+    },
+    "android": {
+      "package": "com.shalommobilespa.android",
+      "versionCode": 1
+    }
   },
   "name": "shalom-mobile-spa"
 }

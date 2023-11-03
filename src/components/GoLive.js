@@ -45,7 +45,7 @@ function JoinScreen({ getMeetingAndToken, setMode }) {
     <SafeAreaView
       style={{
         flex: 1,
-        backgroundColor: "black",
+        backgroundColor: "white",
         justifyContent: "center",
         paddingHorizontal: 6 * 10,
       }}
@@ -58,7 +58,7 @@ function JoinScreen({ getMeetingAndToken, setMode }) {
         style={{
           padding: 12,
           borderWidth: 1,
-          borderColor: "white",
+          borderColor: "gray",
           borderRadius: 6,
           color: "white",
           marginBottom: 16,

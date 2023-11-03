@@ -1,17 +1,13 @@
-import { StatusBar } from 'expo-status-bar';
+import 'react-native-gesture-handler';
 import React from 'react';
-import { StyleSheet, Text, View, Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createAppContainer } from 'react-navigation';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { FontAwesome5 } from '@expo/vector-icons'; 
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import LogoTitle from './logo';
-import HeaderButtonComponent from './src/components/common/HeaderButtonComponent'
-import {
-  Item,
-  HeaderButtons,
-} from "react-navigation-header-buttons";
 
 // Screens
 import HomeScreen from './src/components/HomeScreen';
@@ -19,6 +15,8 @@ import ShalomScreen from './src/components/Shalom';
 import EventsScreen from './src/components/Events';
 import GoLiveScreen from './src/components/GoLive';
 import ChurchScreen from './src/components/Church';
+import BibleScreen from './src/components/bible/Bible';
+import FetchAll from './src/components/bible/FetchAll';
 
 //Screen names
 const homeName = "Home";
@@ -26,10 +24,13 @@ const shalomName = "Shalom";
 const eventsName = "Events";
 const goLiveName = "GoLive";
 const churchName = "Church";
+const bibleName = "Bible";
 
 const BottomTab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
 export default function App() {
+
   return (
     
     <NavigationContainer>
@@ -54,6 +55,8 @@ export default function App() {
 
             } else if (rn === churchName) {
               return <FontAwesome5 name="church" size={24} color={color} />;
+            } else if(rn === bibleName){
+              return <FontAwesome5 name="bible" size={24} color={color} />
             }
 
             // You can return any component that you like here!
@@ -77,10 +80,20 @@ export default function App() {
         <BottomTab.Screen name={eventsName} component={EventsScreen} options={{ headerTitle: (props) => <LogoTitle />, headerTitleAlign: 'left'}}/>
         <BottomTab.Screen name={goLiveName} component={GoLiveScreen} options={{ headerTitle: (props) => <LogoTitle />, headerTitleAlign: 'left'}}/>
         <BottomTab.Screen name={churchName} component={ChurchScreen} options={{ headerTitle: (props) => <LogoTitle />, headerTitleAlign: 'left'}}/>
-
+        <BottomTab.Screen name={bibleName} component={StackNavigator} options={{ headerTitle: (props) => <LogoTitle />, headerTitleAlign: 'left'}}/>
       </BottomTab.Navigator>
     </NavigationContainer>
   );
 }
  
+function StackNavigator() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Fetch All" >
+        {(props) => <FetchAll {...props} />}
+      </Stack.Screen>
+      <Stack.Screen name="Bible" component={BibleScreen}></Stack.Screen>
+    </Stack.Navigator>
+  )
+}
 
