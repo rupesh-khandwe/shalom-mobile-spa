@@ -3,7 +3,6 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createAppContainer } from 'react-navigation';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { FontAwesome5 } from '@expo/vector-icons'; 
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
@@ -17,6 +16,9 @@ import GoLiveScreen from './src/components/GoLive';
 import ChurchScreen from './src/components/Church';
 import BibleScreen from './src/components/bible/Bible';
 import FetchAll from './src/components/bible/FetchAll';
+import ChaptersScreen from './src/components/bible/Chapters';
+import VerseScreen from './src/components/bible/Verse';
+import VerseCountScreen from './src/components/bible/VerseCount'
 
 //Screen names
 const homeName = "Home";
@@ -25,6 +27,10 @@ const eventsName = "Events";
 const goLiveName = "GoLive";
 const churchName = "Church";
 const bibleName = "Bible";
+const chaptersName = "Chapters";
+const sectionsName = "Sections";
+const verseName = "Verse";
+const verseCountName = "VerseCount";
 
 const BottomTab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -93,6 +99,9 @@ function StackNavigator() {
         {(props) => <FetchAll {...props} />}
       </Stack.Screen>
       <Stack.Screen name="Bible" component={BibleScreen}></Stack.Screen>
+      <Stack.Screen name={chaptersName} component={ChaptersScreen}></Stack.Screen>
+      <Stack.Screen name={verseCountName} component={VerseCountScreen}></Stack.Screen> 
+      <Stack.Screen name={verseName} component={VerseScreen}></Stack.Screen>
     </Stack.Navigator>
   )
 }

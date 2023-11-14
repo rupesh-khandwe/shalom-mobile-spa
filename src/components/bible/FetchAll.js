@@ -13,6 +13,7 @@ const FetchAll = ({navigation}) => {
     axios
     .get('http://192.168.68.136:8090/bible/v1/bibleList')
     .then((res) => {
+        console.log(res.data);
         setFilteredDataSource(res.data);
         setMasterDataSource(res.data);
     })
@@ -48,7 +49,8 @@ const FetchAll = ({navigation}) => {
   const ItemView = ({ item }) => {
     return (
       // Flat List Item
-      <Text style={styles.itemStyle}  onPress={() => navigation.push('Bible', {bibleId: item.id})}>
+
+      <Text style={styles.itemStyle}  onPress={() => navigation.push('Bible', {bibleId: item.bibleId})}>
         {item.id}
         {'.'}
         {item.bibleName}
@@ -89,10 +91,6 @@ const FetchAll = ({navigation}) => {
           placeholder="Type Here..."
           value={search}
         />
-
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}><Button title='Popular Bible' onPress={pressHandler} /></Text>
-        </View>
         <FlatList
           data={filteredDataSource}
           keyExtractor={(item, index) => index.toString()}
@@ -100,64 +98,32 @@ const FetchAll = ({navigation}) => {
           renderItem={ItemView}
         />
       </View>
-
-      
-      <TouchableOpacity 
-        style={styles.container}
-
-        >
-  
-  
-          <View style={styles.textContainer}>
-            <Text style={styles.jobName} numberOfLines={1}>
-             Hello 
-            </Text>
-            <Text style={styles.jobType}> <Button title='to review details screen' onPress={pressHandler} /></Text>
-          </View>
-      </TouchableOpacity>
     </SafeAreaView>
     )
   }
   
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: "space-between",
-      alignItems: "center",
-      flexDirection: "row",
-      padding: SIZES.medium,
-      borderRadius: SIZES.small,
-      backgroundColor: "#FFF",
-      ...SHADOWS.medium,
-      shadowColor: COLORS.white,
-    },
-    logoContainer: {
-      width: 50,
-      height: 50,
-      backgroundColor: COLORS.white,
-      borderRadius: SIZES.medium,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    logoImage: {
-      width: "70%",
-      height: "70%",
-    },
-    textContainer: {
-      flex: 1,
-      marginHorizontal: SIZES.medium,
-    },
-    jobName: {
-        fontSize: SIZES.medium,
-        color: COLORS.primary,
-      },
-      jobType: {
-        fontSize: SIZES.small + 2,
-        color: COLORS.gray,
-        marginTop: 3,
-        textTransform: "capitalize",
-      },
-  });
+ const styles = StyleSheet.create({
+  container: {
+    backgroundColor: 'white',
+    marginTop: SIZES.medium,
+    gap: SIZES.small,
+    borderRadius: SIZES.medium,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: SIZES.large,
+    color: COLORS.primary,
+  },
+  itemStyle: {
+    padding: 10,
+    fontSize: SIZES.large,
+    color: COLORS.primary,
+  },
+});
 
 
   export default FetchAll;

@@ -10,7 +10,7 @@ import { SIZES, COLORS } from "../../constants";
 
 
 
-const Bible = ({route, navigation}) => {
+const Sections = ({route, navigation}) => {
   const [search, setSearch] = useState('');
   const [filteredDataSource, setFilteredDataSource] = useState([]);
   const [masterDataSource, setMasterDataSource] = useState([]);
@@ -18,9 +18,8 @@ const Bible = ({route, navigation}) => {
   const API_KEY = "14336e15a3f06e3daa59286d6a38e9e3";
 
   useEffect(() => {
-
     axios
-    .get(FETCH_ALL_BOOK_URL+"/"+route.params.bibleId+"/books", { headers: { 'api-key': API_KEY, 'content-type': 'application/json'}}) 
+    .get(FETCH_ALL_BOOK_URL+"/"+route.params.bibleId+"/books/"+route.params.bookId+"/sections", { headers: { 'api-key': API_KEY, 'content-type': 'application/json'}}) 
     .then((res) => {
         console.log(
           res.data.data);
@@ -35,9 +34,10 @@ const Bible = ({route, navigation}) => {
     return (
       // Flat List Item
 
-      <Text style={styles.itemStyle}  onPress={() => navigation.push('Chapters', {bookId: item.id, bibleId: item.bibleId})}>
-       
-        {item.nameLong}
+      <Text style={styles.itemStyle} onPress={() => navigation.push('Verse', {sectionId: item.id, bibleId: item.bibleId})}>
+        {item.id}
+        {'.'}
+        {item.title}
       </Text>
     );
   };
@@ -46,7 +46,7 @@ const Bible = ({route, navigation}) => {
     //Function for click on an item
 
 
-    alert('Id : ' + item.id + ' Title : ' + item.bibleName);
+    alert('Id : ' + item.id + ' Title : ' + item.title);
   };
 
 
@@ -70,7 +70,7 @@ const Bible = ({route, navigation}) => {
       // Filter the masterDataSource
       // Update FilteredDataSource
       const newData = masterDataSource.filter(function (item) {
-        const itemData = item.nameLong;
+        const itemData = item.title;
         const textData = text;
         return itemData.indexOf(textData) > -1;
       });
@@ -131,4 +131,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Bible;
+export default Sections;

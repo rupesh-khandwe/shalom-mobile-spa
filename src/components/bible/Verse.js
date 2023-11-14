@@ -3,14 +3,14 @@
 import React, { useState, useEffect } from 'react';
 
 // import all the components we are going to use
-import { SafeAreaView, Text, StyleSheet, View, FlatList, Button } from 'react-native';
+import { SafeAreaView, Text, StyleSheet, View, FlatList, Button, ScrollView } from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import axios from 'axios';
 import { SIZES, COLORS } from "../../constants";
+import RenderHtml from 'react-native-render-html';
+import HTMLView from 'react-native-htmlview';
 
-
-
-const Bible = ({route, navigation}) => {
+const Verse = ({route, navigation}) => {
   const [search, setSearch] = useState('');
   const [filteredDataSource, setFilteredDataSource] = useState([]);
   const [masterDataSource, setMasterDataSource] = useState([]);
@@ -18,14 +18,19 @@ const Bible = ({route, navigation}) => {
   const API_KEY = "14336e15a3f06e3daa59286d6a38e9e3";
 
   useEffect(() => {
-
+    console.log("reached==");
+    console.log(route.params.bibleId + "=="+route.params.chapterId);
     axios
-    .get(FETCH_ALL_BOOK_URL+"/"+route.params.bibleId+"/books", { headers: { 'api-key': API_KEY, 'content-type': 'application/json'}}) 
+    .get(FETCH_ALL_BOOK_URL+"/"+route.params.bibleId+"/verses/"+route.params.chapterId, { 
+      params: { 'include-chapter-numbers': true, 'include-verse-spans': true},
+      headers: { 'api-key': API_KEY, 'content-type': 'application/json'}
+    }, {
+      responseType: 'document'
+    }) 
     .then((res) => {
-        console.log(
-          res.data.data);
+          console.log("VERSE COUNT =="+res.data.data.verseCount+" CONTENT =="+res.data.data.content);
         setFilteredDataSource(res.data.data);
-        setMasterDataSource(res.data.data);
+        //setMasterDataSource(res.data.data);
     })
     .catch((err) => console.log("error1 "+err));
   }, []);
@@ -35,9 +40,10 @@ const Bible = ({route, navigation}) => {
     return (
       // Flat List Item
 
-      <Text style={styles.itemStyle}  onPress={() => navigation.push('Chapters', {bookId: item.id, bibleId: item.bibleId})}>
-       
-        {item.nameLong}
+      <Text style={styles.itemStyle} >
+        {item.chapterId}
+        {/* {'.'}
+        {item.content} */}
       </Text>
     );
   };
@@ -46,7 +52,7 @@ const Bible = ({route, navigation}) => {
     //Function for click on an item
 
 
-    alert('Id : ' + item.id + ' Title : ' + item.bibleName);
+    alert('Id : ' + item.id + ' Title : ' + item.title);
   };
 
 
@@ -70,7 +76,7 @@ const Bible = ({route, navigation}) => {
       // Filter the masterDataSource
       // Update FilteredDataSource
       const newData = masterDataSource.filter(function (item) {
-        const itemData = item.nameLong;
+        const itemData = item.content;
         const textData = text;
         return itemData.indexOf(textData) > -1;
       });
@@ -87,23 +93,28 @@ const Bible = ({route, navigation}) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <SearchBar
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={styles.contentContainer}
+      >
+        <Text style={styles.itemStyle}></Text>
+        <HTMLView value={filteredDataSource.content}></HTMLView>
+        {/* <SearchBar
           round
           searchIcon={{ size: 24 }}
           onChangeText={(text) => searchFilterFunction(text)}
           onClear={(text) => searchFilterFunction('')}
           placeholder="Type Here..."
           value={search}
-        />
+        /> */}
 
-        <FlatList
+        {/* <FlatList
           data={filteredDataSource}
           keyExtractor={(item, index) => index.toString()}
           ItemSeparatorComponent={ItemSeparatorView}
           renderItem={ItemView}
-        />
-      </View>
+        /> */}
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -114,6 +125,23 @@ const styles = StyleSheet.create({
     marginTop: SIZES.medium,
     gap: SIZES.small,
     borderRadius: SIZES.medium,
+  },
+  scrollView: {
+    height: '10%',
+    width: '95%',
+    margin: 20,
+    alignSelf: 'center',
+    padding: 20,
+    borderWidth: 5,
+    borderRadius: 5,
+    borderColor: 'black',
+    backgroundColor: 'lightgrey'
+  },
+  contentContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'lightgrey',
+    paddingBottom: 10
   },
   header: {
     flexDirection: "row",
@@ -131,4 +159,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Bible;
+export default Verse;
