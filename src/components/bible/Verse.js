@@ -97,7 +97,7 @@ const Verse = ({route, navigation}) => {
         style={styles.scrollView} 
         contentContainerStyle={styles.contentContainer}
       >
-        <Text style={styles.itemStyle}></Text>
+        <Text style={styles.htmlStyle}></Text>  
         <HTMLView value={filteredDataSource.content}></HTMLView>
         {/* <SearchBar
           round
@@ -156,6 +156,14 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: SIZES.large,
     color: COLORS.primary,
+  },
+  htmlStyle: {
+    padding: 10,
+    justifyContent: 'center',
+    textAlign: 'center', 
+    fontSize: SIZES.large,
+    fontWeight: 'bold', 
+    flexWrap: 'wrap'
   },
 });
 

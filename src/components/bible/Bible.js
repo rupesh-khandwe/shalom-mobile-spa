@@ -14,20 +14,20 @@ const Bible = ({route, navigation}) => {
   const [search, setSearch] = useState('');
   const [filteredDataSource, setFilteredDataSource] = useState([]);
   const [masterDataSource, setMasterDataSource] = useState([]);
-  const FETCH_ALL_BOOK_URL = "https://api.scripture.api.bible/v1/bibles";
+  const FETCH_ALL_BOOK_URL = "https://api.scripture.api.bible/v1/bibles/";
   const API_KEY = "14336e15a3f06e3daa59286d6a38e9e3";
 
   useEffect(() => {
 
     axios
-    .get(FETCH_ALL_BOOK_URL+"/"+route.params.bibleId+"/books", { headers: { 'api-key': API_KEY, 'content-type': 'application/json'}}) 
+    .get(FETCH_ALL_BOOK_URL+route.params.bibleId+"/books", { headers: { 'api-key': API_KEY, 'content-type': 'application/json'}}) 
     .then((res) => {
         console.log(
           res.data.data);
         setFilteredDataSource(res.data.data);
         setMasterDataSource(res.data.data);
     })
-    .catch((err) => console.log("error1 "+err));
+       .catch((err) => console.log("error1 "+err));
   }, []);
 
 
@@ -35,11 +35,10 @@ const Bible = ({route, navigation}) => {
     return (
       // Flat List Item
 
-      <Text style={styles.itemStyle}  onPress={() => navigation.push('Chapters', {bookId: item.id, bibleId: item.bibleId})}>
-       
+      <Text style={styles.itemStyle}  onPress={() => navigation.push('Chapters', {bookId: item.id, bibleId: item.bibleId})}>  
         {item.nameLong}
       </Text>
-    );
+    ); 
   };
 
   const getItem = (item) => {
