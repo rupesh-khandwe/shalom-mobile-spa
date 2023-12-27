@@ -7,7 +7,6 @@ import { SafeAreaView, Text, StyleSheet, View, FlatList, Button, TouchableOpacit
 import { SearchBar } from 'react-native-elements';
 import axios from 'axios';
 import { SIZES, COLORS } from "../../constants";
-import DataTable, {COL_TYPES}  from 'react-native-datatable-component';
 import HTMLView from 'react-native-htmlview';
 import { Table, Row, Rows } from 'react-native-table-component';
 

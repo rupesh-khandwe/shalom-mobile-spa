@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image } from 'react-native';
 
-import Logo from './assets/shalom_logo.png';
+import Logo from '../../assets/favicon.png';
 
 export default function LogoTitle(){
     return(

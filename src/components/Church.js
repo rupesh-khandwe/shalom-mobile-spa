@@ -16,7 +16,7 @@ export default function Church({ navigation }) {
     useEffect(() => {
         console.log(FETCH_CHURCH_URL+SEARCH_BY_KEY+(filteredDataSource!=null)?"Bengaluru":filteredDataSource);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
         axios
-        .get("http://192.168.68.129:8090/church/v1/searchByKey?key=Bengaluru")
+        .get("http:///192.168.68.133:8090/userProfile/v1/authenticate")
         .then((res) => {
             console.log(res.data);
             setFilteredDataSource(res.data);
