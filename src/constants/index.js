@@ -1,4 +1,4 @@
-import images from "./images";
+import images from "../assets/images";
 import icons from "./icons";
 import { COLORS, FONT, SIZES, SHADOWS } from "./theme";
 

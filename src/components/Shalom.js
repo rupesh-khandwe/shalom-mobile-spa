@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList, Image, Button  } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { SafeAreaView, Text, StyleSheet, View, FlatList, Image, Button, ScrollView  } from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import axios from 'axios';
 import { SIZES, COLORS } from "../constants"; 
 import { Card, Title, Paragraph } from 'react-native-paper'
 import { FontAwesome, AntDesign } from '@expo/vector-icons'; 
 import { Video, ResizeMode } from 'expo-av';
+import { AuthContext } from '../context/AuthContext';
 
 export default function Shalom({ navigation }) {
-    const FETCH_CHURCH_URL = "http://192.168.68.129:8090/event/v1/";
+    const {userToken}= useContext(AuthContext);
+    const BASE_URL_API = "http://192.168.68.133:8090/api/shalom/v1";
     const SEARCH_BY_KEY = "eventByUserId?key=";
     const [search, setSearch] = useState('');
     const [filteredDataSource, setFilteredDataSource] = useState([]);
@@ -17,9 +19,11 @@ export default function Shalom({ navigation }) {
     const [status, setStatus] = React.useState({});
 
     useEffect(() => {
-        console.log(FETCH_CHURCH_URL+SEARCH_BY_KEY+(filteredDataSource!=null)?"Bengaluru":filteredDataSource);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
+        console.log("Shalom component");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
         axios
-        .get("http://192.168.68.129:8090/shalom/v1/shalomByUserId?id=1")
+        .get(`${BASE_URL_API}/shalomByUserId?id=1`, {
+          headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+        })
         .then((res) => {
             console.log(res.data);
             setFilteredDataSource(res.data);
@@ -81,7 +85,7 @@ export default function Shalom({ navigation }) {
                     />
                     <View style={styles.buttons}>
                         <Button title="Play" onPress={() => video.current.playFromPositionAsync(10)} />
-                        <Button title={status.isLooping ? "Set to not loop" : "Set to loop"} onPress={() => video.current.setIsLoopingAsync(!status.isLooping)} />
+                        {/* <Button title={status.isLooping ? "Set to not loop" : "Set to loop"} onPress={() => video.current.setIsLoopingAsync(!status.isLooping)} /> */}
                     </View>
                 </View>
             }
@@ -117,38 +121,53 @@ export default function Shalom({ navigation }) {
 
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
-        <View style={styles.container}>
-          <SearchBar
-            round
-            searchIcon={{ size: 24 }}
-            onChangeText={(text) => searchFilterFunction(text)}
-            onClear={(text) => searchFilterFunction('')}
-            placeholder="Search shalom..."
-            value={search}
-          />
-  
-          <FlatList
-            data={filteredDataSource}
-            keyExtractor={(e, index) => index.toString()}
-            ItemSeparatorComponent={ItemSeparatorView}
-            renderItem={ItemView}
-          />
+        <SafeAreaView style={{  flex: 1, backgroundColor: '#fff'  }}>
+          <ScrollView style={{padding: 20}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginTop: 30,
+              }}>
+              <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
+                Shalom's
+              </Text>
+            </View>
+            <View style={styles.container}>
+              {/* <SearchBar
+                lightTheme
+                round
+                inputStyle={{backgroundColor: 'white'}}
+                containerStyle={{backgroundColor: 'white'}}
+                inputContainerStyle={{backgroundColor: 'white'}}
+                placeholderTextColor={'#g5g5g5'}
+                searchIcon={{ size: 20 }}
+                onChangeText={(text) => searchFilterFunction(text)}
+                onClear={(text) => searchFilterFunction('')}
+                placeholder="Search shalom..."
+                value={search}
+              /> */}
+      
+              <FlatList
+                data={filteredDataSource}
+                keyExtractor={(e, index) => index.toString()}
+                ItemSeparatorComponent={ItemSeparatorView}
+                renderItem={ItemView}
+              />
 
-        </View>
+            </View>
+        </ScrollView>
       </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
       backgroundColor: 'white',
       marginTop: SIZES.medium,
       gap: SIZES.small,
       borderRadius: SIZES.medium,
-      justifyContent: 'center',
-      backgroundColor: '#ecf0f1',
+
     },
     header: {
       flexDirection: "row",
@@ -190,4 +209,12 @@ const styles = StyleSheet.create({
 
         margin: 16
       },
+    searchBar: {
+      flexDirection: 'row',
+      borderColor: '#C6C6C6',
+      borderRadius: 8,
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      marginRight: 5
+    }
   });

@@ -1,22 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { SafeAreaView, Text, StyleSheet, View, FlatList,ScrollView } from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import axios from 'axios';
 import { SIZES, COLORS } from "../constants"; 
 import { Card, Title, Paragraph } from 'react-native-paper'
+import { AuthContext } from '../context/AuthContext';
 
 export default function Church({ navigation }) {
 
-    const FETCH_CHURCH_URL = "http://192.168.68.129:8090/church/v1/";
+    const {userToken}= useContext(AuthContext);
+    const BASE_URL_API = "http://192.168.68.133:8090/api/church/v1";
     const SEARCH_BY_KEY = "searchByKey?key=";
     const [search, setSearch] = useState('');
     const [filteredDataSource, setFilteredDataSource] = useState([]);
     const [masterDataSource, setMasterDataSource] = useState([]);
 
     useEffect(() => {
-        console.log(FETCH_CHURCH_URL+SEARCH_BY_KEY+(filteredDataSource!=null)?"Bengaluru":filteredDataSource);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
+        console.log("Church rendered");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
         axios
-        .get("http://192.168.68.129:8090/church/v1/searchByKey?key=Bengaluru")
+        .get(`${BASE_URL_API}/searchByKey?key=Bengaluru`, {
+          headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+        })
         .then((res) => {
             console.log(res.data);
             setFilteredDataSource(res.data);
@@ -83,11 +87,27 @@ export default function Church({ navigation }) {
 
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+      <ScrollView style={{padding: 20}}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginTop: 30,
+          }}>
+          <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
+            Church List
+          </Text>
+        </View>
         <View style={styles.container}>
           <SearchBar
+            lightTheme
             round
-            searchIcon={{ size: 24 }}
+            inputStyle={{backgroundColor: 'white'}}
+            containerStyle={{backgroundColor: 'white'}}
+            inputContainerStyle={{backgroundColor: 'white'}}
+            placeholderTextColor={'#g5g5g5'}
+            searchIcon={{ size: 20 }}
             onChangeText={(text) => searchFilterFunction(text)}
             onClear={(text) => searchFilterFunction('')}
             placeholder="Search by Church name and address..."
@@ -101,6 +121,7 @@ export default function Church({ navigation }) {
             renderItem={ItemView}
           />
         </View>
+        </ScrollView>
       </SafeAreaView>
     );
 }

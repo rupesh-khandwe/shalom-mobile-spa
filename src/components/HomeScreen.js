@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList, Button, Image } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { SafeAreaView, Text, StyleSheet, View, FlatList, Button, Image, ScrollView, TouchableOpacity, ImageBackground, } from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import axios from 'axios';
 import { SIZES, COLORS } from "../constants"; 
 import { Card, Title, Paragraph } from 'react-native-paper'
 import { FontAwesome, AntDesign } from '@expo/vector-icons'; 
 import { Video, ResizeMode } from 'expo-av';
+import { AuthContext } from '../context/AuthContext';
 
 export default function HomeScreen({ navigation }) {
-    const FETCH_CHURCH_URL = "http://192.168.68.129:8090/event/v1/";
+    const {userToken}= useContext(AuthContext);
+    const BASE_URL_API = "http://192.168.68.133:8090/api/shalom/v1";
     const SEARCH_BY_KEY = "eventByUserId?key=";
     const [search, setSearch] = useState('');
     const [filteredDataSource, setFilteredDataSource] = useState([]);
@@ -21,8 +23,9 @@ export default function HomeScreen({ navigation }) {
     const likeFlow = () => {
         setLikeFlag(!likeFlag);
         axios
-        .get("http://192.168.68.129:8090/shalom/v1/updateLike", {
+        .get(`${BASE_URL_API}/updateLike`, {
             params: { userId: userId, shalomId: userId, likeFlag: likeFlag },
+            headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
             console.log(res.data);
@@ -33,9 +36,11 @@ export default function HomeScreen({ navigation }) {
     };
 
     useEffect(() => {   
-        console.log(FETCH_CHURCH_URL+SEARCH_BY_KEY+(filteredDataSource!=null)?"Bengaluru":filteredDataSource);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
+        console.log("Bearer "+ userToken);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
         axios
-        .get("http://192.168.68.129:8090/shalom/v1/shalomsWithLikeComment")
+        .get(`${BASE_URL_API}/shalomsWithLikeComment`, {
+          headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+        })
         .then((res) => {
             console.log(res.data);
             setFilteredDataSource(res.data);
@@ -95,7 +100,7 @@ export default function HomeScreen({ navigation }) {
                     />
                     <View style={styles.buttons}>
                         <Button title="Play" onPress={() => video.current.playFromPositionAsync(10)} />
-                        <Button title={status.isLooping ? "Set to not loop" : "Set to loop"} onPress={() => video.current.setIsLoopingAsync(!status.isLooping)} />
+                        {/* <Button title={status.isLooping ? "Set to not loop" : "Set to loop"} onPress={() => video.current.setIsLoopingAsync(!status.isLooping)} /> */}
                     </View>
                 </View>
             }
@@ -134,24 +139,50 @@ export default function HomeScreen({ navigation }) {
 
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
-        <View style={styles.container}>
-          <SearchBar
-            round
-            searchIcon={{ size: 24 }}
-            onChangeText={(text) => searchFilterFunction(text)}
-            onClear={(text) => searchFilterFunction('')}
-            placeholder="Search shalom..."
-            value={search}
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+        <ScrollView style={{padding: 20}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginTop: 30,
+            }}>
+            <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium'}}>
+              Hello Rupesh
+            </Text>
+            <TouchableOpacity onPress={() => navigation.openDrawer()}>
+              <ImageBackground
+                source={require('../assets/images/user-profile.jpg')}
+                style={{width: 35, height: 35}}
+                imageStyle={{borderRadius: 25}}
+              />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.container}>
+          <View
+            style={{
+              height: 5,
+              width: '100%',
+              backgroundColor: '#C8C8C8',
+            }}
           />
-  
-          <FlatList
-            data={filteredDataSource}
-            keyExtractor={(e, index) => index.toString()}
-            ItemSeparatorComponent={ItemSeparatorView}
-            renderItem={ItemView}
-          />
-        </View>
+            {/* <SearchBar
+              round
+              searchIcon={{ size: 24 }}
+              onChangeText={(text) => searchFilterFunction(text)}
+              onClear={(text) => searchFilterFunction('')}
+              placeholder="Search shalom..."
+              value={search}
+            /> */}
+    
+            <FlatList
+              data={filteredDataSource}
+              keyExtractor={(e, index) => index.toString()}
+              ItemSeparatorComponent={ItemSeparatorView}
+              renderItem={ItemView}
+            />
+          </View>
+       </ScrollView>
       </SafeAreaView>
     );
 }

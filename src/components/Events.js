@@ -1,21 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList } from 'react-native';
-import { SearchBar } from 'react-native-elements';
+import React, { useState, useEffect, useContext } from 'react';
+import { SafeAreaView, Text, StyleSheet, View, FlatList, ScrollView, TouchableHighlight, TextInput, Easing } from 'react-native';
+import { Icon, SearchBar } from 'react-native-elements';
 import axios from 'axios';
 import { SIZES, COLORS } from "../constants"; 
 import { Card, Title, Paragraph } from 'react-native-paper'
+import { AuthContext } from '../context/AuthContext';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 export default function Events({ navigation }) {
-    const FETCH_CHURCH_URL = "http://192.168.68.129:8090/event/v1/";
+    const {userToken}= useContext(AuthContext);
+    const BASE_URL_API = "http://192.168.68.133:8090/api/event/v1";
     const SEARCH_BY_KEY = "eventByUserId?key=";
     const [search, setSearch] = useState('');
     const [filteredDataSource, setFilteredDataSource] = useState([]);
     const [masterDataSource, setMasterDataSource] = useState([]);
+    const animation = useSharedValue(0);
+    const animatedStyle = useAnimatedStyle(() => {
+      return {
+        width: animation.value==1?withTiming(300, {duration: 500}):withTiming(0, {duration:500})
+      }
+    });
 
     useEffect(() => {
-        console.log(FETCH_CHURCH_URL+SEARCH_BY_KEY+(filteredDataSource!=null)?"Bengaluru":filteredDataSource);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
+        console.log("Events launched");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
         axios
-        .get("http://192.168.68.129:8090/event/v1/eventByUserId?id=1")
+        .get(`${BASE_URL_API}/eventByUserId?id=1`, {
+          headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+        })
         .then((res) => {
             console.log(res.data);
             setFilteredDataSource(res.data);
@@ -82,14 +94,64 @@ export default function Events({ navigation }) {
       />
     );
   };
-
+  
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+        <ScrollView style={{padding: 20}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginTop: 30,
+            }}>
+            <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
+              Event's
+            </Text>
+            {/* <TouchableHighlight
+              activeOpacity={1}
+              underlayColor={"#ccd0d5"}
+              onPress={this._onFocus}
+              style={styles.search_icon_box}
+            >
+              <Icon name="search" size={22} color={"#000000"}></Icon>
+            </TouchableHighlight> */}
+            {/* <Animated.View
+              style={[
+                {
+                  width: 300,
+                  height: 50,
+                  backgroundColor: '#ccd0d5',
+                  borderRadius: 10,
+                  flexDirection: 'row',
+                  alignItems: 'center'
+
+                },
+                animatedStyle
+              ]}
+            >
+              <TextInput style={{width:'80%'}} placeholder='Search..'> </TextInput>
+              <TouchableHighlight onPress={()=>{
+                if(animation.value==1){
+                  animation.value=0;
+                } else {
+                  animation.value=1;
+                }
+              }}>
+                <Icon name="search" size={22} color={"#000000"}></Icon>
+              </TouchableHighlight>
+            </Animated.View> */}
+          
+          </View>
         <View style={styles.container}>
           <SearchBar
+            lightTheme
             round
-            searchIcon={{ size: 24 }}
+            inputStyle={{backgroundColor: 'white'}}
+            containerStyle={{backgroundColor: 'white'}}
+            inputContainerStyle={{backgroundColor: 'white'}}
+            placeholderTextColor={'#g5g5g5'}
+            searchIcon={{ size: 20 }}
             onChangeText={(text) => searchFilterFunction(text)}
             onClear={(text) => searchFilterFunction('')}
             placeholder="Search events by location..."
@@ -103,7 +165,9 @@ export default function Events({ navigation }) {
             renderItem={ItemView}
           />
         </View>
+        </ScrollView>
       </SafeAreaView>
+
     );
 }
 
@@ -127,5 +191,14 @@ const styles = StyleSheet.create({
       padding: 10,
       fontSize: SIZES.large,
       color: COLORS.primary,
+    },
+    search_icon_box: {
+      width: 40,
+      height: 40,
+      borderRadius: 40,
+      backgroundColor: "#e4e6eb",
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center'
     },
   });
