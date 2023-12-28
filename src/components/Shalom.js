@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList, Image, Button  } from 'react-native';
+import { SafeAreaView, Text, StyleSheet, View, FlatList, Image, Button, ScrollView  } from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import axios from 'axios';
 import { SIZES, COLORS } from "../constants"; 
@@ -121,44 +121,53 @@ export default function Shalom({ navigation }) {
 
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
-        <View style={styles.container}>
-          <SearchBar
-            lightTheme
-            round
-            inputStyle={{backgroundColor: 'white'}}
-            containerStyle={{backgroundColor: 'white'}}
-            inputContainerStyle={{backgroundColor: 'white'}}
-            placeholderTextColor={'#g5g5g5'}
-            searchIcon={{ size: 20 }}
-            onChangeText={(text) => searchFilterFunction(text)}
-            onClear={(text) => searchFilterFunction('')}
-            placeholder="Search shalom..."
-            value={search}
-          />
-  
-          <FlatList
-            data={filteredDataSource}
-            keyExtractor={(e, index) => index.toString()}
-            ItemSeparatorComponent={ItemSeparatorView}
-            renderItem={ItemView}
-          />
+        <SafeAreaView style={{  flex: 1, backgroundColor: '#fff'  }}>
+          <ScrollView style={{padding: 20}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginTop: 30,
+              }}>
+              <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
+                Shalom's
+              </Text>
+            </View>
+            <View style={styles.container}>
+              {/* <SearchBar
+                lightTheme
+                round
+                inputStyle={{backgroundColor: 'white'}}
+                containerStyle={{backgroundColor: 'white'}}
+                inputContainerStyle={{backgroundColor: 'white'}}
+                placeholderTextColor={'#g5g5g5'}
+                searchIcon={{ size: 20 }}
+                onChangeText={(text) => searchFilterFunction(text)}
+                onClear={(text) => searchFilterFunction('')}
+                placeholder="Search shalom..."
+                value={search}
+              /> */}
+      
+              <FlatList
+                data={filteredDataSource}
+                keyExtractor={(e, index) => index.toString()}
+                ItemSeparatorComponent={ItemSeparatorView}
+                renderItem={ItemView}
+              />
 
-        </View>
+            </View>
+        </ScrollView>
       </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
       backgroundColor: 'white',
       marginTop: SIZES.medium,
-      padding: 2,
       gap: SIZES.small,
       borderRadius: SIZES.medium,
-      justifyContent: 'center',
-      backgroundColor: '#ecf0f1',
+
     },
     header: {
       flexDirection: "row",

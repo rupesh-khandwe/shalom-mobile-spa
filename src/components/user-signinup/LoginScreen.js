@@ -5,6 +5,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  Image
 } from 'react-native';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -16,7 +17,7 @@ import { AuthContext } from '../../context/AuthContext';
 import GoogleSVG from '../../assets/images/misc/GoogleSVG';
 import FacebookSVG from '../../assets/images/misc/FacebookSVG';
 import TwitterSVG from '../../assets/images/misc/TwitterSVG';
-import LoginSVG from '../../assets/images/misc/LoginSVG';
+import { cover, icon } from '../../assets/images';
 
 const LoginScreen = ({navigation}) => {
   const [userName, setUserName] = useState('');
@@ -26,11 +27,12 @@ const LoginScreen = ({navigation}) => {
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
       <View style={{paddingHorizontal: 25}}>
-        <View style={{alignItems: 'center'}}>
-          <LoginSVG
-            height={300}
+        <View style={{alignItems: 'center', paddingTop: 30}}>
+          <Image
+            source={icon}
             width={300}
-            style={{transform: [{rotate: '-5deg'}]}}
+            height={300}
+            style={{transform: [{rotate: '-15deg'}]}}
           />
         </View>
 
@@ -61,7 +63,7 @@ const LoginScreen = ({navigation}) => {
           value={userName}
         />
 
-<InputField
+        <InputField
           label={'Password'}
           icon={
             <Ionicons

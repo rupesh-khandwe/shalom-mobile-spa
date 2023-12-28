@@ -145,7 +145,7 @@ export default function HomeScreen({ navigation }) {
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
-              marginBottom: 20,
+              marginTop: 30,
             }}>
             <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium'}}>
               Hello Rupesh
@@ -159,6 +159,13 @@ export default function HomeScreen({ navigation }) {
             </TouchableOpacity>
           </View>
           <View style={styles.container}>
+          <View
+            style={{
+              height: 5,
+              width: '100%',
+              backgroundColor: '#C8C8C8',
+            }}
+          />
             {/* <SearchBar
               round
               searchIcon={{ size: 24 }}

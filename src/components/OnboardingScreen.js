@@ -3,9 +3,9 @@ import { SafeAreaView, View, Text, TouchableOpacity, Image } from 'react-native'
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import GamingSVG from '../assets/images/misc/GamingSVG';
+import { cover, icon, shalomimages } from '../assets/images';
 
 const OnboardingScreen = ({navigation}) => {
-  const shalomLogo = require('../assets/shalom_registered_logo.JPG');
   return (
     <SafeAreaView
       style={{
@@ -27,7 +27,7 @@ const OnboardingScreen = ({navigation}) => {
       </View>
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <Image
-          source={shalomLogo}
+          source={icon}
           width={300}
           height={300}
           style={{transform: [{rotate: '-15deg'}]}}
