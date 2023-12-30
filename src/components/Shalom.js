@@ -9,7 +9,7 @@ import { Video, ResizeMode } from 'expo-av';
 import { AuthContext } from '../context/AuthContext';
 
 export default function Shalom({ navigation }) {
-    const {userToken}= useContext(AuthContext);
+    const {userToken, userInfo}= useContext(AuthContext);
     const BASE_URL_API = "http://192.168.68.133:8090/api/shalom/v1";
     const SEARCH_BY_KEY = "eventByUserId?key=";
     const [search, setSearch] = useState('');
@@ -19,9 +19,9 @@ export default function Shalom({ navigation }) {
     const [status, setStatus] = React.useState({});
 
     useEffect(() => {
-        console.log("Shalom component");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
+        console.log("Shalom component"+ userInfo.userId);
         axios
-        .get(`${BASE_URL_API}/shalomByUserId?id=1`, {
+        .get(`${BASE_URL_API}/shalomByUserId?id=${userInfo.userId}`, {
           headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
         })
         .then((res) => {

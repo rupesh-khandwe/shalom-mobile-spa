@@ -9,7 +9,7 @@ import { Video, ResizeMode } from 'expo-av';
 import { AuthContext } from '../context/AuthContext';
 
 export default function HomeScreen({ navigation }) {
-    const {userToken}= useContext(AuthContext);
+    const {userToken, userInfo}= useContext(AuthContext);
     const BASE_URL_API = "http://192.168.68.133:8090/api/shalom/v1";
     const SEARCH_BY_KEY = "eventByUserId?key=";
     const [search, setSearch] = useState('');
@@ -18,7 +18,8 @@ export default function HomeScreen({ navigation }) {
     const video = React.useRef(null);
     const [status, setStatus] = React.useState({});
     const [likeFlag, setLikeFlag] = React.useState(false);
-    const userId= 1;
+    const [userId, setUserId]= useState('');
+    const [userName, setUserName]= useState('');
 
     const likeFlow = () => {
         setLikeFlag(!likeFlag);
@@ -36,6 +37,8 @@ export default function HomeScreen({ navigation }) {
     };
 
     useEffect(() => {   
+        setUserId(userInfo.userId);
+        setUserName(userInfo.userFirstName);
         console.log("Bearer "+ userToken);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
         axios
         .get(`${BASE_URL_API}/shalomsWithLikeComment`, {
@@ -148,7 +151,7 @@ export default function HomeScreen({ navigation }) {
               marginTop: 30,
             }}>
             <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium'}}>
-              Hello Rupesh
+              Hello {userName}
             </Text>
             <TouchableOpacity onPress={() => navigation.openDrawer()}>
               <ImageBackground

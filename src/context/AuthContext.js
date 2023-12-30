@@ -11,7 +11,6 @@ export const AuthProvider = ({children}) => {
     BASE_URL_USER_PROFILE = 'http://192.168.68.133:8090/userProfile/v1';
 
     const login = (userName, password) => {
-        console.log(userName+"****"+password);
         setIsLoading(true);
         axios
         .post(`${BASE_URL_USER_PROFILE}/authenticate`, {
@@ -19,12 +18,12 @@ export const AuthProvider = ({children}) => {
              password
         })
         .then((res) => {
-            console.log(res.data);
             let userInfo = res.data;
+            console.log(JSON.stringify(userInfo));
             setUserInfo(userInfo);
-            setUserToken(userInfo);
+            setUserToken(userInfo.jwttoken);
             AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
-            AsyncStorage.setItem('userToken', userInfo);
+            AsyncStorage.setItem('userToken', userInfo.jwttoken);
         })
         .catch((err) => console.log(`Login error ${err}`)); 
         setIsLoading(false);
@@ -47,7 +46,7 @@ export const AuthProvider = ({children}) => {
 
             if(userInfo){
                 setUserToken(userToken);
-                setUserInfo(userToken);
+                setUserInfo(userInfo);
             }
             setIsLoading(false);
         } catch (error) {
@@ -60,7 +59,7 @@ export const AuthProvider = ({children}) => {
      }, []);
 
     return (
-        <AuthContext.Provider value={{login, logout, isLoading, userToken}}>
+        <AuthContext.Provider value={{login, logout, isLoading, userToken, userInfo}}>
             {children}
         </AuthContext.Provider>
     );

@@ -16,7 +16,7 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { AuthContext } from '../../context/AuthContext';
 
 const CustomDrawer = props => {
-  const {logout}= useContext(AuthContext);
+  const {logout, userInfo}= useContext(AuthContext);
   return (
     <View style={{flex: 1}}>
       <DrawerContentScrollView
@@ -36,7 +36,7 @@ const CustomDrawer = props => {
               fontFamily: 'Roboto-Medium',
               marginBottom: 5,
             }}>
-            Rupesh Khandwe
+            {userInfo.userFirstName} {userInfo.userLastName}
           </Text>
         </ImageBackground>
         <View style={{flex: 1, backgroundColor: '#fff', paddingTop: 10}}>
