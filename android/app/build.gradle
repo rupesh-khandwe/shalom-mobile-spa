@@ -135,8 +135,8 @@ android {
 }
 
 dependencies {
-    implementation project(':rnfgservice')
     implementation project(':rnwebrtc')
+    implementation project(':rnfgservice')
     implementation project(':rnincallmanager')
 
     // The version of react-native is set by the React Native Gradle Plugin

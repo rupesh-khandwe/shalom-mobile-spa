@@ -16,9 +16,8 @@ import {
   RTCView,
   Constants,
 } from "@videosdk.live/react-native-sdk";
-import Video from "react-native-video";
 import { createMeeting, authToken } from "../api/api";
-
+import Video from "react-native-video";
 
 // Responsible for either schedule new meeting or to join existing meeting as a host or as a viewer.
 function JoinScreen({ getMeetingAndToken, setMode }) {
@@ -45,7 +44,7 @@ function JoinScreen({ getMeetingAndToken, setMode }) {
     <SafeAreaView
       style={{
         flex: 1,
-        backgroundColor: "white",
+        backgroundColor: "black",
         justifyContent: "center",
         paddingHorizontal: 6 * 10,
       }}
@@ -58,7 +57,7 @@ function JoinScreen({ getMeetingAndToken, setMode }) {
         style={{
           padding: 12,
           borderWidth: 1,
-          borderColor: "gray",
+          borderColor: "white",
           borderRadius: 6,
           color: "white",
           marginBottom: 16,
@@ -275,9 +274,69 @@ function HeaderView() {
   );
 }
 
-// Responsible for Viewer side view, which contains video player for streaming HLS and managing HLS state (HLS_STARTED, HLS_STOPPING, HLS_STARTING, etc.)
-// imports react-native-video
+function Container(){
 
+  const {join, changeWebcam, localParticipant} = useMeeting({
+    onError: error => {
+      console.log(error.message);
+    }
+  });
+
+  const mMeeting = useMeeting({
+    onMeetingJoined: () => {
+      // We will pin the local participant if he joins in CONFERENCE mode
+      if (mMeetingRef.current.localParticipant.mode == "CONFERENCE") {
+        mMeetingRef.current.localParticipant.pin();
+      }
+    }
+  });
+
+  // We will create a ref to meeting object so that when used inside the
+  // Callback functions, meeting state is maintained
+  const mMeetingRef = useRef(mMeeting);
+  useEffect(() => {
+    mMeetingRef.current = mMeeting;
+  }, [mMeeting]);
+
+  return (
+    <View style={{ flex: 1 }}>
+      {localParticipant?.mode == Constants.modes.CONFERENCE ? (
+        <SpeakerView />
+      ) : localParticipant?.mode == Constants.modes.VIEWER ? (
+        <ViewerView />
+      ) : (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "black",
+          }}
+        >
+          <Text style={{ fontSize: 20, color: "white" }}>
+            Press Join button to enter studio.
+          </Text>
+          <Button
+            btnStyle={{
+              marginTop: 8,
+              paddingHorizontal: 22,
+              padding: 12,
+              borderWidth: 1,
+              borderColor: "white",
+              borderRadius: 8,
+            }}
+            buttonText={"Join"}
+            onPress={() => {
+              join();
+            }}
+          />
+        </View>
+      )}
+    </View>
+  );
+}
+
+// Responsible for Viewer side view, which contains video player for streaming HLS and managing HLS state (HLS_STARTED, HLS_STOPPING, HLS_STARTING, etc.)
 function ViewerView({}) {
   const { hlsState, hlsUrls } = useMeeting();
 
@@ -315,71 +374,6 @@ function ViewerView({}) {
   );
 }
 
-// Responsible for managing two view (Speaker & Viewer) based on provided mode (`CONFERENCE` & `VIEWER`)
-function Container() {
-  const { join, changeWebcam, localParticipant } = useMeeting({
-    onError: (error) => {
-      console.log(error.message);
-    },
-  });
-
-  // const mMeeting = useMeeting({
-  //   onMeetingJoined: () => {
-  //     // We will pin the local participant if he joins in CONFERENCE mode
-  //     if (mMeetingRef.current.localParticipant.mode == "CONFERENCE") {
-  //       mMeetingRef.current.localParticipant.pin();
-  //     }
-  //   }
-  // });
-
-  // // We will create a ref to meeting object so that when used inside the
-  // // Callback functions, meeting state is maintained
-  // const mMeetingRef = useRef(mMeeting);
-  // useEffect(() => {
-  //   mMeetingRef.current = mMeeting;
-  // }, [mMeeting]);
-
-  return (
-    <View style={{ flex: 1 }}>
-      {localParticipant?.mode == Constants.modes.CONFERENCE ? (
-        <SpeakerView />
-      ) : localParticipant?.mode == Constants.modes.VIEWER ? (
-        <ViewerView />
-      ) : (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "black",
-          }}
-        >
-          <Text style={{ fontSize: 20, color: "white" }}>
-            Press Join button to enter studio.
-          </Text>
-          <Button
-            btnStyle={{
-              marginTop: 8,
-              paddingHorizontal: 22,
-              padding: 12,
-              borderWidth: 1,
-              borderColor: "white",
-              borderRadius: 8,
-            }}
-            buttonText={"Join"}
-            onPress={() => {
-              join();
-              setTimeout(() => {
-                changeWebcam();
-              }, 300);
-            }}
-          />
-        </View>
-      )}
-    </View>
-  );
-}
-
 // Common Component which will also be used in Controls Component
 const Button = ({ onPress, buttonText, backgroundColor, btnStyle }) => {
   return (
@@ -398,12 +392,11 @@ const Button = ({ onPress, buttonText, backgroundColor, btnStyle }) => {
 };
 
 function GoLive() {
-
   const [meetingId, setMeetingId] = useState(null);
 
   //State to handle the mode of the participant i.e. CONFERNCE or VIEWER
   const [mode, setMode] = useState("CONFERENCE");
-  
+
   //Getting MeetingId from the API we created earlier
   const getMeetingAndToken = async (id) => {
     const meetingId =

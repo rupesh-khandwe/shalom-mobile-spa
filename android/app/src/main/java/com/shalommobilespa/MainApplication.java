@@ -19,9 +19,9 @@ import expo.modules.ReactNativeHostWrapper;
 import java.util.List;
 
 //video SDK
+import live.videosdk.rnwebrtc.WebRTCModulePackage;
 import live.videosdk.rnfgservice.ForegroundServicePackage;
 import live.videosdk.rnincallmanager.InCallManagerPackage;
-import live.videosdk.rnwebrtc.WebRTCModulePackage;
 //video SDK
 
 public class MainApplication extends Application implements ReactApplication {
@@ -40,9 +40,8 @@ public class MainApplication extends Application implements ReactApplication {
         // Packages that cannot be autolinked yet can be added manually here, for example:
         // packages.add(new MyReactNativePackage());
         packages.add(new ForegroundServicePackage());
-        packages.add(new InCallManagerPackage());
         packages.add(new WebRTCModulePackage());
-
+        packages.add(new InCallManagerPackage());
         return packages;
       }
 

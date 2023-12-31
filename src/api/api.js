@@ -1,5 +1,6 @@
 //Auth token we will use to generate a meeting and connect to it
-export const authToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcwMzkwNTgwMiwiZXhwIjoxNzAzOTA3NjAyfQ.aP6i2qGKEn3iNlybvJI-M8mrlorv4UZbq1zVXJT7SBA";
+export const authToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiJlNzViNDEzMi1lYTNjLTQ0N2YtYWFhYS1iYzE5ZTI3NmVjNDMiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTcwMzkxNTc1NSwiZXhwIjoxNzA2NTA3NzU1fQ.ALc2v0hARVmjT29rrI6qsRF2Y9gKVpTf-IM_qqi5mUU";
 
 // API call to create meeting
 export const createMeeting = async ({ token }) => {
