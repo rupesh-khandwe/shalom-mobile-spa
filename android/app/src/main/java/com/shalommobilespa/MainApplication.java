@@ -21,7 +21,7 @@ import java.util.List;
 //video SDK
 import live.videosdk.rnwebrtc.WebRTCModulePackage;
 import live.videosdk.rnfgservice.ForegroundServicePackage;
-import live.videosdk.rnincallmanager.InCallManagerPackage;
+//import live.videosdk.rnincallmanager.InCallManagerPackage;
 //video SDK
 
 public class MainApplication extends Application implements ReactApplication {
@@ -41,7 +41,7 @@ public class MainApplication extends Application implements ReactApplication {
         // packages.add(new MyReactNativePackage());
         packages.add(new ForegroundServicePackage());
         packages.add(new WebRTCModulePackage());
-        packages.add(new InCallManagerPackage());
+        //packages.add(new InCallManagerPackage());
         return packages;
       }
 

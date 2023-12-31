@@ -4,8 +4,14 @@
   "main": "index.js",
   "scripts": {
     "start": "expo start --dev-client",
-    "android": "exp:ios\",\n    \"web\": \"expo start --web\"\n  },\n  \"dependencies\": {\n    \"@expo/vector-icons\": \"^13.0.0\",\n    \"@expo/webpack-config\": \"^19.0.0\",\n    \"@fortawesomeo run:android",
-    "ios": "expo run/react-fontawesome": "^0.2.0",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "^13.0.0",
+    "@expo/webpack-config": "^19.0.0",
+    "@fortawesome/react-fontawesome": "^0.2.0",
     "@react-native-async-storage/async-storage": "1.18.2",
     "@react-native-community/datetimepicker": "7.2.0",
     "@react-native-community/masked-view": "^0.1.11",
