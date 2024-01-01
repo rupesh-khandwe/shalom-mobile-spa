@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "shalom-mobile-spa",
-    "slug": "shalom-mobile-spa",
+    "slug": "shalom",
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
@@ -13,7 +13,13 @@
     "android": {
       "package": "com.shalommobilespa.android",
       "versionCode": 1
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "39fbb4be-9529-43b5-b544-f303600c7197"
+      }
+    },
+    "owner": "believers.shalom"
   },
   "name": "shalom-mobile-spa"
 }
