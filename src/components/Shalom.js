@@ -1,16 +1,19 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList, Image, Button, ScrollView  } from 'react-native';
+import { SafeAreaView, Text, StyleSheet, View, FlatList, Image, Button, ScrollView, TouchableOpacity, ImageBackground,  } from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import axios from 'axios';
 import { SIZES, COLORS } from "../constants"; 
 import { Card, Title, Paragraph } from 'react-native-paper'
-import { FontAwesome, AntDesign } from '@expo/vector-icons'; 
+import { FontAwesome, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons'; 
 import { Video, ResizeMode } from 'expo-av';
 import { AuthContext } from '../context/AuthContext';
+import {BASE_URL_API} from '@env'
 
 export default function Shalom({ navigation }) {
     const {userToken, userInfo}= useContext(AuthContext);
-    const BASE_URL_API = "http://192.168.68.133:8090/api/shalom/v1";
+    //const BASE_URL_API = "http://shalom-api.us-east-1.elasticbeanstalk.com/api/shalom/v1";
+    //const BASE_URL_API = "http://192.168.68.131:5000/api/shalom/v1";
+    
     const SEARCH_BY_KEY = "eventByUserId?key=";
     const [search, setSearch] = useState('');
     const [filteredDataSource, setFilteredDataSource] = useState([]);
@@ -25,7 +28,6 @@ export default function Shalom({ navigation }) {
           headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
-            console.log(res.data);
             setFilteredDataSource(res.data);
             setMasterDataSource(res.data);
         })
@@ -90,18 +92,20 @@ export default function Shalom({ navigation }) {
                 </View>
             }
             {item.imageUrl &&
-                <Image
+              item.imageUrl.split('|').map((img) => {
+                  <Image
                     style={{width: '100%', height: 200,resizeMode : 'stretch' }}
-                    source={{uri: item.imageUrl}} 
-                />        
+                    source={{uri: img}} 
+                />  
+              })
             }
-            <View style={{flexDirection:'row', margin:10}}>
+            {/* <View style={{flexDirection:'row', margin:10}}>
                 <Text style={styles.comment}>
                     <View style={{paddingLeft:5}} ><AntDesign name="like2" size={24} color="black"  /></View>
                     <View style={{paddingLeft:45}}><FontAwesome name="comments-o" size={24} color="black"  /></View>
                     <View style={{paddingLeft:45}}><FontAwesome name="share-square" size={24} color="black"   /></View>
                 </Text>
-            </View>
+            </View> */}
         </Card>
         ); 
     };
@@ -132,6 +136,14 @@ export default function Shalom({ navigation }) {
               <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
                 Shalom's
               </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Post')}>
+              <MaterialCommunityIcons name="home-group-plus" size={35} color="purple"   />
+              {/* <ImageBackground
+                source={require('../assets/images/user-profile.jpg')}
+                style={{width: 35, height: 35}}
+                imageStyle={{borderRadius: 25}}
+              /> */}
+            </TouchableOpacity>
             </View>
             <View style={styles.container}>
               {/* <SearchBar

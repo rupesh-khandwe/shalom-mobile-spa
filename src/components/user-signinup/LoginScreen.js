@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   SafeAreaView,
   View,
@@ -18,11 +18,13 @@ import GoogleSVG from '../../assets/images/misc/GoogleSVG';
 import FacebookSVG from '../../assets/images/misc/FacebookSVG';
 import TwitterSVG from '../../assets/images/misc/TwitterSVG';
 import { cover, icon } from '../../assets/images';
+import { showMessage, hideMessage  } from "react-native-flash-message";
 
-const LoginScreen = ({navigation}) => {
+const LoginScreen = ({navigation, route}) => {
   const [userName, setUserName] = useState('');
   const [userPassword, setUserPassword] = useState('');
   const {login, userToken}= useContext(AuthContext);
+  const register = route.params;
 
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
@@ -35,7 +37,12 @@ const LoginScreen = ({navigation}) => {
             style={{transform: [{rotate: '-15deg'}]}}
           />
         </View>
-
+        <Text>{register==="success"?showMessage({
+            message: "Registration is successful, please login!",
+            type: "info",
+            hideOnPress: true,
+            backgroundColor: "purple",
+          }):""}</Text>
         <Text
           style={{
             fontFamily: 'Roboto-Medium',
@@ -49,7 +56,7 @@ const LoginScreen = ({navigation}) => {
         <Text>{userToken}</Text>
 
         <InputField
-          label={'Email ID'}
+          label={'User name'}
           icon={
             <MaterialIcons
             name="alternate-email"
@@ -144,6 +151,7 @@ const LoginScreen = ({navigation}) => {
             <Text style={{color: '#AD40AF', fontWeight: '700'}}> Register</Text>
           </TouchableOpacity>
         </View>
+
       </View>
     </SafeAreaView>
   );

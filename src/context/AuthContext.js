@@ -1,17 +1,20 @@
 import React, {createContext, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-//import { BASE_URL_USER_PROFILE } from '../Config.js'
+import { BASE_URL_USER_PROFILE } from '@env'
+
 
 export const AuthContext = createContext();
 export const AuthProvider = ({children}) => {
     const [isLoading, setIsLoading] = useState(false);
     const [userToken, setUserToken] = useState(null);
     const [userInfo, setUserInfo] = useState(null);
-    BASE_URL_USER_PROFILE = 'http://192.168.68.133:8090/userProfile/v1';
-
+    const [shalom, setShalom] = useState(null);
+    //const BASE_URL_USER_PROFILE = "http://shalom-api.us-east-1.elasticbeanstalk.com/userProfile/v1";
+    //const BASE_URL_USER_PROFILE = "http://192.168.68.131:5000/userProfile/v1";
     const login = (userName, password) => {
         setIsLoading(true);
+        console.log("inside AuthProvider=="+BASE_URL_USER_PROFILE+"**"+userName+"=password="+password);
         axios
         .post(`${BASE_URL_USER_PROFILE}/authenticate`, {
              userName, 
@@ -27,6 +30,10 @@ export const AuthProvider = ({children}) => {
         })
         .catch((err) => console.log(`Login error ${err}`)); 
         setIsLoading(false);
+     }
+
+     const editorData = (post) => {
+        setShalom(post);
      }
 
      const logout = () => {
@@ -59,7 +66,7 @@ export const AuthProvider = ({children}) => {
      }, []);
 
     return (
-        <AuthContext.Provider value={{login, logout, isLoading, userToken, userInfo}}>
+        <AuthContext.Provider value={{login, logout, isLoading, userToken, userInfo, editorData, shalom}}>
             {children}
         </AuthContext.Provider>
     );

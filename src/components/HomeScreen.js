@@ -1,53 +1,80 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList, Button, Image, ScrollView, TouchableOpacity, ImageBackground, } from 'react-native';
+import { SafeAreaView, Text, StyleSheet, View, FlatList, Button, Image, ScrollView, TouchableOpacity, ImageBackground, RefreshControl} from 'react-native';
+import Share from 'react-native-share';
 import { SearchBar } from 'react-native-elements';
 import axios from 'axios';
 import { SIZES, COLORS } from "../constants"; 
-import { Card, Title, Paragraph } from 'react-native-paper'
+import { Card, Title } from 'react-native-paper'
 import { FontAwesome, AntDesign } from '@expo/vector-icons'; 
 import { Video, ResizeMode } from 'expo-av';
 import { AuthContext } from '../context/AuthContext';
+import { BASE_URL_API } from '@env'
 
 export default function HomeScreen({ navigation }) {
     const {userToken, userInfo}= useContext(AuthContext);
-    const BASE_URL_API = "http://192.168.68.133:8090/api/shalom/v1";
     const SEARCH_BY_KEY = "eventByUserId?key=";
     const [search, setSearch] = useState('');
     const [filteredDataSource, setFilteredDataSource] = useState([]);
     const [masterDataSource, setMasterDataSource] = useState([]);
     const video = React.useRef(null);
     const [status, setStatus] = React.useState({});
-    const [likeFlag, setLikeFlag] = React.useState(false);
+    const [likeFlag, setLikeFlag] = React.useState(true);
     const [userId, setUserId]= useState('');
     const [userName, setUserName]= useState('');
+    const [refreshing, setRefreshing] = React.useState(false);
 
-    const likeFlow = () => {
-        setLikeFlag(!likeFlag);
+    const onRefresh = React.useCallback(() => {
+      setRefreshing(true);
+      setTimeout(() => {
+        setRefreshing(false);
+      }, 2000);
+    }, []);
+
+
+    const likeFlow = (shalomId, likeFlag) => {
         axios
-        .get(`${BASE_URL_API}/updateLike`, {
-            params: { userId: userId, shalomId: userId, likeFlag: likeFlag },
+        .put(`${BASE_URL_API}/saveLike`, null, {
+            params: { userId: userId, shalomId: shalomId, likeFlag: likeFlag },
             headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
-            console.log(res.data);
             setFilteredDataSource(res.data);
-            setMasterDataSource(res.data);
+            //setMasterDataSource(res.data);
         })
         .catch((err) => console.log(err)); 
     };
 
+const onShare = async () => {
+    try {
+      const result = await Share.open({
+        message:
+          'Share your favorite shaloms to the world',
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+        } else {
+          // shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+  }
+  
     useEffect(() => {   
         setUserId(userInfo.userId);
-        setUserName(userInfo.userFirstName);
+        setUserName(userInfo.userFirstName+" "+ userInfo.userLastName);
         console.log("Bearer "+ userToken);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
         axios
         .get(`${BASE_URL_API}/shalomsWithLikeComment`, {
           headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
-            console.log(res.data);
             setFilteredDataSource(res.data);
-            setMasterDataSource(res.data);
+            //setMasterDataSource(res.data);
         })
         .catch((err) => console.log(err));
       }, []);
@@ -78,15 +105,19 @@ export default function HomeScreen({ navigation }) {
         return (
         // Flat List Item onPress={() => navigation.push('Chapters', {bookId: item.id, bibleId: item.bibleId})}
         <Card style={{marginTop:10, borderColor:'black', borderRadius:5, borderBottomWidth:1}}>
-            <View style={{flexDirection:'row',}}>
+            <View style={{flexDirection:'row', flex:1}}>
                 {/*  Text */}
-                <View style={{justifyContent:'space-around', flex:2/3, margin:10}}>
-                    <Title>{item.shalom}</Title>
+                <TouchableOpacity onPress={() => navigation.openDrawer()}>
+                    <FontAwesome name="user-circle" size={30} color="gray"   />
+                  </TouchableOpacity>
+                <View style={{justifyContent:'space-around', marginLeft:5}}>
+                  <Title>{item.userName}</Title>
                 </View>
                 {/*  Image */}
             </View>
             <View style={{margin:10}}>
-                <Text>Shalom posted on : {item.createdOn}</Text>
+              <Text>{item.shalom}</Text>
+                {/* <Text>Shalom posted on : {item.createdOn}</Text> */}
             </View>
             {item.videoUrl && 
                 <View style={styles.container}>
@@ -101,10 +132,10 @@ export default function HomeScreen({ navigation }) {
                         isLooping
                         onPlayb ackStatusUpdate={status => setStatus(() => status)}
                     />
-                    <View style={styles.buttons}>
+                    {/* <View style={styles.buttons}>
                         <Button title="Play" onPress={() => video.current.playFromPositionAsync(10)} />
-                        {/* <Button title={status.isLooping ? "Set to not loop" : "Set to loop"} onPress={() => video.current.setIsLoopingAsync(!status.isLooping)} /> */}
-                    </View>
+                        {/* <Button title={status.isLooping ? "Set to not loop" : "Set to loop"} onPress={() => video.current.setIsLoopingAsync(!status.isLooping)} /> 
+                    </View> */}
                 </View>
             }
             {item.imageUrl &&
@@ -119,13 +150,23 @@ export default function HomeScreen({ navigation }) {
                     <Text style={{paddingLeft:45}} >{item.commentCount} Comment</Text>
             </View>
             <View style={{flexDirection:'row', margin:10}}>
-                    <Text style={{paddingLeft:5}} onPress={()=> likeFlow()} ><AntDesign name={likeFlag ? "like1": "like2"} size={24} color={likeFlag ?"#3282F6":"black"}  /></Text>
-                    <Text style={{paddingLeft:45}} onPress={()=> alert('Like')}><FontAwesome name="comments-o" size={24} color="black"  /></Text>
-                    <Text style={{paddingLeft:45}}><FontAwesome name="share-square" size={24} color="black"   /></Text>
+                    <Text style={{paddingLeft:5}} onPress={()=> {item.likeFlag=item.likeFlag===null?true:item.likeFlag===true?false:true; setLikeFlag(item.likeFlag);likeFlow(item.shalomId, item.likeFlag)}} ><AntDesign name={item.likeFlag===null ? "like2": "like1"} size={24} color={item.likeFlag===null ?"gray":"purple"}  /></Text>
+                    <Text style={{paddingLeft:45}} onPress={()=> alert('Like')}><FontAwesome name={item.commentCount>0 ? "comments-o": "comments"} size={24} color={item.commentCount>0 ?"purple":"gray"}   /></Text>
+                    <Text style={{paddingLeft:45}} onPress={onShare}><FontAwesome name="share-square" size={24} color="gray"   /></Text>
+                    {/* item.likeFlag=item.likeFlag===null?true:item.likeFlag===true?false:true; setLikeFlag(item.likeFlag); */}
             </View>
         </Card>
         ); 
     };
+
+    // onPress={async () => {
+    //   await onShareSingle({
+    //     title: "Share to Instagram",
+    //     message: "Check out my pic.",
+    //     social: Share.Social.FACEBOOK, 
+    //   });
+    // }} title="Share to Instagram">
+
 
   const ItemSeparatorView = () => {
     return (
@@ -143,7 +184,11 @@ export default function HomeScreen({ navigation }) {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-        <ScrollView style={{padding: 20}}>
+        <ScrollView style={{padding: 20}}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
           <View
             style={{
               flexDirection: 'row',

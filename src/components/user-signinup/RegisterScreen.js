@@ -4,15 +4,12 @@ import {
   ScrollView,
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   Image,
-  Button,
   StyleSheet
 } from 'react-native';
 
 import InputField from '../common/InputField';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -20,17 +17,18 @@ import GoogleSVG from '../../assets/images/misc/GoogleSVG';
 import FacebookSVG from '../../assets/images/misc/FacebookSVG';
 import TwitterSVG from '../../assets/images/misc/TwitterSVG';
 import CustomButton from '../common/CustomButton';
-import { cover, icon } from '../../assets/images';
+import { icon } from '../../assets/images';
 import {Dropdown} from 'react-native-element-dropdown';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import axios from 'axios';
+import {BASE_URL_LOCATION_API, BASE_URL_RGSTR_API} from '@env'
 
 
 export default function RegisterScreen({navigation}) {
-  const [date, setDate] = useState(new Date(1598051730000));
-  const [dateString, setDateString] = useState('Date of Birth');
-  const [mode, setMode] = useState('date');
-  const [show, setShow] = useState(false);
+  // const [date, setDate] = useState(new Date(1598051730000));
+  // const [dateString, setDateString] = useState('Date of Birth');
+  // const [mode, setMode] = useState('date');
+  // const [show, setShow] = useState(false);
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [middleName, setMiddleName] = useState('');
@@ -50,18 +48,20 @@ export default function RegisterScreen({navigation}) {
   const [stateData, setStateData] = useState([]);
   const [cityData, setCityData] = useState([]);
   const [regionData, setRegionData] = useState([]);
-  const [countryName, setCountryName] = useState(null);
-  const [stateName, setStateName] = useState(null);
-  const [cityName, setCityName] = useState(null);
-  const [regionName, setRegionName] = useState(null);
+  // const [countryName, setCountryName] = useState(null);
+  // const [stateName, setStateName] = useState(null);
+  // const [cityName, setCityName] = useState(null);
+  // const [regionName, setRegionName] = useState(null);
   const [isFocus, setIsFocus] = useState(false);
-  const BASE_URL_API = "http://192.168.68.133:8090/address/v1";
-  const BASE_URL_RGSTR_API = "http://192.168.68.133:8090/userProfile/v1/register";
+  const [genderData, setGenderData] = useState([
+    {label: 'Male', value: 'M'},
+    {label: 'Female', value: 'F'}
+  ]);
 
   useEffect(() => {
-    console.log("Registration launched");
+    console.log("Registration launched"+BASE_URL_LOCATION_API);
     axios
-    .get(`${BASE_URL_API}/CountryList`, {
+    .get(`${BASE_URL_LOCATION_API}/CountryList`, {
       headers: { 'content-type': 'application/json'},
     })
     .then((res) => {
@@ -82,7 +82,7 @@ export default function RegisterScreen({navigation}) {
     console.log(countryCode);
     var config = {
       method: 'get',
-      url: `${BASE_URL_API}/StateList?countryId=${countryCode}`,
+      url: `${BASE_URL_LOCATION_API}/StateList?countryId=${countryCode}`,
       headers: {
         'content-type': 'application/json',
       },
@@ -90,11 +90,9 @@ export default function RegisterScreen({navigation}) {
 
     axios(config)
       .then(function (response) {
-        console.log(JSON.stringify(response.data));
         var count = Object.keys(response.data).length;
         let stateArray = [];
         for (var i = 0; i < count; i++) {
-          console.log( response.data[i].stateId+"="+response.data[i].stateName);
           stateArray.push({
             value: response.data[i].stateId,
             label: response.data[i].stateName,
@@ -111,7 +109,7 @@ export default function RegisterScreen({navigation}) {
     console.log(countryCode+"=="+stateCode);
     var config = {
       method: 'get',
-      url: `${BASE_URL_API}/CityList?stateId=${stateCode}&countryId=${countryCode}`,
+      url: `${BASE_URL_LOCATION_API}/CityList?stateId=${stateCode}&countryId=${countryCode}`,
       headers: {
         'content-type': 'application/json',
       },
@@ -119,7 +117,6 @@ export default function RegisterScreen({navigation}) {
 
     axios(config)
       .then(function (response) {
-        console.log(JSON.stringify(response.data));
         var count = Object.keys(response.data).length;
         let cityArray = [];
         for (var i = 0; i < count; i++) {
@@ -139,7 +136,7 @@ export default function RegisterScreen({navigation}) {
     console.log(cityCode);
     var config = {
       method: 'get',
-      url: `${BASE_URL_API}/RegionList?cityId=${cityCode}`,
+      url: `${BASE_URL_LOCATION_API}/RegionList?cityId=${cityCode}`,
       headers: {
         'content-type': 'application/json',
       },
@@ -147,7 +144,6 @@ export default function RegisterScreen({navigation}) {
 
     axios(config)
       .then(function (response) {
-        console.log(JSON.stringify(response.data));
         var count = Object.keys(response.data).length;
         let regionArray = [];
         for (var i = 0; i < count; i++) {
@@ -184,8 +180,10 @@ export default function RegisterScreen({navigation}) {
         password
     })
     .then((res) => {
-        console.log(res.data);
-        navigation.goBack();
+        //navigation.goBack();
+        navigation.navigate('Login', 
+          "success"
+        );
     })
     .catch((err) => console.log(`Login error ${err}`)); 
   };
@@ -339,19 +337,37 @@ export default function RegisterScreen({navigation}) {
           onChangeText={(text) => {setLastName(text)}}
           value={lastName}
         />
-        <InputField
-          label={'Gender'}
-          icon={
-            <Ionicons
-              name="person-outline"
-              size={20}
-              color="#666"
-              style={{marginRight: 5}}
-            />
-          }
-          onChangeText={(text) => {setGender(text)}}
+  
+        <Dropdown
+          style={[styles.dropdownRegion, isFocus && {borderColor: 'black'}]}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          inputSearchStyle={styles.inputSearchStyle}
+          iconStyle={styles.iconStyle}
+          data={genderData}
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder={!isFocus ? 'Select gender' : '...'}
           value={gender}
+          onFocus={() => setIsFocus(true)}
+          onBlur={() => setIsFocus(false)}
+          onChange={item => {
+            setGender(item.value);
+            setIsFocus(false);
+          }}
+          renderLeftIcon={() => (
+            <AntDesign
+              style={styles.icon}
+              color={isFocus ? '#AD40AF' : 'black'}
+              name="Safety"
+              size={20}
+            />
+          )}
         />
+
+
+
         <InputField
           label={'Phone-1'}
           icon={
@@ -424,7 +440,6 @@ export default function RegisterScreen({navigation}) {
           onChange={item => {
             setCountryId(item.value);
             handleState(item.value);
-            setCountryName(item.label);
             setIsFocus(false);
           }}
           renderLeftIcon={() => (
@@ -456,7 +471,6 @@ export default function RegisterScreen({navigation}) {
           onChange={item => {
             setStateId(item.value);
             handleCity(countryId, item.value);
-            setStateName(item.label);
             setIsFocus(false);
           }}
           renderLeftIcon={() => (
@@ -488,7 +502,6 @@ export default function RegisterScreen({navigation}) {
           onChange={item => {
             setCityId(item.value);
             handleRegion(item.value);
-            setCityName(item.label);
             setIsFocus(false);
           }}
           renderLeftIcon={() => (
@@ -519,7 +532,6 @@ export default function RegisterScreen({navigation}) {
           onBlur={() => setIsFocus(false)}
           onChange={item => {
             setRegionId(item.value);
-            setRegionName(item.label);
             setIsFocus(false);
           }}
           renderLeftIcon={() => (

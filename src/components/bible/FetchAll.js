@@ -11,7 +11,7 @@ const FetchAll = ({navigation}) => {
 
   useEffect(() => {
     axios
-    .get('http://192.168.68.129:8090/bible/v1/bibleList')
+    .get('http://shalom-api.us-east-1.elasticbeanstalk.com/bible/v1/bibleList')
     .then((res) => {
         console.log(res.data);
         setFilteredDataSource(res.data);

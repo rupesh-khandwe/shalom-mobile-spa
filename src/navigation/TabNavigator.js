@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
@@ -6,33 +6,76 @@ import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 // Screens
 import HomeScreen from '../components/HomeScreen';
 import ShalomScreen from '../components/Shalom';
-import EventsScreen from '../components/Events';
+import EventsScreen from '../components/event/Events';
 import GoLiveScreen from '../components/GoLive';
-import ChurchScreen from '../components/Church';
+import ChurchScreen from '../components/church/Church';
 
 //import Ionicons from 'react-native-vector-icons/Ionicons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { FontAwesome5 } from '@expo/vector-icons'; 
-import { MaterialCommunityIcons } from '@expo/vector-icons'; 
-import Feather from 'react-native-vector-icons/Feather';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'; 
+import RichTxtEditor from '../components/common/RichTxtEditor';
+import SavePost from '../components/common/SavePost';
+import RegisterChurch from '../components/church/RegisterChurch';
+import AddEvent from '../components/event/AddEvent';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-const HomeStack = () => {
+const ShalomStack = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Home"
-        component={HomeScreen}
+        name="Shalom"
+        component={ShalomScreen}
         options={{headerShown: false}}
       />
       <Stack.Screen
-        name="GameDetails"
-        component={GameDetailsScreen}
-        options={({route}) => ({
-          title: route.params?.title,
-        })}
+        name="Post"
+        component={RichTxtEditor}
+        options={{
+          headerRight: (props) => (
+           <SavePost></SavePost>
+          ),
+        }}
+      />
+    </Stack.Navigator>
+  );
+};
+
+const EventsStack = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Event"
+        component={EventsScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="Add-event"
+        component={AddEvent}
+        options={{
+          
+        }}
+      />
+    </Stack.Navigator>
+  );
+};
+
+const ChurchStack = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Church"
+        component={ChurchScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="Register-church"
+        component={RegisterChurch}
+        options={{
+         
+        }}
       />
     </Stack.Navigator>
   );
@@ -63,7 +106,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Shalom"
-        component={ShalomScreen}
+        component={ShalomStack}
         options={{
           tabBarBadge: 3,
           tabBarBadgeStyle: {backgroundColor: 'yellow'},
@@ -74,10 +117,10 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Events"
-        component={EventsScreen}
+        component={EventsStack}
         options={{
           tabBarIcon: ({color, size}) => (
-            <Ionicons name="today-outline" color={color} size={size} />
+            <MaterialIcons name="event" color={color} size={size} />
           ),
         }}
       />
@@ -91,8 +134,8 @@ const TabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Church"
-        component={ChurchScreen}
+        name="ChurchList"
+        component={ChurchStack}
         options={{
           tabBarIcon: ({color, size}) => (
             <FontAwesome5 name="church" size={24} color={color} />
