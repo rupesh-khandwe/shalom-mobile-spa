@@ -15,12 +15,42 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { FontAwesome5 } from '@expo/vector-icons'; 
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'; 
 import RichTxtEditor from '../components/common/RichTxtEditor';
+import Comment from '../components/common/Comment';
 import SavePost from '../components/common/SavePost';
 import RegisterChurch from '../components/church/RegisterChurch';
 import AddEvent from '../components/event/AddEvent';
+import Profile from '../components/user-signinup/Profile';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+
+const HomeStack = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="Comment"
+        component={Comment}
+        options={{
+          headerRight: (props) => (
+           <SavePost name="comment"></SavePost>
+          ),
+        }}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={Profile}
+        options={{
+         
+        }}
+      />
+    </Stack.Navigator>
+  );
+};
 
 const ShalomStack = () => {
   return (
@@ -35,7 +65,7 @@ const ShalomStack = () => {
         component={RichTxtEditor}
         options={{
           headerRight: (props) => (
-           <SavePost></SavePost>
+           <SavePost name="shalom"></SavePost>
           ),
         }}
       />
@@ -93,7 +123,7 @@ const TabNavigator = () => {
       }}>
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={HomeStack}
         options={({route}) => ({
           tabBarStyle: {
             display: 'flex',
@@ -105,7 +135,7 @@ const TabNavigator = () => {
         })}
       />
       <Tab.Screen
-        name="Shalom"
+        name="Shaloms"
         component={ShalomStack}
         options={{
           tabBarBadge: 3,

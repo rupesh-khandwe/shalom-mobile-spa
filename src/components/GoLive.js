@@ -410,7 +410,7 @@ function GoLive() {
         meetingId,
         micEnabled: true,
         webcamEnabled: true,
-        name: "C.V. Raman",
+        name: "Rupesh Khandwe",
         //These will be the mode of the participant CONFERENCE or VIEWER
         mode: mode,
       }}

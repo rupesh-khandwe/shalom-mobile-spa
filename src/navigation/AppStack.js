@@ -2,17 +2,75 @@ import React from 'react';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 
 import CustomDrawer from '../components/common/CustomDrawer';
-
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import ProfileScreen from '../components/user-signinup/ProfileScreen';
-import SettingsScreen from '../components/SettingsScreen';
-
 import TabNavigator from './TabNavigator';
+import Profile from '../components/user-signinup/Profile';
+import BackHistory from '../components/common/BackHistory';
+import Settings from '../components/Settings';
+import EditProfile from '../components/user-signinup/EditProfile';
+import FollowUser from '../components/user-signinup/FollowUser';
 
 const Drawer = createDrawerNavigator();
-
+const Stack = createNativeStackNavigator();
 const AppStack = () => {
+
+  const ProfileStack = () => {
+    return (
+      <Stack.Navigator>
+       
+        <Stack.Screen
+          name="Profile"
+          component={Profile}
+          options={{
+            headerLeft: (props) => (
+              <BackHistory name="back"></BackHistory>
+             ),
+
+          }}
+        />
+        <Stack.Screen
+          name="Edit-profile"
+          component={EditProfile}
+          options={{
+            headerLeft: (props) => (
+              <BackHistory name="back"></BackHistory>
+             ),
+
+          }}
+        />
+        <Stack.Screen
+          name="Follow-user"
+          component={FollowUser}
+          options={{
+            headerLeft: (props) => (
+              <BackHistory name="back"></BackHistory>
+             ),
+
+          }}
+        />
+      </Stack.Navigator>
+    );
+  };
+
+  const SettingsStack = () => {
+    return (
+      <Stack.Navigator>
+         <Stack.Screen
+          name=" "
+          component={Settings}
+          options={{
+            headerLeft: (props) => (
+              <BackHistory name="back"></BackHistory>
+             ),
+
+          }}
+        />
+      </Stack.Navigator>
+    );
+  };
+
   return (
     <Drawer.Navigator
       drawerContent={props => <CustomDrawer {...props} />}
@@ -38,7 +96,7 @@ const AppStack = () => {
       />
       <Drawer.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={ProfileStack}
         options={{
           drawerIcon: ({color}) => (
             <Ionicons name="person-outline" size={22} color={color} />
@@ -47,7 +105,7 @@ const AppStack = () => {
       />
       <Drawer.Screen
         name="Settings"
-        component={SettingsScreen}
+        component={SettingsStack}
         options={{
           drawerIcon: ({color}) => (
             <Ionicons name="settings-outline" size={22} color={color} />

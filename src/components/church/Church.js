@@ -7,8 +7,9 @@ import { Card, Title, Paragraph } from 'react-native-paper'
 import { AuthContext } from '../../context/AuthContext';
 import { MaterialIcons } from '@expo/vector-icons'; 
 import {BASE_URL_CHURCH_API} from '@env'
+import { showMessage, hideMessage  } from "react-native-flash-message";
 
-export default function Church({ navigation }) {
+export default function Church({ navigation, route }) {
 
     const {userToken}= useContext(AuthContext);
     const SEARCH_BY_KEY = "searchByKey?key=";
@@ -16,24 +17,16 @@ export default function Church({ navigation }) {
     const [filteredDataSource, setFilteredDataSource] = useState([]);
     const [masterDataSource, setMasterDataSource] = useState([]);
     const [refreshing, setRefreshing] = React.useState(false);
-
-    const onRefresh = React.useCallback(() => {
-      setRefreshing(true);
-      setTimeout(() => {
-        setRefreshing(false);
-      }, 2000);
-    }, []);
-
+    const register = route.params;
 
     useEffect(() => {
-        console.log("Church rendered");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
+        console.log(BASE_URL_CHURCH_API,"Church rendered");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
         axios
         .get(`${BASE_URL_CHURCH_API}/searchByKey?key=Bengaluru`, {
           headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
             setFilteredDataSource(res.data);
-            setMasterDataSource(res.data);
         })
         .catch((err) => console.log(err));
       }, []);
@@ -63,7 +56,7 @@ export default function Church({ navigation }) {
     const ItemView = ({ item }) => {
         return (
         // Flat List Item
-        <Card style={{marginTop:10, borderColor:'black', borderRadius:5, borderBottomWidth:1}}
+        <Card style={{marginTop:10, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}
             onPress={() => navigation.push('Chapters', {bookId: item.id, bibleId: item.bibleId})}
         >
             <View style={{flexDirection:'row',}}>
@@ -86,7 +79,7 @@ export default function Church({ navigation }) {
       // Flat List Item Separator
       <View
         style={{
-          height: 5,
+          height: 0,
           width: '100%',
           backgroundColor: '#C8C8C8',
         }}
@@ -98,10 +91,11 @@ export default function Church({ navigation }) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <ScrollView style={{padding: 20}}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        
       >
+        {/* refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        } */}
         <View
           style={{
             flexDirection: 'row',
@@ -111,6 +105,12 @@ export default function Church({ navigation }) {
           <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
             Church List
           </Text>
+          <Text>{register==="success"?showMessage({
+            message: "Church has been registered successfully!",
+            type: "info",
+            hideOnPress: true,
+            backgroundColor: "purple",
+          }):""}</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Register-church')}>
             <MaterialIcons name="post-add" size={35} color="purple" />
           </TouchableOpacity>

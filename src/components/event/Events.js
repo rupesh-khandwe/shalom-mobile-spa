@@ -7,16 +7,17 @@ import { Card, Title, Paragraph } from 'react-native-paper'
 import { AuthContext } from '../../context/AuthContext';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { MaterialIcons } from '@expo/vector-icons'; 
+import { MaterialIcons, FontAwesome, Ionicons, Fontisto  } from '@expo/vector-icons'; 
 import {BASE_URL_EVENT_API} from '@env'
 
-export default function Events({ navigation }) {
+export default function Events({ navigation, route }) {
     const {userToken, userInfo}= useContext(AuthContext);
     const SEARCH_BY_KEY = "eventByUserId?key=";
     const [search, setSearch] = useState('');
     const [filteredDataSource, setFilteredDataSource] = useState([]);
     const [masterDataSource, setMasterDataSource] = useState([]);
     const animation = useSharedValue(0);
+    const register = route.params;
     const animatedStyle = useAnimatedStyle(() => {
       return {
         width: animation.value==1?withTiming(300, {duration: 500}):withTiming(0, {duration:500})
@@ -61,7 +62,7 @@ export default function Events({ navigation }) {
     const ItemView = ({ item }) => {
         return (
         // Flat List Item
-        <Card style={{marginTop:10, borderColor:'black', borderRadius:5, borderBottomWidth:1}}
+        <Card style={{marginTop:10, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}
             onPress={() => navigation.push('Chapters', {bookId: item.id, bibleId: item.bibleId})}
         >
             <View style={{flexDirection:'row',}}>
@@ -75,8 +76,9 @@ export default function Events({ navigation }) {
                 <Paragraph>{item.description}</Paragraph>
             </View>
             <View style={{margin:10}}>
-                <Paragraph>{item.addressline1}, {item.addressline2}, {item.phone1}</Paragraph>
-                <Text>Event date/time: {item.eventDate} / {item.eventTime}</Text>
+                <Paragraph><FontAwesome name="address-card" size={24} color="purple" /> {item.addressline1}, {item.addressline2}, {item.phone1}</Paragraph>
+                <Text><Fontisto name="date" size={24} color="purple" />  {item.eventDate} </Text>
+                <Text><Ionicons name="time-sharp" size={24} color="purple" /> {item.eventTime}</Text>
             </View>
         </Card>
         ); 
@@ -87,7 +89,7 @@ export default function Events({ navigation }) {
       // Flat List Item Separator
       <View
         style={{
-          height: 5,
+          height: 0,
           width: '100%',
           backgroundColor: '#C8C8C8',
         }}
@@ -108,6 +110,12 @@ export default function Events({ navigation }) {
             <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
               Event's
             </Text>
+            <Text>{register==="success"?showMessage({
+            message: "Event has been added successfully!",
+            type: "info",
+            hideOnPress: true,
+            backgroundColor: "purple",
+          }):""}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Add-event')}>
             <MaterialIcons name="post-add" size={35} color="purple" />
               {/* <ImageBackground

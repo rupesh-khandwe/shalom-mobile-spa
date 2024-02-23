@@ -3,7 +3,9 @@ import {
   SafeAreaView,
   ScrollView,
   View,
-  StyleSheet
+  StyleSheet,
+  Keyboard, 
+  Text
 } from 'react-native';
 
 import InputField from '../common/InputField';
@@ -35,6 +37,7 @@ export default function RegisterChurch({navigation}) {
   const [userId, setUserId] = useState([]);
   const [createdBy, setCreatedBy] = useState([]);
   const [isFocus, setIsFocus] = useState(false);
+  const [errors, setErrors] = useState({});
   const church_model = {
     'userId': userId,
     'churchName': churchName,
@@ -71,6 +74,44 @@ export default function RegisterChurch({navigation}) {
     })
     .catch((err) => console.log(err));
   }, []);
+
+  const validateForm = () =>{
+    Keyboard.dismiss();
+    let errors = {};
+    const requireFieldMsg = " Required field*";
+    const regexPhone = /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/i;
+    if(!churchName) errors.churchName = requireFieldMsg;
+
+    if(!phone1){
+      errors.phone1 = requireFieldMsg;
+    } else if(!regexPhone.test(phone1)){
+      errors.phone1 = "Invalid phone1";
+    }
+    if(phone2){
+      if(!regexPhone.test(phone2)) errors.phone2 = "Invalid phone2";
+    }
+    if(!addressline1) errors.addressline1 = requireFieldMsg;
+    if(!countryId) errors.countryId = "Please select country";
+    if(!stateId) errors.stateId = "Please select state";
+    if(!cityId) errors.cityId = "Please select city";
+    if(!regionId) errors.regionId = "Please select region";
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+}
+
+const handleSubmit = () =>{
+  if(validateForm()){
+    setChurchName("");
+    setPhone1("");
+    setAddressline1("");
+    setCountryId("");
+    setStateId("");
+    setCityId("");
+    setRegionId("");
+    setErrors({});
+    handleRegister();
+  }
+}
 
   const handleState = countryCode => {
     var config = {
@@ -159,7 +200,9 @@ export default function RegisterChurch({navigation}) {
       {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
       })
     .then((res) => {
-        navigation.goBack();
+      navigation.navigate('Church', 
+      "success"
+    );
     })
     .catch((err) => console.log(`Login error ${err}`)); 
   };
@@ -174,7 +217,7 @@ export default function RegisterChurch({navigation}) {
         </View>
 
         <InputField
-          label={'Church Name'}
+          label={'Church Name*'}
           icon={
             <MaterialCommunityIcons
               name="church"
@@ -185,6 +228,7 @@ export default function RegisterChurch({navigation}) {
           }
           onChangeText={(text) => {setChurchName(text)}}
           value={churchName}
+          error={errors.churchName}
         />
 
 
@@ -204,7 +248,7 @@ export default function RegisterChurch({navigation}) {
         />
 
         <InputField
-          label={'Phone-1'}
+          label={'Phone-1*'}
           icon={
             <Ionicons
               name="person-outline"
@@ -215,6 +259,7 @@ export default function RegisterChurch({navigation}) {
           }
           onChangeText={(text) => {setPhone1(text)}}
           value={phone1}
+          error={errors.phone1}
         />
         <InputField
           label={'Phone-2'}
@@ -231,7 +276,7 @@ export default function RegisterChurch({navigation}) {
         />
 
         <InputField
-          label={'Address Line 1'}
+          label={'Address Line 1*'}
           icon={
             <Ionicons
               name="person-outline"
@@ -242,6 +287,7 @@ export default function RegisterChurch({navigation}) {
           }
           onChangeText={(text) => {setAddressline1(text)}}
           value={addressline1}
+          error={errors.addressline1}
         />
         <InputField
           label={'Address Line 2'}
@@ -268,7 +314,7 @@ export default function RegisterChurch({navigation}) {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isFocus ? 'Select country' : '...'}
+          placeholder={!isFocus ? 'Select country*' : '...'}
           searchPlaceholder="Search..."
           value={countryId}
           onFocus={() => setIsFocus(true)}
@@ -286,7 +332,11 @@ export default function RegisterChurch({navigation}) {
               size={20}
             />
           )}
-        />
+          error={errors.countryId}
+          />
+          {
+            errors.countryId ? (<Text style={styles.errorText}>{errors.countryId}</Text>):null
+          }
 
         <Dropdown
           style={[styles.dropdown, isFocus && {borderColor: 'black'}]}
@@ -299,7 +349,7 @@ export default function RegisterChurch({navigation}) {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isFocus ? 'Select state' : '...'}
+          placeholder={!isFocus ? 'Select state*' : '...'}
           searchPlaceholder="Search..."
           value={stateId}
           onFocus={() => setIsFocus(true)}
@@ -317,7 +367,11 @@ export default function RegisterChurch({navigation}) {
               size={20}
             />
           )}
-        />
+          error={errors.stateId}
+          />
+          {
+            errors.stateId ? (<Text style={styles.errorText}>{errors.stateId}</Text>):null
+          }
 
         <Dropdown
           style={[styles.dropdown, isFocus && {borderColor: 'black'}]}
@@ -330,7 +384,7 @@ export default function RegisterChurch({navigation}) {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isFocus ? 'Select city' : '...'}
+          placeholder={!isFocus ? 'Select city*' : '...'}
           searchPlaceholder="Search..."
           value={cityId}
           onFocus={() => setIsFocus(true)}
@@ -348,7 +402,11 @@ export default function RegisterChurch({navigation}) {
               size={20}
             />
           )}
-        />
+          error={errors.cityId}
+          />
+          {
+            errors.cityId ? (<Text style={styles.errorText}>{errors.cityId}</Text>):null
+          }
 
         <Dropdown
           style={[styles.dropdownRegion, isFocus && {borderColor: 'black'}]}
@@ -361,7 +419,7 @@ export default function RegisterChurch({navigation}) {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isFocus ? 'Select region' : '...'}
+          placeholder={!isFocus ? 'Select region*' : '...'}
           searchPlaceholder="Search..."
           value={regionId}
           onFocus={() => setIsFocus(true)}
@@ -378,9 +436,13 @@ export default function RegisterChurch({navigation}) {
               size={20}
             />
           )}
-        />
+          error={errors.regionId}
+          />
+          {
+            errors.regionId ? (<Text style={styles.errorText}>{errors.regionId}</Text>):null
+          }
 
-        <CustomButton label={'Register'} onPress={handleRegister} />
+        <CustomButton label={'Register'} onPress={handleSubmit} />
 
       </ScrollView>
     </SafeAreaView>
@@ -431,4 +493,8 @@ const styles = StyleSheet.create({
     height: 40,
     fontSize: 16,
   },
+  errorText: {
+    color: 'red',
+    marginBottom: 20,
+  }
 });

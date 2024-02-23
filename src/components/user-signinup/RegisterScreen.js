@@ -6,7 +6,8 @@ import {
   Text,
   TouchableOpacity,
   Image,
-  StyleSheet
+  StyleSheet,
+  Keyboard
 } from 'react-native';
 
 import InputField from '../common/InputField';
@@ -19,10 +20,12 @@ import TwitterSVG from '../../assets/images/misc/TwitterSVG';
 import CustomButton from '../common/CustomButton';
 import { icon } from '../../assets/images';
 import {Dropdown} from 'react-native-element-dropdown';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import axios from 'axios';
-import {BASE_URL_LOCATION_API, BASE_URL_RGSTR_API} from '@env'
-
+import {BASE_URL_LOCATION_API, BASE_URL_USER_PROFILE} from '@env'
+import PhoneInput from "react-native-phone-number-input";
+import { FontAwesome, AntDesign } from '@expo/vector-icons'; 
+import { LoginManager, GraphRequest, GraphRequestManager } from "react-native-fbsdk";
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
 export default function RegisterScreen({navigation}) {
   // const [date, setDate] = useState(new Date(1598051730000));
@@ -44,6 +47,7 @@ export default function RegisterScreen({navigation}) {
   const [regionId, setRegionId] = useState('');
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [countryData, setCountryData] = useState([]);
   const [stateData, setStateData] = useState([]);
   const [cityData, setCityData] = useState([]);
@@ -53,6 +57,14 @@ export default function RegisterScreen({navigation}) {
   // const [cityName, setCityName] = useState(null);
   // const [regionName, setRegionName] = useState(null);
   const [isFocus, setIsFocus] = useState(false);
+  const [formFields, setFormFields] = useState({
+    email: '',
+    firstName: ''
+  });
+  const [errors, setErrors] = useState({});
+  const [secureText, setSecureText] = useState(true);
+  const [confirmSecureText, setConfirmSecureText] = useState(true);
+  
   const [genderData, setGenderData] = useState([
     {label: 'Male', value: 'M'},
     {label: 'Female', value: 'F'}
@@ -76,7 +88,141 @@ export default function RegisterScreen({navigation}) {
       setCountryData(countryArray);
     })
     .catch((err) => console.log(err));
+
+    GoogleSignin.configure();
   }, []);
+
+  
+const googleLogin = async () => {
+  try {
+    await GoogleSignin.hasPlayServices();
+    const userInfo = await GoogleSignin.signIn();
+    setState({ userInfo });
+    console.log("Google user info", userInfo);
+  } catch (error) {
+    if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+      // user cancelled the login flow
+      console.log(error)
+    } else if (error.code === statusCodes.IN_PROGRESS) {
+      // operation (e.g. sign in) is in progress already
+      console.log(error)
+    } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+      // play services not available or outdated
+      console.log(error)
+    } else {
+      // some other error happened
+      console.log("Default error ",error)
+    }
+  }
+};
+
+const fbLogin = (resCallback) => {
+  LoginManager.logOut();
+  return LoginManager.logInWithPermissions(['email', 'public_profile']).then(
+    result => {
+      console.log("fb results=="+result)
+      if(result.declinedPermissions && result.declinedPermissions.includes("email")){
+        resCallback({message: "Email is required"})
+      }
+      if(result.isCancelled){
+        console.log("Error")
+      } else {
+        const infoRequest = new GraphRequest(
+          '/me?fields=email,name,picture',
+          null,
+          resCallback
+        );
+        new GraphRequestManager().addRequest(infoRequest).start()
+      }
+    },
+    function(error){
+      console.log("Login fail with error:", error)
+    }
+  )
+}
+
+const onFbLogin = async() => {
+  try {
+    await fbLogin(_responseInfoCallBack)
+  } catch (error) {
+    console.log("FB login error",error)
+  }
+}
+
+const _responseInfoCallBack = async(error, result) =>{
+  if(error){
+    console.log("error fb1", error)
+    return;
+  } else{
+    const userData = result
+    console.log("FB data===", userData)
+  }
+}
+
+
+  const validateForm = () =>{
+      Keyboard.dismiss();
+      let errors = {};
+      const requireFieldMsg = " Required field*";
+      const regexPhone = /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/i;
+      let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
+      if(!email){
+        errors.email = requireFieldMsg
+      } else if(!regexEmail.test(email)){
+        errors.email = "Email is invalid"
+      }
+      if(!firstName) errors.firstName = requireFieldMsg;
+      if(!lastName) errors.lastName = requireFieldMsg;
+      if(!gender) errors.gender = "Please select gender";
+      if(!phone1){
+        errors.phone1 = "Please enter phone1";
+      } else if(!regexPhone.test(phone1)){
+        errors.phone1 = "Invalid phone1";
+      }
+      if(!regexPhone.test(phone2)) errors.phone2 = "Invalid phone2";
+      if(!addressLine1) errors.addressLine1 = requireFieldMsg;
+      if(!countryId) errors.countryId = "Please select country";
+      if(!stateId) errors.stateId = "Please select state";
+      if(!cityId) errors.cityId = "Please select city";
+      if(!regionId) errors.regionId = "Please select region";
+      if(!userName) errors.userName = requireFieldMsg;
+      if(!password) errors.password = requireFieldMsg;
+      if(!confirmPassword) errors.confirmPassword = requireFieldMsg;
+      if(password !== confirmPassword) errors.confirmedPassword = "Confirm passward must match with Password fields";
+      setErrors(errors);
+      return Object.keys(errors).length === 0;
+  }
+
+  const handleSubmit = () =>{
+    if(validateForm()){
+      console.log("Submitted", userName, userPassword);
+      setEmail("");
+      setFirstName("");
+      setErrors({});
+      console.log(errors+"****"+email+"***"+firstName);
+      handleRegister();
+    }
+  }
+
+  const setHideFlag = () =>{
+    setSecureText(!secureText)
+  }
+
+  const setConfirmHideFlag = () =>{
+    setConfirmSecureText(!confirmSecureText)
+  }
+
+  const handleOnChange = (text, input) =>{
+    setFormFields((prevState)=>({...prevState, [input]: text}))
+    console.log("Form fields..",formFields)
+  };
+
+  const handleError = (errorMessage, input) =>{
+    setErrors((prevState)=>({...prevState, [input]: errorMessage}))
+    console.log("Form fields..",errors)
+  }
+
+  
 
   const handleState = countryCode => {
     console.log(countryCode);
@@ -162,7 +308,7 @@ export default function RegisterScreen({navigation}) {
   const handleRegister = () => {
     console.log(handleRegister);
     axios
-    .post(`${BASE_URL_RGSTR_API}`, {
+    .post(`${BASE_URL_USER_PROFILE}/register`, {
         email,
         firstName,
         middleName,
@@ -245,7 +391,7 @@ export default function RegisterScreen({navigation}) {
             marginBottom: 30,
           }}>
           <TouchableOpacity
-            onPress={() => {}}
+            onPress={googleLogin}
             style={{
               borderColor: '#ddd',
               borderWidth: 2,
@@ -256,7 +402,7 @@ export default function RegisterScreen({navigation}) {
             <GoogleSVG height={24} width={24} />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => {}}
+            onPress={onFbLogin}
             style={{
               borderColor: '#ddd',
               borderWidth: 2,
@@ -284,7 +430,7 @@ export default function RegisterScreen({navigation}) {
         </Text>
 
         <InputField
-          label={'Email ID'}
+          label={'Email ID*'}
           icon={
             <MaterialIcons
               name="alternate-email"
@@ -294,12 +440,18 @@ export default function RegisterScreen({navigation}) {
             />
           }
           keyboardType="email-address"
+          // onChangeText={(text) => {setEmail(text);handleOnChange(text, 'email')}}
+          // // (text) => {setEmail(text)}
+          // onFocus={()=> {
+          //   handleError(null, 'email')
+          // }}
           onChangeText={(text) => {setEmail(text)}}
           value={email}
+          error={errors.email}
         />
 
         <InputField
-          label={'First Name'}
+          label={'First Name*'}
           icon={
             <Ionicons
               name="person-outline"
@@ -308,8 +460,10 @@ export default function RegisterScreen({navigation}) {
               style={{marginRight: 5}}
             />
           }
+          //onChangeText={(text) => {handleOnChange(text, 'firstName')}}
           onChangeText={(text) => {setFirstName(text)}}
           value={firstName}
+          error={errors.firstName}
         />
         <InputField
           label={'Middle Name'}
@@ -325,7 +479,7 @@ export default function RegisterScreen({navigation}) {
           value={middleName}
         />
         <InputField
-          label={'Last Name'}
+          label={'Last Name*'}
           icon={
             <Ionicons
               name="person-outline"
@@ -336,6 +490,7 @@ export default function RegisterScreen({navigation}) {
           }
           onChangeText={(text) => {setLastName(text)}}
           value={lastName}
+          error={errors.lastName}
         />
   
         <Dropdown
@@ -348,7 +503,7 @@ export default function RegisterScreen({navigation}) {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isFocus ? 'Select gender' : '...'}
+          placeholder={!isFocus ? 'Select gender*' : '...'}
           value={gender}
           onFocus={() => setIsFocus(true)}
           onBlur={() => setIsFocus(false)}
@@ -364,11 +519,45 @@ export default function RegisterScreen({navigation}) {
               size={20}
             />
           )}
+          error={errors.gender}
         />
+        {
+          errors.gender ? (<Text style={styles.errorText}>{errors.gender}</Text>):null
+        }
 
-
-
-        <InputField
+      <PhoneInput
+            defaultValue={phone1}
+            textInputProps={{maxLength: 10}}
+            onChangeText={(text) => {
+              setPhone1(text);
+            }}
+            onChangeFormattedText={(text) => {
+              setPhone1(text);
+            }}
+            containerStyle={styles.phoneInput}
+            placeholder="Phone-1*"
+            error={errors.phone1}
+          />
+        {
+          errors.phone1 ? (<Text style={styles.errorText}>{errors.phone1}</Text>):null
+        }
+        <PhoneInput
+            defaultValue={phone2}
+            textInputProps={{maxLength: 10}}
+            onChangeText={(text) => {
+              setPhone2(text);
+            }}
+            onChangeFormattedText={(text) => {
+              setPhone2(text);
+            }}
+            containerStyle={styles.phoneInput}
+            placeholder="Phone-2"
+            error={errors.phone2}
+            />
+          {
+            errors.phone2 ? (<Text style={styles.errorText}>{errors.phone2}</Text>):null
+          }
+        {/* <InputField
           label={'Phone-1'}
           icon={
             <Ionicons
@@ -393,9 +582,9 @@ export default function RegisterScreen({navigation}) {
           }
           onChangeText={(text) => {setPhone2(text)}}
           value={phone2}
-        />
+        /> */}
         <InputField
-          label={'Address Line 1'}
+          label={'Address Line 1*'}
           icon={
             <Ionicons
               name="person-outline"
@@ -406,6 +595,7 @@ export default function RegisterScreen({navigation}) {
           }
           onChangeText={(text) => {setAddressLine1(text)}}
           value={addressLine1}
+          error={errors.addressLine1}
         />
         <InputField
           label={'Address Line 2'}
@@ -432,7 +622,7 @@ export default function RegisterScreen({navigation}) {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isFocus ? 'Select country' : '...'}
+          placeholder={!isFocus ? 'Select country*' : '...'}
           searchPlaceholder="Search..."
           value={countryId}
           onFocus={() => setIsFocus(true)}
@@ -450,7 +640,11 @@ export default function RegisterScreen({navigation}) {
               size={20}
             />
           )}
-        />
+          error={errors.countryId}
+          />
+          {
+            errors.countryId ? (<Text style={styles.errorText}>{errors.countryId}</Text>):null
+          }
 
         <Dropdown
           style={[styles.dropdown, isFocus && {borderColor: 'black'}]}
@@ -463,7 +657,7 @@ export default function RegisterScreen({navigation}) {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isFocus ? 'Select state' : '...'}
+          placeholder={!isFocus ? 'Select state*' : '...'}
           searchPlaceholder="Search..."
           value={stateId}
           onFocus={() => setIsFocus(true)}
@@ -481,7 +675,11 @@ export default function RegisterScreen({navigation}) {
               size={20}
             />
           )}
-        />
+          error={errors.stateId}
+          />
+          {
+            errors.stateId ? (<Text style={styles.errorText}>{errors.stateId}</Text>):null
+          }
 
         <Dropdown
           style={[styles.dropdown, isFocus && {borderColor: 'black'}]}
@@ -494,7 +692,7 @@ export default function RegisterScreen({navigation}) {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isFocus ? 'Select city' : '...'}
+          placeholder={!isFocus ? 'Select city*' : '...'}
           searchPlaceholder="Search..."
           value={cityId}
           onFocus={() => setIsFocus(true)}
@@ -512,7 +710,11 @@ export default function RegisterScreen({navigation}) {
               size={20}
             />
           )}
-        />
+          error={errors.cityId}
+          />
+          {
+            errors.cityId ? (<Text style={styles.errorText}>{errors.cityId}</Text>):null
+          }
 
         <Dropdown
           style={[styles.dropdownRegion, isFocus && {borderColor: 'black'}]}
@@ -525,7 +727,7 @@ export default function RegisterScreen({navigation}) {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isFocus ? 'Select region' : '...'}
+          placeholder={!isFocus ? 'Select region*' : '...'}
           searchPlaceholder="Search..."
           value={regionId}
           onFocus={() => setIsFocus(true)}
@@ -542,7 +744,11 @@ export default function RegisterScreen({navigation}) {
               size={20}
             />
           )}
-        />
+          error={errors.regionId}
+          />
+          {
+            errors.regionId ? (<Text style={styles.errorText}>{errors.regionId}</Text>):null
+          }
         {/* <InputField
           label={'Country'}
           icon={
@@ -557,7 +763,7 @@ export default function RegisterScreen({navigation}) {
           value={addressline1}
         /> */}
         <InputField
-          label={'User Name'}
+          label={'User Name*'}
           icon={
             <Ionicons
               name="ios-lock-closed-outline"
@@ -568,10 +774,11 @@ export default function RegisterScreen({navigation}) {
           }
           onChangeText={(text) => {setUserName(text)}}
           value={userName}
+          error={errors.userName}
         />
 
         <InputField
-          label={'Password'}
+          label={'Password*'}
           icon={
             <Ionicons
               name="ios-lock-closed-outline"
@@ -583,10 +790,14 @@ export default function RegisterScreen({navigation}) {
           inputType="password"
           onChangeText={(text) => {setPassword(text)}}
           value={password}
+          fieldButtonLabel={<FontAwesome name={secureText?"eye-slash":"eye"} size={22} color="purple"/>}
+          fieldButtonFunction={setHideFlag}
+          error={errors.password}
+          secureTextFlag={secureText}
         />
 
         <InputField
-          label={'Confirm Password'}
+          label={'Confirm Password*'}
           icon={
             <Ionicons
               name="ios-lock-closed-outline"
@@ -596,7 +807,16 @@ export default function RegisterScreen({navigation}) {
             />
           }
           inputType="password"
+          onChangeText={(text) => {setConfirmPassword(text)}}
+          value={confirmPassword}
+          fieldButtonLabel={<FontAwesome name={confirmSecureText?"eye-slash":"eye"} size={22} color="purple"/>}
+          fieldButtonFunction={setConfirmHideFlag}
+          error={errors.confirmPassword}
+          secureTextFlag={confirmSecureText}
         />
+          {
+            errors.confirmedPassword ? (<Text style={styles.errorText}>{errors.confirmedPassword}</Text>):null
+          }
         {/* DOB code in future if needed */}
         {/* <View
           style={{
@@ -632,8 +852,8 @@ export default function RegisterScreen({navigation}) {
         />
         )} */}
 
-        <CustomButton label={'Register'} onPress={handleRegister} />
-
+        {/* <CustomButton label={'Register'} onPress={handleRegister} /> */}
+        <CustomButton label={'Register'} onPress={handleSubmit} />
         <View
           style={{
             flexDirection: 'row',
@@ -667,6 +887,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginBottom: 25,
   },
+  phoneInput: {
+    width:'100%',
+    height: 55,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: '#ccc', 
+    marginBottom: 20, 
+    paddingHorizontal: 10, 
+  },
   label: {
     position: 'absolute',
     backgroundColor: 'white',
@@ -694,4 +924,8 @@ const styles = StyleSheet.create({
     height: 40,
     fontSize: 16,
   },
+  errorText: {
+    color: 'red',
+    marginBottom: 20,
+  }
 });

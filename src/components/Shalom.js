@@ -11,8 +11,6 @@ import {BASE_URL_API} from '@env'
 
 export default function Shalom({ navigation }) {
     const {userToken, userInfo}= useContext(AuthContext);
-    //const BASE_URL_API = "http://shalom-api.us-east-1.elasticbeanstalk.com/api/shalom/v1";
-    //const BASE_URL_API = "http://192.168.68.131:5000/api/shalom/v1";
     
     const SEARCH_BY_KEY = "eventByUserId?key=";
     const [search, setSearch] = useState('');
@@ -22,7 +20,7 @@ export default function Shalom({ navigation }) {
     const [status, setStatus] = React.useState({});
 
     useEffect(() => {
-        console.log("Shalom component"+ userInfo.userId);
+        console.log("Shalom component"+ `${BASE_URL_API}/shalomByUserId?id=${userInfo.userId}`);
         axios
         .get(`${BASE_URL_API}/shalomByUserId?id=${userInfo.userId}`, {
           headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
@@ -35,7 +33,7 @@ export default function Shalom({ navigation }) {
       }, []);
 
       const searchFilterFunction = (text) => {
-        // Check if searched text is not blank
+        // Check if searched text is not blank 
         if (text) {
           // Inserted text is not blank
           // Filter the masterDataSource
@@ -59,7 +57,7 @@ export default function Shalom({ navigation }) {
     const ItemView = ({ item }) => {
         return (
         // Flat List Item
-        <Card style={{marginTop:10, borderColor:'black', borderRadius:5, borderBottomWidth:1}}
+        <Card style={{margin:6, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}
             onPress={() => navigation.push('Chapters', {bookId: item.id, bibleId: item.bibleId})}
         >
             <View style={{flexDirection:'row',}}>
@@ -115,7 +113,7 @@ export default function Shalom({ navigation }) {
       // Flat List Item Separator
       <View
         style={{
-          height: 5,
+          height: 0,
           width: '100%',
           backgroundColor: '#C8C8C8',
         }}

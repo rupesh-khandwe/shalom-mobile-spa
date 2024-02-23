@@ -1,18 +1,20 @@
 import {Text, TouchableOpacity} from 'react-native';
 import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
+
 
 export default function CustomTopNavButton({label, onPress}) {
   return (
     <TouchableOpacity
       onPress={onPress}
       style={{
-        backgroundColor: '#AD40AF',
+        backgroundColor: label?'#AD40AF':'white',
         padding: 10,
         borderRadius: 10,
         marginTop: 5,
         marginBottom: 5,
       }}>
-      <Text
+      {label && <Text
         style={{
           textAlign: 'center',
           fontWeight: '700',
@@ -20,7 +22,8 @@ export default function CustomTopNavButton({label, onPress}) {
           color: '#fff',
         }}>
         {label}
-      </Text>
+      </Text>}
+      {!label && <Ionicons name="chevron-back-outline" size={24} color="black" />}
     </TouchableOpacity>
   );
 }

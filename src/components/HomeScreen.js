@@ -26,18 +26,28 @@ export default function HomeScreen({ navigation }) {
     const onRefresh = React.useCallback(() => {
       setRefreshing(true);
       setTimeout(() => {
+        axios
+        .get(`${BASE_URL_API}/shalomsWithLikeComment?userId=${userId}`, {
+          headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+        })
+        .then((res) => {
+            setFilteredDataSource(res.data);
+            //setMasterDataSource(res.data);
+        })
+        .catch((err) => console.log(err));
         setRefreshing(false);
       }, 2000);
     }, []);
 
 
-    const likeFlow = (shalomId, likeFlag) => {
+    const likeFlow = (shalomId, slikeFlag) => {
         axios
         .put(`${BASE_URL_API}/saveLike`, null, {
-            params: { userId: userId, shalomId: shalomId, likeFlag: likeFlag },
+            params: { userId: userId, shalomId: shalomId, likeFlag: slikeFlag },
             headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
+            console.log(res.data);
             setFilteredDataSource(res.data);
             //setMasterDataSource(res.data);
         })
@@ -69,7 +79,7 @@ const onShare = async () => {
         setUserName(userInfo.userFirstName+" "+ userInfo.userLastName);
         console.log("Bearer "+ userToken);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
         axios
-        .get(`${BASE_URL_API}/shalomsWithLikeComment`, {
+        .get(`${BASE_URL_API}/shalomsWithLikeComment?userId=${userInfo.userId}`, {
           headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
@@ -104,7 +114,7 @@ const onShare = async () => {
     const ItemView = ({ item }) => {
         return (
         // Flat List Item onPress={() => navigation.push('Chapters', {bookId: item.id, bibleId: item.bibleId})}
-        <Card style={{marginTop:10, borderColor:'black', borderRadius:5, borderBottomWidth:1}}>
+        <Card style={{marginTop:10, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}>
             <View style={{flexDirection:'row', flex:1}}>
                 {/*  Text */}
                 <TouchableOpacity onPress={() => navigation.openDrawer()}>
@@ -150,8 +160,21 @@ const onShare = async () => {
                     <Text style={{paddingLeft:45}} >{item.commentCount} Comment</Text>
             </View>
             <View style={{flexDirection:'row', margin:10}}>
-                    <Text style={{paddingLeft:5}} onPress={()=> {item.likeFlag=item.likeFlag===null?true:item.likeFlag===true?false:true; setLikeFlag(item.likeFlag);likeFlow(item.shalomId, item.likeFlag)}} ><AntDesign name={item.likeFlag===null ? "like2": "like1"} size={24} color={item.likeFlag===null ?"gray":"purple"}  /></Text>
-                    <Text style={{paddingLeft:45}} onPress={()=> alert('Like')}><FontAwesome name={item.commentCount>0 ? "comments-o": "comments"} size={24} color={item.commentCount>0 ?"purple":"gray"}   /></Text>
+                    <Text style={{paddingLeft:5}} 
+                        onPress={()=> {
+                            item.likeFlag=(item.likeFlag===null || !item.likeFlag)?true:false;
+                            setLikeFlag(item.likeFlag)
+                            likeFlow(item.shalomId, item.likeFlag)
+                          }
+                        } 
+                    >
+                      <AntDesign 
+                        name={item.likeFlag===null || !item.likeFlag ? "like2": "like1"} 
+                        size={24} 
+                        color={item.likeFlag===null || !item.likeFlag ?"gray": "purple"}  
+                      />
+                    </Text>
+                    <Text style={{paddingLeft:45}} onPress={()=> navigation.navigate('Comment', {"userId": userId ,"userName": item.userName, "shalomId": item.shalomId, "shalom": item.shalom, "imageUrl": item.imageUrl, "likeCount": item.likeCount, "likeFlag": item.likeFlag} )}><FontAwesome name={item.commentCount>0 ? "comments-o": "comments"} size={24} color={item.commentCount>0 ?"purple":"gray"}   /></Text>
                     <Text style={{paddingLeft:45}} onPress={onShare}><FontAwesome name="share-square" size={24} color="gray"   /></Text>
                     {/* item.likeFlag=item.likeFlag===null?true:item.likeFlag===true?false:true; setLikeFlag(item.likeFlag); */}
             </View>
@@ -173,7 +196,7 @@ const onShare = async () => {
       // Flat List Item Separator
       <View
         style={{
-          height: 5,
+          height: 0,
           width: '100%',
           backgroundColor: '#C8C8C8',
         }}
@@ -282,5 +305,15 @@ const styles = StyleSheet.create({
 
         margin: 16
       },
+    commentContainer: {
+        marginTop: 6,
+        backgroundColor: '#d3d3d3e0',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: 10,
+        width: 300,
+        //cursor: pointer,
+        borderRadius: 5,
+      }
   });
 

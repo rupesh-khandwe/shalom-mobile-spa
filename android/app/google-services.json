@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "519356566951",
+    "project_id": "shalom-spa-553a4",
+    "storage_bucket": "shalom-spa-553a4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:519356566951:android:c794a14fdff8b777077a82",
+        "android_client_info": {
+          "package_name": "com.shalommobilespa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "519356566951-e1f6aa0dsm4v5cucrjvtlftjgeusskl9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shalommobilespa",
+            "certificate_hash": "568d12def77de8fee448f70b86b1e1abfc52c1de"
+          }
+        },
+        {
+          "client_id": "519356566951-siiffpd9aj26t6ff8n7in257q4m2mt9i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhNpAygShW-EbtwkRDhX2FQ0JLwIsm0E4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "519356566951-siiffpd9aj26t6ff8n7in257q4m2mt9i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -10,8 +10,8 @@ export const AuthProvider = ({children}) => {
     const [userToken, setUserToken] = useState(null);
     const [userInfo, setUserInfo] = useState(null);
     const [shalom, setShalom] = useState(null);
-    //const BASE_URL_USER_PROFILE = "http://shalom-api.us-east-1.elasticbeanstalk.com/userProfile/v1";
-    //const BASE_URL_USER_PROFILE = "http://192.168.68.131:5000/userProfile/v1";
+    const [shalomId , setShalomId] = useState(null);
+
     const login = (userName, password) => {
         setIsLoading(true);
         console.log("inside AuthProvider=="+BASE_URL_USER_PROFILE+"**"+userName+"=password="+password);
@@ -32,8 +32,9 @@ export const AuthProvider = ({children}) => {
         setIsLoading(false);
      }
 
-     const editorData = (post) => {
+     const editorData = (post, id) => {
         setShalom(post);
+        setShalomId(id);
      }
 
      const logout = () => {
@@ -66,7 +67,7 @@ export const AuthProvider = ({children}) => {
      }, []);
 
     return (
-        <AuthContext.Provider value={{login, logout, isLoading, userToken, userInfo, editorData, shalom}}>
+        <AuthContext.Provider value={{login, logout, isLoading, userToken, userInfo, editorData, shalom, shalomId}}>
             {children}
         </AuthContext.Provider>
     );

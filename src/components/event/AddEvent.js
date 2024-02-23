@@ -4,7 +4,8 @@ import {
   ScrollView,
   View,
   StyleSheet,
-  Text
+  Text,
+  Keyboard
 } from 'react-native';
 
 import InputField from '../common/InputField';
@@ -47,6 +48,7 @@ export default function AddEvent({navigation}) {
   const [eventTime, setEventTime] = useState('');
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
+  const [errors, setErrors] = useState({});
   const event_model = {
     'userId': userId,
     'categoryId': categoryId,
@@ -104,6 +106,51 @@ export default function AddEvent({navigation}) {
     .catch((err) => console.log(err));
 
   }, []);
+
+
+  const validateForm = () =>{
+    Keyboard.dismiss();
+    let errors = {};
+    const requireFieldMsg = " Required field*";
+    const regexPhone = /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/i;
+
+    if(!categoryId) errors.categoryId = "Please select category";
+    if(!eventDate) errors.eventDate = "Please select event date";
+    if(!eventTime) errors.eventTime = "Please select event time";
+
+    if(!phone1){
+      errors.phone1 = requireFieldMsg;
+    } else if(!regexPhone.test(phone1)){
+      errors.phone1 = "Invalid phone1";
+    }
+    if(phone2){
+      if(!regexPhone.test(phone2)) errors.phone2 = "Invalid phone2";
+    }
+    if(!addressline1) errors.addressline1 = requireFieldMsg;
+    if(!countryId) errors.countryId = "Please select country";
+    if(!stateId) errors.stateId = "Please select state";
+    if(!cityId) errors.cityId = "Please select city";
+    if(!regionId) errors.regionId = "Please select region";
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+}
+
+const handleSubmit = () =>{
+  if(validateForm()){
+    setEventDate("");
+    setEventTime("");
+    setPhone1("");
+    setPhone2("");
+    setAddressline1("");
+    setCountryId  ("");
+    setAddressline1("");
+    setAddressline1("");
+    setAddressline1("");
+    setErrors({});
+    handleAddEvent();
+  }
+}
+
 
   const handleState = countryCode => {
     console.log(countryCode);
@@ -199,7 +246,7 @@ export default function AddEvent({navigation}) {
       })
     .then((res) => {
         console.log(res.data);
-        navigation.navigate('Event');
+        navigation.navigate('Event', "success");
     })
     .catch((err) => console.log(`Login error ${err}`)); 
   };
@@ -251,7 +298,7 @@ export default function AddEvent({navigation}) {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isFocus ? 'Select event category' : '...'}
+          placeholder={!isFocus ? 'Select event category*' : '...'}
           searchPlaceholder="Search..."
           value={categoryId}
           onFocus={() => setIsFocus(true)}
@@ -269,7 +316,11 @@ export default function AddEvent({navigation}) {
               size={20}
             />
           )}
-        />
+          error={errors.categoryId}
+          />
+          {
+            errors.categoryId ? (<Text style={styles.errorText}>{errors.categoryId}</Text>):null
+          }
 
         <InputField
           label={'Event title'}
@@ -302,23 +353,25 @@ export default function AddEvent({navigation}) {
       <TouchableOpacity onPress={showDatepicker}>
         <View pointerEvents="none">
           <InputField
-              label={' Event date'}
+              label={' Event date*'}
               icon={
                 <Fontisto name="date" size={23} color="purple" />
               }
               value={" "+eventDate}
-            />
+              error={errors.eventDate}
+              />
           </View>
       </TouchableOpacity>
       
       <TouchableOpacity onPress={showTimepicker}>
         <View pointerEvents="none">
           <InputField 
-            label={' Event time'}
+            label={' Event time*'}
             icon={
               <MaterialIcons name="av-timer" size={25} color="purple" />
             }
             value={eventTime}
+            error={errors.eventTime}
           /></View>
       </TouchableOpacity>
           {show && (<DateTimePicker
@@ -333,7 +386,7 @@ export default function AddEvent({navigation}) {
           )}
 
         <InputField
-          label={'Phone-1'}
+          label={'Phone-1*'}
           icon={
             <Ionicons
               name="person-outline"
@@ -344,6 +397,7 @@ export default function AddEvent({navigation}) {
           }
           onChangeText={(text) => {setPhone1(text)}}
           value={phone1}
+          error={errors.phone1}
         />
         <InputField
           label={'Phone-2'}
@@ -357,10 +411,11 @@ export default function AddEvent({navigation}) {
           }
           onChangeText={(text) => {setPhone2(text)}}
           value={phone2}
+          error={errors.phone2}
         />
 
         <InputField
-          label={'Address Line 1'}
+          label={'Address Line 1*'}
           icon={
             <Ionicons
               name="person-outline"
@@ -371,6 +426,7 @@ export default function AddEvent({navigation}) {
           }
           onChangeText={(text) => {setAddressline1(text)}}
           value={addressline1}
+          error={errors.addressline1}
         />
         <InputField
           label={'Address Line 2'}
@@ -397,7 +453,7 @@ export default function AddEvent({navigation}) {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isFocus ? 'Select country' : '...'}
+          placeholder={!isFocus ? 'Select country*' : '...'}
           searchPlaceholder="Search..."
           value={countryId}
           onFocus={() => setIsFocus(true)}
@@ -416,7 +472,11 @@ export default function AddEvent({navigation}) {
               size={20}
             />
           )}
-        />
+          error={errors.countryId}
+          />
+          {
+            errors.countryId ? (<Text style={styles.errorText}>{errors.countryId}</Text>):null
+          }
 
         <Dropdown
           style={[styles.dropdown, isFocus && {borderColor: 'black'}]}
@@ -429,7 +489,7 @@ export default function AddEvent({navigation}) {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isFocus ? 'Select state' : '...'}
+          placeholder={!isFocus ? 'Select state*' : '...'}
           searchPlaceholder="Search..."
           value={stateId}
           onFocus={() => setIsFocus(true)}
@@ -448,7 +508,12 @@ export default function AddEvent({navigation}) {
               size={20}
             />
           )}
-        />
+          
+              error={errors.stateId}
+          />
+          {
+            errors.stateId ? (<Text style={styles.errorText}>{errors.stateId}</Text>):null
+          }
 
         <Dropdown
           style={[styles.dropdown, isFocus && {borderColor: 'black'}]}
@@ -461,7 +526,7 @@ export default function AddEvent({navigation}) {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isFocus ? 'Select city' : '...'}
+          placeholder={!isFocus ? 'Select city*' : '...'}
           searchPlaceholder="Search..."
           value={cityId}
           onFocus={() => setIsFocus(true)}
@@ -480,7 +545,11 @@ export default function AddEvent({navigation}) {
               size={20}
             />
           )}
-        />
+          error={errors.cityId}
+          />
+          {
+            errors.cityId ? (<Text style={styles.errorText}>{errors.cityId}</Text>):null
+          }
 
         <Dropdown
           style={[styles.dropdownRegion, isFocus && {borderColor: 'black'}]}
@@ -493,7 +562,7 @@ export default function AddEvent({navigation}) {
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder={!isFocus ? 'Select region' : '...'}
+          placeholder={!isFocus ? 'Select region*' : '...'}
           searchPlaceholder="Search..."
           value={regionId}
           onFocus={() => setIsFocus(true)}
@@ -511,9 +580,13 @@ export default function AddEvent({navigation}) {
               size={20}
             />
           )}
-        />
+          error={errors.regionId}
+          />
+          {
+            errors.regionId ? (<Text style={styles.errorText}>{errors.regionId}</Text>):null
+          }
 
-        <CustomButton label={'Add Event'} onPress={handleAddEvent} />
+        <CustomButton label={'Add Event'} onPress={handleSubmit} />
 
       </ScrollView>
     </SafeAreaView>
@@ -564,4 +637,8 @@ const styles = StyleSheet.create({
     height: 40,
     fontSize: 16,
   },
+  errorText: {
+    color: 'red',
+    marginBottom: 20,
+  }
 });

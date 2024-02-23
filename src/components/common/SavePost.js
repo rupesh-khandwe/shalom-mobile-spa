@@ -4,35 +4,74 @@ import { AuthContext } from '../../context/AuthContext';
 import axios from 'axios';
 import {BASE_URL_API} from '@env'
 import { useNavigation } from '@react-navigation/native';
+import { showMessage, hideMessage  } from "react-native-flash-message";
 
-const SavePost = ({ }) => {
+const SavePost = (props) => {
     const navigation = useNavigation();
-    const {shalom, userToken, userInfo} = useContext(AuthContext);
-    //const BASE_URL_API = "http://192.168.68.131:5000/api/shalom/v1";
+    const {shalom, userToken, userInfo, shalomId} = useContext(AuthContext);
     const [userId, setUserId]= useState('');
     const [userName, setUserName]= useState('');
-    const data = {
+    const shalomData = {
         'userId': userId,
         'shalom': shalom,
         'userName': userName
     }
 
+    const commentData = {
+        'userId': userId,
+        'userName': userName,
+        'shalomId': shalomId,
+        'shalomComment': shalom,
+    }
+
     useEffect(() =>{
         setUserId(userInfo.userId);
         setUserName(userInfo.userFirstName+" "+userInfo.userLastName);
-        console.log(userId+"****"+userName+ "***"+ BASE_URL_API);
     });
 
     const saveAction = () => {
-        axios
-        .post(`${BASE_URL_API}/save`, 
-            data,
-            {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
-        })
-        .then((res) => {
-            navigation.goBack();
-        })
-        .catch((err) => console.log(`Login error ${err}`)); 
+
+        if(props.name === "comment"){
+            if(shalom){
+                axios
+                .post(`${BASE_URL_API}/save/comment`, 
+                    commentData,
+                    {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
+                })
+                .then((res) => {
+                    navigation.goBack();
+                })
+                .catch((err) => console.log(`Login error ${err}`)); 
+            } else {
+                showMessage({
+                    message: "Empty comments cant be saved.",
+                    type: "Danger",
+                    hideOnPress: true,
+                    backgroundColor: "red",
+                })
+            }
+        }
+       
+        if(props.name === "shalom"){
+            if(shalom){
+                axios
+                .post(`${BASE_URL_API}/save`, 
+                    shalomData,
+                    {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
+                })
+                .then((res) => {
+                    navigation.goBack();
+                })
+                .catch((err) => console.log(`Login error ${err}`)); 
+            } else {
+                showMessage({
+                    message: "Empty posts cant be saved.",
+                    type: "Danger",
+                    hideOnPress: true,
+                    backgroundColor: "red",
+                })
+            }
+        }
     }
 
   return (
