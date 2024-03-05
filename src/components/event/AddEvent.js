@@ -69,7 +69,7 @@ export default function AddEvent({navigation}) {
 
   useEffect(() => {
     setUserId(userInfo.userId);
-    setCreatedBy(userInfo.userFirstName+" "+userInfo.userLastName);
+    setCreatedBy(userInfo.userName);
     console.log("Registration launched"+BASE_URL_EVENT_API);
     axios
     .get(`${BASE_URL_EVENT_API}/category`, {
@@ -246,7 +246,7 @@ const handleSubmit = () =>{
       })
     .then((res) => {
         console.log(res.data);
-        navigation.navigate('Event', "success");
+        navigation.replace('Event', "success");
     })
     .catch((err) => console.log(`Login error ${err}`)); 
   };

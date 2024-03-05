@@ -9,10 +9,11 @@ import {
 import {
   DrawerContentScrollView,
   DrawerItemList,
+  DrawerItem,
 } from '@react-navigation/drawer';
+import { DrawerActions } from '@react-navigation/native';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { AuthContext } from '../../context/AuthContext';
 
 const CustomDrawer = props => {
@@ -36,11 +37,15 @@ const CustomDrawer = props => {
               fontFamily: 'Roboto-Medium',
               marginBottom: 5,
             }}>
-            {userInfo.userFirstName} {userInfo.userLastName}
+            {userInfo.userName} 
           </Text>
         </ImageBackground>
         <View style={{flex: 1, backgroundColor: '#fff', paddingTop: 10}}>
           <DrawerItemList {...props} />
+          <DrawerItem
+            label=""
+            onPress={() => props.navigation.dispatch(DrawerActions.closeDrawer())}
+      />
         </View>
       </DrawerContentScrollView>
       <View style={{padding: 20, borderTopWidth: 1, borderTopColor: '#ccc'}}>

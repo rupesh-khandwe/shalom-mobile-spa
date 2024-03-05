@@ -26,7 +26,7 @@ const SavePost = (props) => {
 
     useEffect(() =>{
         setUserId(userInfo.userId);
-        setUserName(userInfo.userFirstName+" "+userInfo.userLastName);
+        setUserName(userInfo.userName);
     });
 
     const saveAction = () => {
@@ -39,7 +39,7 @@ const SavePost = (props) => {
                     {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
                 })
                 .then((res) => {
-                    navigation.goBack();
+                    navigation.replace("Home");
                 })
                 .catch((err) => console.log(`Login error ${err}`)); 
             } else {
@@ -60,7 +60,7 @@ const SavePost = (props) => {
                     {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
                 })
                 .then((res) => {
-                    navigation.goBack();
+                    navigation.replace("Shalom");
                 })
                 .catch((err) => console.log(`Login error ${err}`)); 
             } else {

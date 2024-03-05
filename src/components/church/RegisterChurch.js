@@ -17,6 +17,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 import {BASE_URL_CHURCH_API, BASE_URL_LOCATION_API} from '@env'
+import { showMessage, hideMessage  } from "react-native-flash-message";
 
 export default function RegisterChurch({navigation}) {
   const {userToken, userInfo}= useContext(AuthContext);
@@ -55,7 +56,7 @@ export default function RegisterChurch({navigation}) {
 
   useEffect(() => {
     setUserId(userInfo.userId);
-    setCreatedBy(userInfo.userFirstName+" "+userInfo.userLastName);
+    setCreatedBy(userInfo.userName);
     console.log("Registration launched"+BASE_URL_LOCATION_API);
     axios
     .get(`${BASE_URL_LOCATION_API}/CountryList`, {
@@ -200,11 +201,16 @@ const handleSubmit = () =>{
       {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
       })
     .then((res) => {
-      navigation.navigate('Church', 
+      navigation.replace('Church', 
       "success"
     );
     })
-    .catch((err) => console.log(`Login error ${err}`)); 
+    .catch((err) => showMessage({
+      message: "Church name has already been used.",
+      type: "info",
+      hideOnPress: true,
+      backgroundColor: "red",
+    })); 
   };
 
   return (

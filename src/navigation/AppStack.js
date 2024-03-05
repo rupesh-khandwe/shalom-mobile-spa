@@ -25,7 +25,7 @@ const AppStack = () => {
           component={Profile}
           options={{
             headerLeft: (props) => (
-              <BackHistory name="back"></BackHistory>
+              <BackHistory name="Back"></BackHistory>
              ),
 
           }}
@@ -35,7 +35,7 @@ const AppStack = () => {
           component={EditProfile}
           options={{
             headerLeft: (props) => (
-              <BackHistory name="back"></BackHistory>
+              <BackHistory name="Profile"></BackHistory>
              ),
 
           }}
@@ -45,7 +45,7 @@ const AppStack = () => {
           component={FollowUser}
           options={{
             headerLeft: (props) => (
-              <BackHistory name="back"></BackHistory>
+              <BackHistory name="Profile"></BackHistory>
              ),
 
           }}
@@ -58,11 +58,11 @@ const AppStack = () => {
     return (
       <Stack.Navigator>
          <Stack.Screen
-          name=" "
+          name="Settings"
           component={Settings}
           options={{
             headerLeft: (props) => (
-              <BackHistory name="back"></BackHistory>
+              <BackHistory name="Back"></BackHistory>
              ),
 
           }}
@@ -72,7 +72,7 @@ const AppStack = () => {
   };
 
   return (
-    <Drawer.Navigator
+    <Drawer.Navigator 
       drawerContent={props => <CustomDrawer {...props} />}
       screenOptions={{
         headerShown: false,

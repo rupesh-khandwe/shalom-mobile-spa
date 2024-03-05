@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList,ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import { SafeAreaView, Text, StyleSheet, View, FlatList, TouchableOpacity, RefreshControl,ScrollView } from 'react-native';
+//import { ScrollView } from 'react-native-virtualized-view';
 import { SearchBar } from 'react-native-elements';
 import axios from 'axios';
 import { SIZES, COLORS } from "../../constants"; 
@@ -18,8 +19,17 @@ export default function FollowUser({ navigation, route }) {
     const [masterDataSource, setMasterDataSource] = useState([]);
     const [refreshing, setRefreshing] = React.useState(false);
     const register = route.params;
+    const [userId, setUserId] = useState('');
+    const [followId, setFollowId] = useState('');
+    const [followFlag, setFollowFlag] = useState(true);
+    const followPayload = {
+      userId: userId,
+      followId: followId,
+      followFlag: followFlag
+    }
 
     useEffect(() => {
+        setUserId(userInfo.userId);
         axios
         .get(`${BASE_URL_API}/users?userId=${userInfo.userId}`, {
           headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
@@ -46,12 +56,42 @@ export default function FollowUser({ navigation, route }) {
         }
       };
     
+      const followUser = (followerId, followName)=>{
+        followPayload.followId=followerId;
+        console.log(followPayload);
+        axios
+        .put(`${BASE_URL_API}/saveFollow`, 
+            followPayload,
+          {headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+        })
+        .then((res) => {
+          setFilteredDataSource(res.data);
+          setMasterDataSource(res.data);
+            showMessage({
+              message: "You are following "+followName+"!",
+              type: "info",
+              hideOnPress: true,
+              backgroundColor: "purple",
+              style: styles.flashMessage
+            })
+        })
+        .catch((err) => 
+          //console.log(`Login error ${err}`)
+          showMessage({
+            message: "Failed to save, please try-again.",
+            type: "info",
+            hideOnPress: true,
+            backgroundColor: "purple",
+            style: styles.flashMessage
+          })
+        ); 
+      }
+
 
     const ItemView = ({ item }) => {
         return (
         // Flat List Item
         <Card style={{marginTop:10, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}
-            onPress={() => navigation.push('Chapters', {bookId: item.id, bibleId: item.bibleId})}
         >
           <View style={{flexDirection:'row', flex:1, margin:10}}>
             <TouchableOpacity onPress={() => navigation.openDrawer()}>
@@ -67,7 +107,7 @@ export default function FollowUser({ navigation, route }) {
             </View>
 
             <View style={{marginLeft:'auto'}} >
-              <Entypo name="add-user" size={24} color="purple" style={{ right: 10 }}/>
+              <Entypo name="add-user" size={24} color="purple" style={{ right: 10 }} onPress={()=> followUser(item.userId, item.userName)}/>
             </View>
           </View>
         </Card>
@@ -125,4 +165,11 @@ const styles = StyleSheet.create({
       gap: SIZES.xSmall,
       borderRadius: SIZES.medium,
     },
+    flashMessage: {
+      borderRadius: 12,
+      opacity: 0.8,
+      borderWidth: 2,
+      borderColor: '#222',
+      margin: 12
+    }
   });

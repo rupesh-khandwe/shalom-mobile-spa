@@ -122,7 +122,6 @@ const Comment = ({route, navigation}) => {
    
     const ItemView = ({ item }) => {
       return (
-      // Flat List Item onPress={() => navigation.push('Chapters', {bookId: item.id, bibleId: item.bibleId})}
       <Card style={{margin:10, borderColor:'purple', borderRadius:10, borderBottomWidth:2}}>
           <View style={{flexDirection:'row', flex:1}}>
               {/*  Text */}

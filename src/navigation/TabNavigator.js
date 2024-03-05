@@ -20,6 +20,7 @@ import SavePost from '../components/common/SavePost';
 import RegisterChurch from '../components/church/RegisterChurch';
 import AddEvent from '../components/event/AddEvent';
 import Profile from '../components/user-signinup/Profile';
+import BackHistory from '../components/common/BackHistory';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -36,6 +37,9 @@ const HomeStack = () => {
         name="Comment"
         component={Comment}
         options={{
+          headerLeft: (props) => (
+            <BackHistory name="Home"></BackHistory>
+           ),
           headerRight: (props) => (
            <SavePost name="comment"></SavePost>
           ),
@@ -67,6 +71,9 @@ const ShalomStack = () => {
           headerRight: (props) => (
            <SavePost name="shalom"></SavePost>
           ),
+          headerLeft: (props) => (
+            <BackHistory name="Shalom"></BackHistory>
+           ),
         }}
       />
     </Stack.Navigator>
@@ -85,7 +92,9 @@ const EventsStack = () => {
         name="Add-event"
         component={AddEvent}
         options={{
-          
+          headerLeft: (props) => (
+            <BackHistory name="Event"></BackHistory>
+           ),
         }}
       />
     </Stack.Navigator>
@@ -104,7 +113,9 @@ const ChurchStack = () => {
         name="Register-church"
         component={RegisterChurch}
         options={{
-         
+          headerLeft: (props) => (
+            <BackHistory name="Church"></BackHistory>
+           ),
         }}
       />
     </Stack.Navigator>
@@ -122,7 +133,7 @@ const TabNavigator = () => {
         tabBarActiveTintColor: 'yellow',
       }}>
       <Tab.Screen
-        name="Home"
+        name="HomeStack"
         component={HomeStack}
         options={({route}) => ({
           tabBarStyle: {

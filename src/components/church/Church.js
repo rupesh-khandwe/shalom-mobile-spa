@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList,ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import { SafeAreaView, Text, StyleSheet, View, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
+import { ScrollView } from 'react-native-virtualized-view'
 import { SearchBar } from 'react-native-elements';
 import axios from 'axios';
 import { SIZES, COLORS } from "../../constants"; 
@@ -11,7 +12,7 @@ import { showMessage, hideMessage  } from "react-native-flash-message";
 
 export default function Church({ navigation, route }) {
 
-    const {userToken}= useContext(AuthContext);
+    const {userToken, getCredentials}= useContext(AuthContext);
     const SEARCH_BY_KEY = "searchByKey?key=";
     const [search, setSearch] = useState('');
     const [filteredDataSource, setFilteredDataSource] = useState([]);
@@ -21,9 +22,10 @@ export default function Church({ navigation, route }) {
 
     useEffect(() => {
         console.log(BASE_URL_CHURCH_API,"Church rendered");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
+        getCredentials();
         axios
         .get(`${BASE_URL_CHURCH_API}/searchByKey?key=Bengaluru`, {
-          headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+          headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
             setFilteredDataSource(res.data);
@@ -103,7 +105,7 @@ export default function Church({ navigation, route }) {
             marginTop: 30,
           }}>
           <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
-            Church List
+            Church
           </Text>
           <Text>{register==="success"?showMessage({
             message: "Church has been registered successfully!",
@@ -111,7 +113,7 @@ export default function Church({ navigation, route }) {
             hideOnPress: true,
             backgroundColor: "purple",
           }):""}</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register-church')}>
+          <TouchableOpacity onPress={() => navigation.replace('Register-church')}>
             <MaterialIcons name="post-add" size={35} color="purple" />
           </TouchableOpacity>
         </View>

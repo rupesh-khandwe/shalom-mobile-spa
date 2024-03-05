@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList, Image, Button, ScrollView, TouchableOpacity, ImageBackground,  } from 'react-native';
-import { SearchBar } from 'react-native-elements';
+import { SafeAreaView, Text, StyleSheet, View, FlatList, Image, Button, TouchableOpacity, ImageBackground  } from 'react-native';
+import { ScrollView } from 'react-native-virtualized-view';
 import axios from 'axios';
 import { SIZES, COLORS } from "../constants"; 
 import { Card, Title, Paragraph } from 'react-native-paper'
@@ -23,7 +23,7 @@ export default function Shalom({ navigation }) {
         console.log("Shalom component"+ `${BASE_URL_API}/shalomByUserId?id=${userInfo.userId}`);
         axios
         .get(`${BASE_URL_API}/shalomByUserId?id=${userInfo.userId}`, {
-          headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+          headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
             setFilteredDataSource(res.data);
@@ -58,7 +58,6 @@ export default function Shalom({ navigation }) {
         return (
         // Flat List Item
         <Card style={{margin:6, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}
-            onPress={() => navigation.push('Chapters', {bookId: item.id, bibleId: item.bibleId})}
         >
             <View style={{flexDirection:'row',}}>
                 {/*  Text */}
@@ -134,7 +133,7 @@ export default function Shalom({ navigation }) {
               <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
                 Shalom's
               </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Post')}>
+              <TouchableOpacity onPress={() => navigation.replace('Post')}>
               <MaterialCommunityIcons name="home-group-plus" size={35} color="purple"   />
               {/* <ImageBackground
                 source={require('../assets/images/user-profile.jpg')}
@@ -144,19 +143,6 @@ export default function Shalom({ navigation }) {
             </TouchableOpacity>
             </View>
             <View style={styles.container}>
-              {/* <SearchBar
-                lightTheme
-                round
-                inputStyle={{backgroundColor: 'white'}}
-                containerStyle={{backgroundColor: 'white'}}
-                inputContainerStyle={{backgroundColor: 'white'}}
-                placeholderTextColor={'#g5g5g5'}
-                searchIcon={{ size: 20 }}
-                onChangeText={(text) => searchFilterFunction(text)}
-                onClear={(text) => searchFilterFunction('')}
-                placeholder="Search shalom..."
-                value={search}
-              /> */}
       
               <FlatList
                 data={filteredDataSource}

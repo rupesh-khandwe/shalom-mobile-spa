@@ -133,29 +133,6 @@ const Settings = ({ navigation }) => {
         backgroundColor: COLORS.white,
       }}
     >
-      <View
-        style={{
-          marginHorizontal: 12,
-          flexDirection: "row",
-          justifyContent: "center",
-        }}
-      >
-        {/* <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={{
-            position: "absolute",
-            left: 0,
-          }}
-        >
-          <MaterialIcons
-            name="keyboard-arrow-left"
-            size={24}
-            color={COLORS.black}
-          />
-        </TouchableOpacity> */}
-
-        <Text style={{ ...FONTS.h3 }}>Settings</Text>
-      </View>
 
       <ScrollView style={{ marginHorizontal: 12 }}>
         {/* Account Settings */}

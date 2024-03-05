@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList, ScrollView, TouchableHighlight, TextInput, Easing } from 'react-native';
+import { SafeAreaView, Text, StyleSheet, View, FlatList, TouchableHighlight, TextInput, Easing } from 'react-native';
+import { ScrollView } from 'react-native-virtualized-view'
 import { Icon, SearchBar } from 'react-native-elements';
 import axios from 'axios';
 import { SIZES, COLORS } from "../../constants"; 
@@ -9,6 +10,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { MaterialIcons, FontAwesome, Ionicons, Fontisto  } from '@expo/vector-icons'; 
 import {BASE_URL_EVENT_API} from '@env'
+import { showMessage, hideMessage  } from "react-native-flash-message";
 
 export default function Events({ navigation, route }) {
     const {userToken, userInfo}= useContext(AuthContext);
@@ -28,7 +30,7 @@ export default function Events({ navigation, route }) {
         console.log("Events launched");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
         axios
         .get(`${BASE_URL_EVENT_API}/eventByUserId?id=${userInfo.userId}`, {
-          headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+          headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
             setFilteredDataSource(res.data);
@@ -44,7 +46,7 @@ export default function Events({ navigation, route }) {
           // Filter the masterDataSource
           // Update FilteredDataSource
           const newData = masterDataSource.filter(function (item) {
-            const itemData = item.addressline1+","+item.addressline2+","+item.churchName;
+            const itemData = item.title+","+item.addressline1+","+item.addressline2+","+item.churchName;
             const textData = text;
             return itemData.indexOf(textData) > -1;
           });
@@ -63,20 +65,19 @@ export default function Events({ navigation, route }) {
         return (
         // Flat List Item
         <Card style={{marginTop:10, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}
-            onPress={() => navigation.push('Chapters', {bookId: item.id, bibleId: item.bibleId})}
         >
             <View style={{flexDirection:'row',}}>
                 {/*  Text */}
-                <View style={{justifyContent:'space-around', flex:2/3, margin:10}}>
+                <View style={{justifyContent:'space-around', flex:2/3, margin:5}}>
                     <Title>{item.title}</Title>
                 </View>
                 {/*  Image */}
             </View>
-            <View style={{margin:10}}>
+            <View style={{margin:8}}>
                 <Paragraph>{item.description}</Paragraph>
             </View>
-            <View style={{margin:10}}>
-                <Paragraph><FontAwesome name="address-card" size={24} color="purple" /> {item.addressline1}, {item.addressline2}, {item.phone1}</Paragraph>
+            <View style={{margin:8}}>
+                <Paragraph><FontAwesome name="address-card" size={21} color="purple" /> {item.addressline1}, {item.addressline2}, {item.phone1}</Paragraph>
                 <Text><Fontisto name="date" size={24} color="purple" />  {item.eventDate} </Text>
                 <Text><Ionicons name="time-sharp" size={24} color="purple" /> {item.eventTime}</Text>
             </View>
@@ -116,7 +117,7 @@ export default function Events({ navigation, route }) {
             hideOnPress: true,
             backgroundColor: "purple",
           }):""}</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Add-event')}>
+            <TouchableOpacity onPress={() => navigation.replace('Add-event')}>
             <MaterialIcons name="post-add" size={35} color="purple" />
               {/* <ImageBackground
                 source={require('../assets/images/user-profile.jpg')}
@@ -166,7 +167,6 @@ export default function Events({ navigation, route }) {
             inputStyle={{backgroundColor: 'white'}}
             containerStyle={{backgroundColor: 'white'}}
             inputContainerStyle={{backgroundColor: 'white'}}
-            placeholderTextColor={'#g5g5g5'}
             searchIcon={{ size: 20 }}
             onChangeText={(text) => searchFilterFunction(text)}
             onClear={(text) => searchFilterFunction('')}

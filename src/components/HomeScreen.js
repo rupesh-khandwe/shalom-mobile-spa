@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList, Button, Image, ScrollView, TouchableOpacity, ImageBackground, RefreshControl} from 'react-native';
+import { SafeAreaView, Text, StyleSheet, View, FlatList, Button, Image, TouchableOpacity, ImageBackground, RefreshControl} from 'react-native';
+import { ScrollView } from 'react-native-virtualized-view'
 import Share from 'react-native-share';
-import { SearchBar } from 'react-native-elements';
 import axios from 'axios';
 import { SIZES, COLORS } from "../constants"; 
 import { Card, Title } from 'react-native-paper'
@@ -11,7 +11,7 @@ import { AuthContext } from '../context/AuthContext';
 import { BASE_URL_API } from '@env'
 
 export default function HomeScreen({ navigation }) {
-    const {userToken, userInfo}= useContext(AuthContext);
+    const {userToken, userInfo, getCredentials}= useContext(AuthContext);
     const SEARCH_BY_KEY = "eventByUserId?key=";
     const [search, setSearch] = useState('');
     const [filteredDataSource, setFilteredDataSource] = useState([]);
@@ -27,12 +27,11 @@ export default function HomeScreen({ navigation }) {
       setRefreshing(true);
       setTimeout(() => {
         axios
-        .get(`${BASE_URL_API}/shalomsWithLikeComment?userId=${userId}`, {
-          headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+        .get(`${BASE_URL_API}/shalomsWithLikeComment?userId=${userInfo.userId}`, {
+          headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
             setFilteredDataSource(res.data);
-            //setMasterDataSource(res.data);
         })
         .catch((err) => console.log(err));
         setRefreshing(false);
@@ -49,7 +48,6 @@ export default function HomeScreen({ navigation }) {
         .then((res) => {
             console.log(res.data);
             setFilteredDataSource(res.data);
-            //setMasterDataSource(res.data);
         })
         .catch((err) => console.log(err)); 
     };
@@ -75,50 +73,33 @@ const onShare = async () => {
   }
   
     useEffect(() => {   
+      console.log("Home Screen=",userToken)
+      console.log("Home Screen unser Info=",userInfo)
+        getCredentials();
         setUserId(userInfo.userId);
-        setUserName(userInfo.userFirstName+" "+ userInfo.userLastName);
-        console.log("Bearer "+ userToken);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
+        setUserName(userInfo.userName);
         axios
         .get(`${BASE_URL_API}/shalomsWithLikeComment?userId=${userInfo.userId}`, {
-          headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+          headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
             setFilteredDataSource(res.data);
-            //setMasterDataSource(res.data);
         })
         .catch((err) => console.log(err));
       }, []);
 
-      const searchFilterFunction = (text) => {
-        // Check if searched text is not blank
-        if (text) {
-          // Inserted text is not blank
-          // Filter the masterDataSource
-          // Update FilteredDataSource
-          const newData = masterDataSource.filter(function (item) {
-            const itemData = item.shalom;
-            const textData = text;
-            return itemData.indexOf(textData) > -1;
-          });
-          setFilteredDataSource(newData);
-          setSearch(text);
-        } else {
-          // Inserted text is blank
-          // Update FilteredDataSource with masterDataSource
-          setFilteredDataSource(masterDataSource);
-          setSearch(text);
-        }
-      };
-    
-
     const ItemView = ({ item }) => {
         return (
-        // Flat List Item onPress={() => navigation.push('Chapters', {bookId: item.id, bibleId: item.bibleId})}
         <Card style={{marginTop:10, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}>
             <View style={{flexDirection:'row', flex:1}}>
                 {/*  Text */}
                 <TouchableOpacity onPress={() => navigation.openDrawer()}>
-                    <FontAwesome name="user-circle" size={30} color="gray"   />
+                    <FontAwesome name="user-circle" size={30} color="gray"  onPress={()=>{
+                  navigation.push('Profile',{
+                    "extUserId": item.userId,
+                    "extUserName": item.userName
+                  })
+                }  }   />
                   </TouchableOpacity>
                 <View style={{justifyContent:'space-around', marginLeft:5}}>
                   <Title>{item.userName}</Title>
@@ -174,7 +155,7 @@ const onShare = async () => {
                         color={item.likeFlag===null || !item.likeFlag ?"gray": "purple"}  
                       />
                     </Text>
-                    <Text style={{paddingLeft:45}} onPress={()=> navigation.navigate('Comment', {"userId": userId ,"userName": item.userName, "shalomId": item.shalomId, "shalom": item.shalom, "imageUrl": item.imageUrl, "likeCount": item.likeCount, "likeFlag": item.likeFlag} )}><FontAwesome name={item.commentCount>0 ? "comments-o": "comments"} size={24} color={item.commentCount>0 ?"purple":"gray"}   /></Text>
+                    <Text style={{paddingLeft:45}} onPress={()=> navigation.replace('Comment', {"userId": userId ,"userName": item.userName, "shalomId": item.shalomId, "shalom": item.shalom, "imageUrl": item.imageUrl, "likeCount": item.likeCount, "likeFlag": item.likeFlag} )}><FontAwesome name={item.commentCount>0 ? "comments-o": "comments"} size={24} color={item.commentCount>0 ?"purple":"gray"}   /></Text>
                     <Text style={{paddingLeft:45}} onPress={onShare}><FontAwesome name="share-square" size={24} color="gray"   /></Text>
                     {/* item.likeFlag=item.likeFlag===null?true:item.likeFlag===true?false:true; setLikeFlag(item.likeFlag); */}
             </View>
@@ -237,15 +218,6 @@ const onShare = async () => {
               backgroundColor: '#C8C8C8',
             }}
           />
-            {/* <SearchBar
-              round
-              searchIcon={{ size: 24 }}
-              onChangeText={(text) => searchFilterFunction(text)}
-              onClear={(text) => searchFilterFunction('')}
-              placeholder="Search shalom..."
-              value={search}
-            /> */}
-    
             <FlatList
               data={filteredDataSource}
               keyExtractor={(e, index) => index.toString()}
@@ -270,30 +242,8 @@ const styles = StyleSheet.create({
       justifyContent: "space-between",
       alignItems: "center",
     },
-    headerTitle: {
-      fontSize: SIZES.large,
-      color: COLORS.primary,
-    },
-    itemStyle: {
-      padding: 10,
-      fontSize: SIZES.large,
-      color: COLORS.primary,
-    },
     comment: {
         flexDirection: 'row',
-    },
-    icon1: {
-        flexDirection: 'row',
-        alignItems: 'left'
-    },
-    icon2: {
-        flexDirection: 'row',
-        alignContent: 'center'
-    },
-    icon3: {
-        flexDirection: 'row',
-        textAlign: 'right',
-        justifyContent: 'right',
     },
     video: {
         flex: 1,

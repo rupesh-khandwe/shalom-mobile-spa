@@ -18,12 +18,6 @@ const Chapters = ({route, navigation}) => {
   const FETCH_ALL_BOOK_URL = "https://api.scripture.api.bible/v1/bibles";
   const API_KEY = "14336e15a3f06e3daa59286d6a38e9e3";
 
-  const data = [
-    { menu: 'Chicken Biryani' }, //If user select this row then this whole object will return to you with select true in this case
-    { menu: 'Chiken koofta' },
-    { menu: 'Chicken sharwma' }
-  ]
-  const nameOfCols = ['menu', 'select'];
 
   useEffect(() => {
     axios

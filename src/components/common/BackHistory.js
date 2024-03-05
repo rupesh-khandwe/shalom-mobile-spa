@@ -8,11 +8,9 @@ import { showMessage, hideMessage  } from "react-native-flash-message";
 
 const BackHistory = (props) => {
     const navigation = useNavigation();
-
-
     const backAction = () => {
-
-        navigation.goBack();
+        //navigation.navigate(props.name);
+        props.name==="Back"?navigation.goBack():navigation.replace(props.name);
     }
 
   return (

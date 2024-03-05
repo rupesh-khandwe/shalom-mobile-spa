@@ -18,6 +18,7 @@ import {
 } from "@videosdk.live/react-native-sdk";
 import { createMeeting, authToken } from "../api/api";
 import Video from "react-native-video";
+import Share from 'react-native-share';
 
 // Responsible for either schedule new meeting or to join existing meeting as a host or as a viewer.
 function JoinScreen({ getMeetingAndToken, setMode }) {
@@ -127,6 +128,26 @@ function ParticipantView({ participantId }) {
   );
 }
 
+const onShare = async (meetingId) => {
+  try {
+    const result = await Share.open({
+      message:
+        'Please join shalom conference now: '+meetingId 
+    });
+    if (result.action === Share.sharedAction) {
+      if (result.activityType) {
+        // shared with activity type of result.activityType
+      } else {
+        // shared
+      }
+    } else if (result.action === Share.dismissedAction) {
+      // dismissed
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+}
+
 // Responsible for managing meeting controls such as toggle mic / webcam and leave
 function Controls() {
   const { toggleWebcam, toggleMic, startHls, stopHls, hlsState } = useMeeting(
@@ -148,6 +169,7 @@ function Controls() {
       stopHls();
     }
   };
+
 
   return (
     <View
@@ -258,9 +280,10 @@ function HeaderView() {
         }}
         onPress={() => {
           Clipboard.setString(meetingId);
-          alert("MeetingId copied successfully");
+          onShare(meetingId);
+          //alert("MeetingId copied successfully");
         }}
-        buttonText={"Copy MeetingId"}
+        buttonText={"Share MeetingId"}
         backgroundColor={"transparent"}
       />
       <Button
