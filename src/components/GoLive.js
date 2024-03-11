@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { useState, useMemo, useRef, useEffect, useContext } from "react";
 import {
   SafeAreaView,
   TouchableOpacity,
@@ -19,6 +19,7 @@ import {
 import { createMeeting, authToken } from "../api/api";
 import Video from "react-native-video";
 import Share from 'react-native-share';
+import { AuthContext } from '../context/AuthContext';
 
 // Responsible for either schedule new meeting or to join existing meeting as a host or as a viewer.
 function JoinScreen({ getMeetingAndToken, setMode }) {
@@ -150,7 +151,7 @@ const onShare = async (meetingId) => {
 
 // Responsible for managing meeting controls such as toggle mic / webcam and leave
 function Controls() {
-  const { toggleWebcam, toggleMic, startHls, stopHls, hlsState } = useMeeting(
+  const { toggleWebcam, toggleMic, startHls, stopHls, hlsState, unmuteMic, muteMic, toggleScreenShare  } = useMeeting(
     {}
   );
 
@@ -170,11 +171,23 @@ function Controls() {
     }
   };
 
+  const handleToggleMic = () => {
+    // Toggling Mic
+    localMicOn=false
+    muteMic();
+    toggleMic(); 
+  };
+
+  const shareScreen = () => {
+    // Toggling Mic
+    toggleScreenShare(); 
+  };
+
 
   return (
     <View
       style={{
-        padding: 24,
+        padding: 10,
         flexDirection: "row",
         justifyContent: "space-between",
       }}
@@ -188,11 +201,19 @@ function Controls() {
       />
       <Button
         onPress={() => {
-          toggleMic();
+          handleToggleMic();
         }}
         buttonText={"Toggle Mic"}
         backgroundColor={"#1178F8"}
       />
+       <Button
+        onPress={() => {
+          shareScreen();
+        }}
+        buttonText={"Share"}
+        backgroundColor={"#1178F8"}
+      />
+      
       {hlsState === "HLS_STARTED" ||
       hlsState === "HLS_STOPPING" ||
       hlsState === "HLS_STARTING" ||
@@ -262,7 +283,18 @@ function SpeakerView() {
 }
 
 function HeaderView() {
-  const { meetingId, leave } = useMeeting();
+  const { meetingId, leave, localMicOn,unmuteMic, muteMic} = useMeeting();
+
+  const handleUnmuteMic = () => {
+    // Unmuting Mic
+    unmuteMic();
+  };
+
+  const handleMuteMic = () => {
+    // Muting Mic
+    muteMic();
+  };
+
   return (
     <View
       style={{
@@ -272,7 +304,7 @@ function HeaderView() {
         alignItems: "center",
       }}
     >
-      <Text style={{ fontSize: 24, color: "white" }}>{meetingId}</Text>
+      {/* <Text style={{ fontSize: 24, color: "white" }}>{meetingId}</Text> */}
       <Button
         btnStyle={{
           borderWidth: 1,
@@ -285,6 +317,21 @@ function HeaderView() {
         }}
         buttonText={"Share MeetingId"}
         backgroundColor={"transparent"}
+      />
+      <Text style={{ color: "white", fontSize: 12 }}>Mic : {localMicOn}</Text>
+      {/* <Button
+        onPress={() => {
+          handleMuteMic();
+        }}
+        buttonText={"Mute Mic"}
+        backgroundColor={"#1178F8"}
+      /> */}
+      <Button
+        onPress={() => {
+          handleUnmuteMic();
+        }}
+        buttonText={"Unmute Mic"}
+        backgroundColor={"#1178F8"}
       />
       <Button
         onPress={() => {
@@ -416,7 +463,7 @@ const Button = ({ onPress, buttonText, backgroundColor, btnStyle }) => {
 
 function GoLive() {
   const [meetingId, setMeetingId] = useState(null);
-
+  const {userInfo}= useContext(AuthContext);
   //State to handle the mode of the participant i.e. CONFERNCE or VIEWER
   const [mode, setMode] = useState("CONFERENCE");
 
@@ -433,7 +480,7 @@ function GoLive() {
         meetingId,
         micEnabled: true,
         webcamEnabled: true,
-        name: "Rupesh Khandwe",
+        name: userInfo.userName,
         //These will be the mode of the participant CONFERENCE or VIEWER
         mode: mode,
       }}

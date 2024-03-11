@@ -21,6 +21,7 @@ import RegisterChurch from '../components/church/RegisterChurch';
 import AddEvent from '../components/event/AddEvent';
 import Profile from '../components/user-signinup/Profile';
 import BackHistory from '../components/common/BackHistory';
+import FollowUser from '../components/user-signinup/FollowUser';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -45,6 +46,16 @@ const HomeStack = () => {
           ),
         }}
       />
+       <Stack.Screen
+          name="Follow-user"
+          component={FollowUser}
+          options={{
+            headerLeft: (props) => (
+              <BackHistory name="Home"></BackHistory>
+             ),
+
+          }}
+        />
       <Stack.Screen
         name="Profile"
         component={Profile}

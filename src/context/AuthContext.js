@@ -2,7 +2,7 @@ import React, {createContext, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { BASE_URL_USER_PROFILE } from '@env'
-import { jwtDecode } from "jwt-decode";
+//import { jwtDecode } from "jwt-decode";
 
 export const AuthContext = createContext();
 export const AuthProvider = ({children}) => {

@@ -5,7 +5,7 @@ import Share from 'react-native-share';
 import axios from 'axios';
 import { SIZES, COLORS } from "../constants"; 
 import { Card, Title } from 'react-native-paper'
-import { FontAwesome, AntDesign } from '@expo/vector-icons'; 
+import { FontAwesome, AntDesign, Ionicons } from '@expo/vector-icons'; 
 import { Video, ResizeMode } from 'expo-av';
 import { AuthContext } from '../context/AuthContext';
 import { BASE_URL_API } from '@env'
@@ -188,7 +188,7 @@ const onShare = async () => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-        <ScrollView style={{padding: 20}}
+        <ScrollView style={{padding: 15}}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -199,9 +199,6 @@ const onShare = async () => {
               justifyContent: 'space-between',
               marginTop: 30,
             }}>
-            <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium'}}>
-              Hello {userName}
-            </Text>
             <TouchableOpacity onPress={() => navigation.openDrawer()}>
               <ImageBackground
                 source={require('../assets/images/user-profile.jpg')}
@@ -209,6 +206,13 @@ const onShare = async () => {
                 imageStyle={{borderRadius: 25}}
               />
             </TouchableOpacity>
+            <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', paddingRight:130, paddingTop:5}}>
+              Hello {userName}
+            </Text>
+            <TouchableOpacity style={{paddingRight:13}} onPress={() => navigation.navigate('Follow-user')}>
+              <Ionicons name="search-circle-sharp" size={35} color="purple" />
+            </TouchableOpacity>
+            
           </View>
           <View style={styles.container}>
           <View
@@ -234,7 +238,7 @@ const styles = StyleSheet.create({
     container: {
       backgroundColor: 'white',
       marginTop: SIZES.medium,
-      gap: SIZES.small,
+
       borderRadius: SIZES.medium,
     },
     header: {

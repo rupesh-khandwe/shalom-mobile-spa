@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {useContext, useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,12 @@ import { AuthContext } from '../../context/AuthContext';
 
 const CustomDrawer = props => {
   const {logout, userInfo}= useContext(AuthContext);
+  const [userName, setUserName]= useState('');
+  
+  useEffect(() => {
+    setUserName(userInfo.userName)
+  }, []);
+
   return (
     <View style={{flex: 1}}>
       <DrawerContentScrollView
@@ -37,7 +43,7 @@ const CustomDrawer = props => {
               fontFamily: 'Roboto-Medium',
               marginBottom: 5,
             }}>
-            {userInfo.userName} 
+            {userName} 
           </Text>
         </ImageBackground>
         <View style={{flex: 1, backgroundColor: '#fff', paddingTop: 10}}>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList, TouchableOpacity, RefreshControl,ScrollView } from 'react-native';
-//import { ScrollView } from 'react-native-virtualized-view';
+import { SafeAreaView, Text, StyleSheet, View, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
+import { ScrollView } from 'react-native-virtualized-view';
 import { SearchBar } from 'react-native-elements';
 import axios from 'axios';
 import { SIZES, COLORS } from "../../constants"; 
@@ -130,7 +130,7 @@ export default function FollowUser({ navigation, route }) {
 
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <ScrollView style={{padding: 5}}>
+      <ScrollView style={{padding: 3}}>
         <View style={styles.container}>
           <SearchBar
             lightTheme
@@ -138,7 +138,6 @@ export default function FollowUser({ navigation, route }) {
             inputStyle={{backgroundColor: 'white'}}
             containerStyle={{backgroundColor: 'white'}}
             inputContainerStyle={{backgroundColor: 'white'}}
-            placeholderTextColor={'#g5g5g5'}
             searchIcon={{ size: 20 }}
             onChangeText={(text) => searchFilterFunction(text)}
             onClear={(text) => searchFilterFunction('')}
@@ -161,7 +160,6 @@ export default function FollowUser({ navigation, route }) {
 const styles = StyleSheet.create({
     container: {
       backgroundColor: 'white',
-      marginTop: SIZES.xSmall,
       gap: SIZES.xSmall,
       borderRadius: SIZES.medium,
     },
