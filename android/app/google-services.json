@@ -26,6 +26,16 @@
           "client_type": 3
         }
       ],
+      "web": [
+        {
+          "client_id":"795791263698-ruaf391ntdjcajcnhvrcpoiml9rkvp4c.apps.googleusercontent.com",
+          "project_id":"shalom-the-believers-hub",
+          "auth_uri":"https://accounts.google.com/o/oauth2/auth",
+          "token_uri":"https://oauth2.googleapis.com/token",
+          "auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs",
+          "client_secret":"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"
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBhNpAygShW-EbtwkRDhX2FQ0JLwIsm0E4"

@@ -1,17 +1,23 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList, Button, Image, TouchableOpacity, ImageBackground, RefreshControl} from 'react-native';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { SafeAreaView, Text, StyleSheet, View, FlatList,TouchableOpacity, ImageBackground, RefreshControl, Dimensions, Animated, Image} from 'react-native';
 import { ScrollView } from 'react-native-virtualized-view'
 import Share from 'react-native-share';
 import axios from 'axios';
 import { SIZES, COLORS } from "../constants"; 
+import { FONTS } from "../constants/theme";
 import { Card, Title } from 'react-native-paper'
 import { FontAwesome, AntDesign, Ionicons } from '@expo/vector-icons'; 
 import { Video, ResizeMode } from 'expo-av';
 import { AuthContext } from '../context/AuthContext';
-import { BASE_URL_API } from '@env'
+import { REACT_APP_BASE_URL_API } from '@env'
+import { PinchGestureHandler, State } from 'react-native-gesture-handler';
+import useAxios from './common/useAxios';
+import moment from "moment";
+import { shalom } from '../assets/images';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen({ navigation }) {
-    const {userToken, userInfo, getCredentials}= useContext(AuthContext);
+    const {userToken, userInfo, userId}= useContext(AuthContext);
     const SEARCH_BY_KEY = "eventByUserId?key=";
     const [search, setSearch] = useState('');
     const [filteredDataSource, setFilteredDataSource] = useState([]);
@@ -19,18 +25,22 @@ export default function HomeScreen({ navigation }) {
     const video = React.useRef(null);
     const [status, setStatus] = React.useState({});
     const [likeFlag, setLikeFlag] = React.useState(true);
-    const [userId, setUserId]= useState('');
+    //const [userId, setUserId]= useState('');
     const [userName, setUserName]= useState('');
     const [refreshing, setRefreshing] = React.useState(false);
+    var width = Dimensions.get("window");
+    const scale = new Animated.Value(1);
+    let api = useAxios()
 
     const onRefresh = React.useCallback(() => {
       setRefreshing(true);
       setTimeout(() => {
         axios
-        .get(`${BASE_URL_API}/shalomsWithLikeComment?userId=${userInfo.userId}`, {
+        .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${userId}`, {
           headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
+            console.log(res.data)
             setFilteredDataSource(res.data);
         })
         .catch((err) => console.log(err));
@@ -41,7 +51,7 @@ export default function HomeScreen({ navigation }) {
 
     const likeFlow = (shalomId, slikeFlag) => {
         axios
-        .put(`${BASE_URL_API}/saveLike`, null, {
+        .put(`${REACT_APP_BASE_URL_API}/shalom/saveLike`, null, {
             params: { userId: userId, shalomId: shalomId, likeFlag: slikeFlag },
             headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
         })
@@ -71,18 +81,50 @@ const onShare = async () => {
       alert(error.message);
     }
   }
+
+  const onZoomEventFunction = Animated.event(
+    [{
+      nativeEvent: {scale : scale}
+    }],
+    {
+      useNativeDriver: true
+    }
+  )
+  const onZoomStateChangeFunction=(event) =>{
+    if(event.nativeEvent.oldState == State.ACTIVE){
+      Animated.spring(scale, {
+        toValue: 1,
+        useNativeDriver: true
+      }).start()
+    }
+  }
+
+  let getData = async(userInfo) =>{
+    let response = await api.get(`/shalom/shalomsWithLikeComment?userId=${userInfo.userId}`)
+
+    if(response.status === 200){
+      console.log("Home Screen step2=",response.data)
+        setNotes(response.data)
+    }
+    
+}
   
     useEffect(() => {   
-      console.log("Home Screen=",userToken)
-      console.log("Home Screen unser Info=",userInfo)
-        getCredentials();
-        setUserId(userInfo.userId);
-        setUserName(userInfo.userName);
+      width = Dimensions.get("window");
+      console.log("Home Screen step1=",userToken)
+   /*    console.log("Home Screen=",userToken)*/
+      console.log("Home Screen unser Info=",userId) 
+      userInfo && getData(userInfo);
+       // getCredentials();
+       console.log("Home Screen step3=",userInfo.userId)
+       //userInfo && setUserId(userInfo.userId);
+       userInfo && setUserName(userInfo.userName);
         axios
-        .get(`${BASE_URL_API}/shalomsWithLikeComment?userId=${userInfo.userId}`, {
+        .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${userInfo.userId}`, {
           headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
+            console.log(res.data);
             setFilteredDataSource(res.data);
         })
         .catch((err) => console.log(err));
@@ -91,20 +133,20 @@ const onShare = async () => {
     const ItemView = ({ item }) => {
         return (
         <Card style={{marginTop:10, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}>
-            <View style={{flexDirection:'row', flex:1}}>
+          <View style={{flexDirection:'row', flex:1}}>
                 {/*  Text */}
-                <TouchableOpacity onPress={() => navigation.openDrawer()}>
-                    <FontAwesome name="user-circle" size={30} color="gray"  onPress={()=>{
+                <View style={{ marginTop:5, }}><TouchableOpacity onPress={() => navigation.openDrawer()}>
+                    <FontAwesome name="user-circle" size={40} color="gray"  onPress={()=>{
                   navigation.push('Profile',{
                     "extUserId": item.userId,
                     "extUserName": item.userName
                   })
                 }  }   />
-                  </TouchableOpacity>
-                <View style={{justifyContent:'space-around', marginLeft:5}}>
+                  </TouchableOpacity></View>
+                <View style={{ marginLeft:5, }}>
                   <Title>{item.userName}</Title>
+                  <Text style={{...FONTS.body5}}>Posted on {moment(item.createdOn).format("MMMM D")}</Text>
                 </View>
-                {/*  Image */}
             </View>
             <View style={{margin:10}}>
               <Text>{item.shalom}</Text>
@@ -129,12 +171,22 @@ const onShare = async () => {
                     </View> */}
                 </View>
             }
-            {item.imageUrl &&
-                <Image
-                    style={{width: '100%', height: 200,resizeMode : 'stretch' }}
-                    source={{uri: item.imageUrl}} 
-                />        
-            }
+            {item.imageUrl ?
+              item.imageUrl.split('|').map((img) => {
+                return(  
+                  <PinchGestureHandler
+                    onGestureEvent={onZoomEventFunction}
+                    onHandlerStateChange={onZoomStateChangeFunction}
+                  >
+                    <Animated.Image
+                      style={{width: {width}, height: 200,resizeMode : 'stretch', transform: [{scale: scale}] }}
+                      source={{uri:img}} 
+                      resizeMode={'contain'}
+                    /> 
+                </PinchGestureHandler>
+                )
+              })
+            : null}
             <View style={{flexDirection:'row', margin:10}}>
 
                     <Text style={{paddingLeft:5}} >{item.likeCount} Like</Text>
@@ -188,7 +240,7 @@ const onShare = async () => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-        <ScrollView style={{padding: 15}}
+        <ScrollView style={{padding: 10}}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -197,29 +249,45 @@ const onShare = async () => {
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
-              marginTop: 30,
+              marginTop: 10,
             }}>
-            <TouchableOpacity onPress={() => navigation.openDrawer()}>
-              <ImageBackground
-                source={require('../assets/images/user-profile.jpg')}
-                style={{width: 35, height: 35}}
-                imageStyle={{borderRadius: 25}}
+            <View style={{marginTop: 0}}>
+              <Image
+                source={shalom}
+                style={{ height: 50, width: 150, resizeMode: 'contain' }}
+                flex={1}
+                resizeMode="contain"
+                resizeMethod="resize"
+                
               />
-            </TouchableOpacity>
-            <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', paddingRight:130, paddingTop:5}}>
-              Hello {userName}
-            </Text>
-            <TouchableOpacity style={{paddingRight:13}} onPress={() => navigation.navigate('Follow-user')}>
+            </View>
+            <View  style={{textAlign: 'right', marginTop:10, marginLeft:120}}>
+            <TouchableOpacity style={{}} onPress={() => navigation.navigate('Follow-user')}>
               <Ionicons name="search-circle-sharp" size={35} color="purple" />
             </TouchableOpacity>
+            
+            </View>
+            <View  style={{textAlign: 'right', marginTop:10, marginRight:15}}>
+            {/* <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', paddingRight:130, paddingTop:5}}>
+              Hello {userName}
+            </Text> */}
+              <TouchableOpacity onPress={() => navigation.openDrawer()}>
+                <ImageBackground
+                  source={require('../assets/images/user-profile.jpg')}
+                  style={{width: 35, height: 35}}
+                  imageStyle={{borderRadius: 25}}
+                />
+              </TouchableOpacity>
+            </View>
+            
             
           </View>
           <View style={styles.container}>
           <View
             style={{
-              height: 5,
+              height: 2,
               width: '100%',
-              backgroundColor: '#C8C8C8',
+              backgroundColor: 'purple',
             }}
           />
             <FlatList

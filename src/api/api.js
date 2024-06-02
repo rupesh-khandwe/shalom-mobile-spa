@@ -14,5 +14,6 @@ export const createMeeting = async ({ token }) => {
   });
   //Destructuring the roomId from the response
   const { roomId } = await res.json();
+  console.log("create meeting - room id",roomId);
   return roomId;
 };

@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "RNCViewPager_autolinked_build",
+		"source" : "C:/Workspace/shalom-mobile-spa/shalom-mobile-spa/node_modules/react-native-pager-view/android/build/generated/source/codegen/jni"
+	}
+}

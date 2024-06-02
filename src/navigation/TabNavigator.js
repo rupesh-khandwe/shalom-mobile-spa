@@ -1,13 +1,16 @@
-import React, {useContext} from 'react';
+import React, {useEffect} from 'react';
+import {Linking} from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 // Screens
 import HomeScreen from '../components/HomeScreen';
 import ShalomScreen from '../components/Shalom';
 import EventsScreen from '../components/event/Events';
-import GoLiveScreen from '../components/GoLive';
+import GoLive from '../components/live/GoLive';
+import JoinScreen from '../components/live/JoinScreen';
 import ChurchScreen from '../components/church/Church';
 
 //import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -61,6 +64,13 @@ const HomeStack = () => {
         component={Profile}
         options={{
          
+        }}
+      />
+      <Stack.Screen
+        name="Join-Room"
+        component={JoinScreen}
+        options={{
+          
         }}
       />
     </Stack.Navigator>
@@ -133,7 +143,24 @@ const ChurchStack = () => {
   );
 };
 
-const TabNavigator = () => {
+const TabNavigator = ({}) => {
+  const navigation = useNavigation();
+  useEffect(() => {
+    const handleDeepLink = ({ url }) => {
+        const route = url.replace(/.*?:\/\//g, '');
+        const routeName = route.split('/')[0];
+        if (routeName === 'golive') {
+          const id = route.split('/')[1];    
+          navigation.navigate('GoLive', { id });
+        }
+    }
+    Linking.addEventListener('url', handleDeepLink);
+    return () => {
+      console.log("removeAllListeners...");
+      Linking.removeAllListeners(handleDeepLink)
+    };
+  }, []);
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -178,7 +205,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="GoLive"
-        component={GoLiveScreen}
+        component={GoLive}
         options={{
           tabBarIcon: ({color, size}) => (
             <Ionicons name="videocam-outline" color={color} size={size} />

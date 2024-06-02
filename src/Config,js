@@ -1,2 +1,2 @@
-export const  BASE_URL_USER_PROFILE = 'http://192.168.68.133:8090/userProfile/v1';
-export const  BASE_URL_API = 'http://192.168.68.133:8090/api';
+//export const  BASE_REACT_APP_URL_USER_PROFILE = 'http://192.168.68.103:5000/userProfile/v1';
+//export const  REACT_APP_BASE_URL_API = 'http://192.168.68.103:5000/api';

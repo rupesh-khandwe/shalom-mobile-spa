@@ -85,6 +85,7 @@ const FONTS = {
   body2: { fontFamily: 'regular', fontSize: SIZES.body2, lineHeight: 30 },
   body3: { fontFamily: 'regular', fontSize: SIZES.body3, lineHeight: 22 },
   body4: { fontFamily: 'regular', fontSize: SIZES.body4, lineHeight: 20 },
+  body5: { fontFamily: 'regular', fontSize: SIZES.body5, lineHeight: 15 },
 }
 
 export { COLORS, SIZES, SHADOWS, FONTS };

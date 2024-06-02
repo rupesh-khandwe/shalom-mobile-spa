@@ -2,8 +2,7 @@ import React from 'react';
 import { SafeAreaView, View, Text, TouchableOpacity, Image } from 'react-native';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import GamingSVG from '../assets/images/misc/GamingSVG';
-import { cover, icon, shalomimages } from '../assets/images';
+import { icon, shalom } from '../assets/images';
 
 const OnboardingScreen = ({navigation}) => {
   return (
@@ -14,23 +13,23 @@ const OnboardingScreen = ({navigation}) => {
         alignItems: 'center',
         backgroundColor: '#fff',
       }}>
-      <View style={{marginTop: 30}}>
-        <Text
-          style={{
-            fontFamily: 'Inter-Bold',
-            fontWeight: 'bold',
-            fontSize: 30,
-            color: '#20315f',
-          }}>
-          SHALOM
-        </Text>
+      <View style={{marginTop: 3}}>
+       
+        <Image
+          source={shalom}
+          style={{ height: 100, width: 200, resizeMode: 'contain' }}
+          flex={1}
+          resizeMode="contain"
+          resizeMethod="resize"
+          
+        />
       </View>
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: 200}}>
         <Image
           source={icon}
-          width={300}
-          height={300}
-          style={{transform: [{rotate: '-15deg'}]}}
+          width={100}
+          height={100}
+          style={{transform: [{rotate: '-2deg'}]}}
         />
       </View>
       <TouchableOpacity
@@ -39,7 +38,7 @@ const OnboardingScreen = ({navigation}) => {
           padding: 20,
           width: '90%',
           borderRadius: 10,
-          marginBottom: 50,
+          marginBottom: 350,
           flexDirection: 'row',
           justifyContent: 'space-between',
         }}

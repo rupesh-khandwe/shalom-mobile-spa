@@ -17,7 +17,7 @@ import { FontAwesome, MaterialIcons, Entypo, SimpleLineIcons } from "@expo/vecto
 import { SceneMap, TabBar, TabView } from "react-native-tab-view";
 import { AuthContext } from '../../context/AuthContext';
 import axios from 'axios';
-import { BASE_URL_API } from '@env'
+import { REACT_APP_BASE_URL_API } from '@env'
 import { showMessage, hideMessage  } from "react-native-flash-message";
 
 const Profile = ({route, navigation}) => {
@@ -60,7 +60,7 @@ const Profile = ({route, navigation}) => {
     console.log("Bearer "+ userToken);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
 
     axios
-    .get(`${BASE_URL_API}/profile?userId=${localExternalUser}`, {
+    .get(`${REACT_APP_BASE_URL_API}/shalom/profile?userId=${localExternalUser}`, {
       headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
     })
     .then((res) => {
@@ -75,7 +75,7 @@ const Profile = ({route, navigation}) => {
     .catch((err) => console.log(err));
 
     axios
-    .get(`${BASE_URL_API}/followers?followId=${localExternalUser}`, {
+    .get(`${REACT_APP_BASE_URL_API}/shalom/followers?followId=${localExternalUser}`, {
       headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
     })
     .then((res) => {
@@ -85,7 +85,7 @@ const Profile = ({route, navigation}) => {
     .catch((err) => console.log(err));
 
     axios
-    .get(`${BASE_URL_API}/following?userId=${localExternalUser}`, {
+    .get(`${REACT_APP_BASE_URL_API}/shalom/following?userId=${localExternalUser}`, {
       headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
     })
     .then((res) => {
@@ -102,7 +102,7 @@ const Profile = ({route, navigation}) => {
     followPayload.userId=rmUserId;
     console.log(followPayload)
     axios
-    .put(`${BASE_URL_API}/updateFollower`, 
+    .put(`${REACT_APP_BASE_URL_API}/shalom/updateFollower`, 
         followPayload,
       {headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
     })
@@ -133,7 +133,7 @@ const Profile = ({route, navigation}) => {
     followPayload.userId=rmUserId;
     console.log("removeFollowing= ",followPayload)
     axios
-    .put(`${BASE_URL_API}/updateFollowing`, 
+    .put(`${REACT_APP_BASE_URL_API}/shalom/updateFollowing`, 
         followPayload,
       {headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
     })
@@ -455,7 +455,7 @@ const Profile = ({route, navigation}) => {
               borderRadius: 10,
               marginHorizontal: SIZES.padding * 2,
             }}
-            onPress={()=> navigation.replace('Follow-user')}
+            onPress={()=> navigation.push('Follow-user')}
           >
             <Text
               style={{

@@ -2,13 +2,17 @@ package com.shalommobilespa;
 
 import android.os.Build;
 import android.os.Bundle;
-
+import com.shalommobilespa.BuildConfig;
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactActivityDelegate;
-
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.Arguments;
 import expo.modules.ReactActivityDelegateWrapper;
+import android.content.Intent;
+import android.net.Uri;
 
 public class MainActivity extends ReactActivity {
   @Override
@@ -62,4 +66,27 @@ public class MainActivity extends ReactActivity {
     // because it's doing more than {@link Activity#moveTaskToBack} in fact.
     super.invokeDefaultOnBackPressed();
   }
+
+ /*  @Override
+  public void onNewIntent(Intent intent) {
+      if (intent.getData() != null) {
+        Uri deepLinkURL = intent.getData();
+        System.out.println("deepLinkURL : ==="+deepLinkURL);
+        // note deeplink_identifier means the identity that you register in the manifest.
+        if (deepLinkURL.toString().contains("golive")) {
+            // Create map for params
+            System.out.println("deepLinkURL contains golive: ===");
+            WritableMap event = Arguments.createMap();
+            // Put data to map
+            event.putString("url", deepLinkURL.toString());
+            // Get EventEmitter from context and send event thanks to it
+            getReactInstanceManager().getCurrentReactContext()
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit("url", event);
+        } else {
+           // to handle other deeplink that not related to the defined deeplink identifier such as notification
+           setIntent(intent);
+        }
+      }
+  }  */
 }

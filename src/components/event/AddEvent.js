@@ -14,15 +14,18 @@ import CustomButton from '../common/CustomButton';
 import { MaterialIcons, MaterialCommunityIcons, Fontisto } from '@expo/vector-icons'; 
 import {Dropdown} from 'react-native-element-dropdown';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { FontAwesome, FontAwesome5 } from '@expo/vector-icons'; 
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
-import {BASE_URL_LOCATION_API, BASE_URL_EVENT_API} from '@env'
+import {REACT_APP_LOCATION_API, REACT_APP_BASE_URL_API} from '@env'
 import { Button } from 'react-native-elements';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import moment from "moment";
 
-export default function AddEvent({navigation}) {
+export default function AddEvent({route, navigation}) {
   const {userToken, userInfo}= useContext(AuthContext);
+  const [eventId, setEventId] = useState(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [phone1, setPhone1] = useState('');
@@ -34,11 +37,17 @@ export default function AddEvent({navigation}) {
   const [stateId, setStateId] = useState(null);
   const [cityId, setCityId] = useState(null);
   const [regionId, setRegionId] = useState('');
+  const [stateName, setStateName] = useState(null);
+  const [cityName, setCityName] = useState(null);
+  const [regionName, setRegionName] = useState('');
   const [categoryData, setCategoryData] = useState([]);
   const [countryData, setCountryData] = useState([]);
   const [stateData, setStateData] = useState([]);
   const [cityData, setCityData] = useState([]);
   const [regionData, setRegionData] = useState([]);
+  const [cityEdit, setCityEdit] = useState(true);
+  const [stateEdit, setStateEdit] = useState(true);
+  const [regionEdit, setRegionEdit] = useState(true);
   const [userId, setUserId] = useState('');
   const [createdBy, setCreatedBy] = useState('');
   const [isFocus, setIsFocus] = useState(false);
@@ -49,7 +58,10 @@ export default function AddEvent({navigation}) {
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
   const [errors, setErrors] = useState({});
+  const [createdOn, setCreatedOn] = useState(null);
+  const [updatedOn, setUpdatedOn] = useState(null);
   const event_model = {
+    'eventId': eventId,
     'userId': userId,
     'categoryId': categoryId,
     'title': title,
@@ -64,15 +76,20 @@ export default function AddEvent({navigation}) {
     'stateId': stateId,
     'cityId': cityId,
     'regionId': regionId,
-    'createdBy': createdBy
+    'createdBy': createdBy,
+    'createdOn': createdOn,
+    'updatedOn': updatedOn,
   }
 
   useEffect(() => {
     setUserId(userInfo.userId);
     setCreatedBy(userInfo.userName);
-    console.log("Registration launched"+BASE_URL_EVENT_API);
+    var params = route.params
+    console.log("route.params",params);
+    !params && setCreatedOn(moment.utc().toISOString());
+    console.log("Registration launched");
     axios
-    .get(`${BASE_URL_EVENT_API}/category`, {
+    .get(`${REACT_APP_BASE_URL_API}/event/category`, {
         headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
     })
     .then((res) => {
@@ -89,7 +106,7 @@ export default function AddEvent({navigation}) {
     .catch((err) => console.log(err));
 
     axios
-    .get(`${BASE_URL_LOCATION_API}/CountryList`, {
+    .get(`${REACT_APP_LOCATION_API}/CountryList`, {
       headers: { 'content-type': 'application/json'},
     })
     .then((res) => {
@@ -104,6 +121,52 @@ export default function AddEvent({navigation}) {
       setCountryData(countryArray);
     })
     .catch((err) => console.log(err));
+
+    if(params && params.eventId){
+      setStateEdit(false);
+      setCityEdit(false);
+      setRegionEdit(false);
+      setEventId(params.eventId)
+      setTitle(params.title)
+      setDescription(params.description);
+      setCategoryId(params.categoryId);
+      setPhone1(params.phone1);
+      setPhone2(params.phone2);
+      setAddressline1(params.addressLine1);
+      setAddressline2(params.addressLine2);
+      setUpdatedOn(moment.utc().toISOString());
+      setCountryId(params.countryId);
+      setStateId(params.stateId);
+      setStateName(params.stateName);
+      setCityId(params.cityId);
+      setCityName(params.cityName)
+      setRegionId(params.regionId);
+      setRegionName(params.regionName)
+      setCreatedOn(params.createdOn)
+      setEventDate(params.eventDate)
+      setEventTime(params.eventTime)
+      //Load state
+      axios
+        .get(`${REACT_APP_LOCATION_API}/StateList?countryId=${params.countryId}`, {
+          headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+        })
+        .then(function (response) {
+            var count = Object.keys(response.data).length;
+            let stateArray = [];
+            for (var i = 0; i < count; i++) {
+              stateArray.push({
+                value: response.data[i].stateId,
+                label: response.data[i].stateName,
+              });
+            }
+            setStateData(stateArray);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+    }
+
+
 
   }, []);
 
@@ -142,10 +205,14 @@ const handleSubmit = () =>{
     setPhone1("");
     setPhone2("");
     setAddressline1("");
-    setCountryId  ("");
-    setAddressline1("");
-    setAddressline1("");
-    setAddressline1("");
+    setAddressline2("");
+    setCountryId("");
+    setCityId("");
+    setStateId("");
+    setRegionId("");
+    setCategoryId("");
+    setTitle("");
+    setDescription("");
     setErrors({});
     handleAddEvent();
   }
@@ -156,7 +223,7 @@ const handleSubmit = () =>{
     console.log(countryCode);
     var config = {
       method: 'get',
-      url: `${BASE_URL_LOCATION_API}/StateList?countryId=${countryCode}`,
+      url: `${REACT_APP_LOCATION_API}/StateList?countryId=${countryCode}`,
       headers: {
         'content-type': 'application/json',
       },
@@ -164,11 +231,9 @@ const handleSubmit = () =>{
 
     axios(config)
       .then(function (response) {
-        console.log(JSON.stringify(response.data));
         var count = Object.keys(response.data).length;
         let stateArray = [];
         for (var i = 0; i < count; i++) {
-          console.log( response.data[i].stateId+"="+response.data[i].stateName);
           stateArray.push({
             value: response.data[i].stateId,
             label: response.data[i].stateName,
@@ -182,10 +247,10 @@ const handleSubmit = () =>{
   };
 
   const handleCity = (countryCode, stateCode) => {
-    console.log(countryCode+"=="+stateCode);
+    setCityEdit(true)
     var config = {
       method: 'get',
-      url: `${BASE_URL_LOCATION_API}/CityList?stateId=${stateCode}&countryId=${countryCode}`,
+      url: `${REACT_APP_LOCATION_API}/CityList?stateId=${stateCode}&countryId=${countryCode}`,
       headers: {
         'content-type': 'application/json',
       },
@@ -193,7 +258,6 @@ const handleSubmit = () =>{
 
     axios(config)
       .then(function (response) {
-        console.log(JSON.stringify(response.data));
         var count = Object.keys(response.data).length;
         let cityArray = [];
         for (var i = 0; i < count; i++) {
@@ -210,10 +274,10 @@ const handleSubmit = () =>{
   };
 
   const handleRegion = (cityCode) => {
-    console.log(cityCode);
+    setRegionEdit(true);
     var config = {
       method: 'get',
-      url: `${BASE_URL_LOCATION_API}/RegionList?cityId=${cityCode}`,
+      url: `${REACT_APP_LOCATION_API}/RegionList?cityId=${cityCode}`,
       headers: {
         'content-type': 'application/json',
       },
@@ -221,7 +285,6 @@ const handleSubmit = () =>{
 
     axios(config)
       .then(function (response) {
-        console.log(JSON.stringify(response.data));
         var count = Object.keys(response.data).length;
         let regionArray = [];
         for (var i = 0; i < count; i++) {
@@ -230,7 +293,7 @@ const handleSubmit = () =>{
             label: response.data[i].regionName + " - " + response.data[i].pincode,
           });
         }
-        setRegionData(regionArray);
+        setRegionData([...regionArray]);
       })
       .catch(function (error) {
         console.log(error);
@@ -240,12 +303,11 @@ const handleSubmit = () =>{
   const handleAddEvent = () => {
     console.log(handleAddEvent);
     axios
-    .post(`${BASE_URL_EVENT_API}/add`, 
+    .post(`${REACT_APP_BASE_URL_API}/event/add`, 
       event_model,
       {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
       })
     .then((res) => {
-        console.log(res.data);
         navigation.replace('Event', "success");
     })
     .catch((err) => console.log(`Login error ${err}`)); 
@@ -277,6 +339,31 @@ const handleSubmit = () =>{
   const showTimepicker = () => {
     showMode('time');
   };
+
+  const regionOnSearchLoad = (item) =>{
+    console.log("item= ", cityId);
+    console.log(item);
+    axios
+    .get(`${REACT_APP_LOCATION_API}/RegionsByKey?cityId=${cityId}&key=${item}`, {
+      headers: {
+        'content-type': 'application/json',
+      },
+    })
+    .then((res) => {
+      var count = Object.keys(res.data).length;
+      let regionArray = [];
+      for (var i = 0; i < count; i++) {
+        regionArray.push({
+          value: res.data[i].regionId,
+          label: res.data[i].regionName + " - " + res.data[i].pincode,
+        });
+      }
+      console.log("regionArray", regionArray)
+      setRegionData([...regionArray, ...regionData])
+    })
+    .catch((err) => console.log(err));
+  }
+
 
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
@@ -477,7 +564,31 @@ const handleSubmit = () =>{
           {
             errors.countryId ? (<Text style={styles.errorText}>{errors.countryId}</Text>):null
           }
+          
+       {!stateEdit && 
+        <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+        >
+        <InputField
+          label={'State'}
+          editable={false}
+          icon={
+            <FontAwesome5 name="city" size={20} color="black" style={{margin: 5}}/>
+          }
+          onChangeText={(text) => {setStateName(text)}}
+          value={" "+stateName}
+          error={errors.stateName}
+          fieldButtonLabel={<FontAwesome name="pencil" size={20} color="purple" />}
+          fieldButtonFunction={()=>setStateEdit(true)}
+        />
 
+      </View>
+      }
+      
+      {stateEdit &&
         <Dropdown
           style={[styles.dropdown, isFocus && {borderColor: 'black'}]}
           placeholderStyle={styles.placeholderStyle}
@@ -497,7 +608,6 @@ const handleSubmit = () =>{
           onChange={item => {
             setStateId(item.value);
             handleCity(countryId, item.value);
-            //setStateName(item.label);
             setIsFocus(false);
           }}
           renderLeftIcon={() => (
@@ -508,13 +618,35 @@ const handleSubmit = () =>{
               size={20}
             />
           )}
-          
-              error={errors.stateId}
-          />
+          error={errors.stateId}
+          />}
           {
             errors.stateId ? (<Text style={styles.errorText}>{errors.stateId}</Text>):null
           }
 
+      {!cityEdit && 
+        <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+      >
+        <InputField
+          label={'City'}
+          editable={false}
+          icon={
+            <FontAwesome5 name="city" size={20} color="black" style={{margin: 5}}/>
+          }
+          onChangeText={(text) => {setPhone1(text)}}
+          value={" "+cityName}
+          error={errors.cityName}
+          fieldButtonLabel={<FontAwesome name="pencil" size={20} color="purple" />}
+          fieldButtonFunction={()=>handleCity(countryId, stateId)}
+        />
+
+      </View>
+      }
+      {cityEdit && 
         <Dropdown
           style={[styles.dropdown, isFocus && {borderColor: 'black'}]}
           placeholderStyle={styles.placeholderStyle}
@@ -534,7 +666,6 @@ const handleSubmit = () =>{
           onChange={item => {
             setCityId(item.value);
             handleRegion(item.value);
-            //setCityName(item.label);
             setIsFocus(false);
           }}
           renderLeftIcon={() => (
@@ -546,11 +677,35 @@ const handleSubmit = () =>{
             />
           )}
           error={errors.cityId}
-          />
+          />}
           {
             errors.cityId ? (<Text style={styles.errorText}>{errors.cityId}</Text>):null
           }
 
+      {!regionEdit && 
+        <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+      >
+        <InputField
+          label={'Region'}
+          editable={false}
+          icon={
+            <FontAwesome5 name="city" size={20} color="black" style={{margin: 5}}/>
+          }
+          onChangeText={(text) => {setRegionName(text)}}
+          value={" "+regionName}
+          error={errors.regionName}
+          fieldButtonLabel={<FontAwesome name="pencil" size={20} color="purple" />}
+          fieldButtonFunction={()=>
+            handleRegion(cityId)}
+        />
+
+      </View>
+      }
+      {regionEdit && 
         <Dropdown
           style={[styles.dropdownRegion, isFocus && {borderColor: 'black'}]}
           placeholderStyle={styles.placeholderStyle}
@@ -563,14 +718,16 @@ const handleSubmit = () =>{
           labelField="label"
           valueField="value"
           placeholder={!isFocus ? 'Select region*' : '...'}
-          searchPlaceholder="Search..."
+          searchPlaceholder="Search with region name or pincode..."
           value={regionId}
           onFocus={() => setIsFocus(true)}
           onBlur={() => setIsFocus(false)}
           onChange={item => {
             setRegionId(item.value);
-            //setRegionName(item.label);
             setIsFocus(false);
+          }}
+          onChangeText={item=> {
+            regionOnSearchLoad(item)
           }}
           renderLeftIcon={() => (
             <AntDesign
@@ -581,12 +738,13 @@ const handleSubmit = () =>{
             />
           )}
           error={errors.regionId}
-          />
+          />}
           {
             errors.regionId ? (<Text style={styles.errorText}>{errors.regionId}</Text>):null
           }
 
-        <CustomButton label={'Add Event'} onPress={handleSubmit} />
+
+        <CustomButton label={eventId?'Update Event':'Add Event'} onPress={handleSubmit} />
 
       </ScrollView>
     </SafeAreaView>

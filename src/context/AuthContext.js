@@ -1,22 +1,24 @@
 import React, {createContext, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { BASE_URL_USER_PROFILE } from '@env'
-//import { jwtDecode } from "jwt-decode";
+import { REACT_APP_USER_PROFILE } from '@env'
+import jwt_decode from "jwt-decode";
+import dayjs from 'dayjs'
 
 export const AuthContext = createContext();
 export const AuthProvider = ({children}) => {
     const [isLoading, setIsLoading] = useState(false);
     const [userToken, setUserToken] = useState(null);
     const [userInfo, setUserInfo] = useState(null);
+    const [userId, setUserId] = useState(null);
     const [shalom, setShalom] = useState(null);
     const [shalomId , setShalomId] = useState(null);
 
     const login = (username, password) => {
         setIsLoading(true);
-        console.log("inside AuthProvider=="+BASE_URL_USER_PROFILE+"**"+username+"=password="+password);
+        console.log("inside AuthProvider=="+REACT_APP_USER_PROFILE+"**"+username+"=password="+password);
         axios
-        .post(`${BASE_URL_USER_PROFILE}/authenticate`, {
+        .post(`${REACT_APP_USER_PROFILE}/authenticate`, {
              username, 
              password
         })
@@ -26,6 +28,7 @@ export const AuthProvider = ({children}) => {
             setCredentials(userInfo)
             setUserToken(userInfo.accessToken);
             setUserInfo(userInfo);
+            setUserId(userInfo.userId);
         })
         .catch((err) => console.log(`Login error ${err}`)); 
         setIsLoading(false);
@@ -68,7 +71,7 @@ export const AuthProvider = ({children}) => {
 
      async function getAccessUsingRefresh (token) {
         return axios
-        .post(`${BASE_URL_USER_PROFILE}/refreshToken`, {
+        .post(`${REACT_APP_USER_PROFILE}/refreshToken`, {
             token
         })
         .then((res) => res.json)
@@ -76,9 +79,9 @@ export const AuthProvider = ({children}) => {
       }
       
       async function getVerifiedKeys (keys) {
-        console.log('Loading keys from storage')
+        console.log('Loading keys from storage', keys)
         if (keys) {
-          console.log('checking access')
+          console.log('checking access', keys.accessToken)
       
           if (!isTokenExpired(keys.accessToken)) {
             console.log('returning access')
@@ -89,7 +92,7 @@ export const AuthProvider = ({children}) => {
       
             console.log('checking refresh expiry')
       
-            if (!isTokenExpired(keys.refreshToken)) {
+           // if (!isTokenExpired(keys.refreshToken)) {
               console.log('fetching access using refresh')
       
               const response = await getAccessUsingRefresh(keys.refreshToken)
@@ -100,14 +103,14 @@ export const AuthProvider = ({children}) => {
               console.log('UPDATED ONE')
       
               return response
-            } else {
+           /*  } else {
               console.log('refresh expired, please login')
               AsyncStorage.removeItem('userToken');
               return null
-            }
+            } */
           }
-        } else {
-          console.log('access not available please login')
+       // } else {
+          //console.log('access not available please login')
       
           return null
         }
@@ -115,6 +118,10 @@ export const AuthProvider = ({children}) => {
       
       function isTokenExpired (token) {
         console.log("token to decode== ",token)
+        const user = jwt_decode(token)
+        console.log("decoded user== ",user)
+        const isExpired = dayjs.unix(user.exp).diff(dayjs()) < 1;
+        console.log("isExpired== ",isExpired)
        // var decoded = jwtDecode(token)
   
        ///   console.log("decoded token== ",decoded)
@@ -123,13 +130,14 @@ export const AuthProvider = ({children}) => {
        //   return true
        // } else {
        //   console.log(" token is not expired== ")
-          return false
+          return isExpired
        // }
       }
       
      const setCredentials = async keys => {
         try {
           console.log("set credentials=", JSON.stringify(keys))
+          console.log("userId=", keys.userId)
           await AsyncStorage.setItem('userToken', keys.accessToken)
           await AsyncStorage.setItem('userInfo', JSON.stringify(keys))
         } catch (e) {
@@ -158,7 +166,7 @@ export const AuthProvider = ({children}) => {
 
 
     return (
-        <AuthContext.Provider value={{login, logout, isLoading, userToken, userInfo, editorData, shalom, shalomId, getCredentials}}>
+        <AuthContext.Provider value={{login, logout, isLoading, userToken, userInfo, userId,editorData, shalom, shalomId, getCredentials}}>
             {children}
         </AuthContext.Provider>
     );

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
+  Button
 } from 'react-native';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -21,7 +22,8 @@ import TwitterSVG from '../../assets/images/misc/TwitterSVG';
 import { cover, icon } from '../../assets/images';
 import { showMessage, hideMessage  } from "react-native-flash-message";
 import { LoginManager, GraphRequest, GraphRequestManager } from "react-native-fbsdk";
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { GoogleSignin, statusCodes, GoogleSigninButton } from '@react-native-google-signin/google-signin';
+import * as Google from 'expo-auth-session/providers/google'
 import { FontAwesome } from '@expo/vector-icons'; 
 
 const LoginScreen = ({navigation, route}) => {
@@ -31,6 +33,53 @@ const LoginScreen = ({navigation, route}) => {
   const register = route.params;
   const [errors, setErrors] = useState({});
   const [secureText, setSecureText] = useState(true);
+  const [loaded, setLoaded] = useState(false);
+  const [userGoogleInfo, setUserGoogleInfo] = useState('');
+  const [userInfo, setUserInfo] = useState(null);
+  const [token, setToken] = useState("");
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: "11084367898-ksku5j6u19pbkpbhk7bg5tk8lot9jbug.apps.googleusercontent.com",
+    iosClientId: "11084367898-dqa37c1dkj9m41slg6l69b9gejo97k3h.apps.googleusercontent.com"
+  })
+
+  async function handleSignIn(){
+
+    const user = await getLocalUser();
+    console.log("user", user);
+    if (!user) {
+      if (response?.type === "success") {
+        // setToken(response.authentication.accessToken);
+        getUserInfo(response.authentication.accessToken);
+      }
+    } else {
+      setUserInfo(user);
+      console.log("loaded locally");
+    }
+  }
+
+  const getLocalUser = async () => {
+    const data = await AsyncStorage.getItem("@user");
+    if (!data) return null;
+    return JSON.parse(data);
+  };
+
+  const getUserInfo = async (token) => {
+    if (!token) return;
+    try {
+      const response = await fetch(
+        "https://www.googleapis.com/userinfo/v2/me",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const user = await response.json();
+      await AsyncStorage.setItem("@user", JSON.stringify(user));
+      setUserInfo(user);
+    } catch (error) {
+      // Add your own error handler here
+    }
+  };
 
   const validateForm = () =>{
     let errors = {}
@@ -58,15 +107,48 @@ const LoginScreen = ({navigation, route}) => {
   }
 
 useEffect(()=>{
-  GoogleSignin.configure()
-}, []);
 
+  handleSignIn();
+
+  GoogleSignin.configure({
+    offlineAccess: true,
+    androidClientId: '11084367898-ksku5j6u19pbkpbhk7bg5tk8lot9jbug.apps.googleusercontent.com',
+    scopes: ['profile', 'email']
+})
+}, [response, token]);
+
+// iOS 11084367898-dqa37c1dkj9m41slg6l69b9gejo97k3h.apps.googleusercontent.com
+// android 11084367898-ksku5j6u19pbkpbhk7bg5tk8lot9jbug.apps.googleusercontent.com
+
+/* const signIn = async()=>{
+    try{
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      setLoaded(true)
+      setUserGoogleInfo(userInfo)
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled the login flow
+        console.log(error)
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        // operation (e.g. sign in) is in progress already
+        console.log(error)
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        // play services not available or outdated
+        console.log(error)
+      } else {
+        // some other error happened
+        console.log("Default error ",error)
+      }
+    }
+} */
 
 const googleLogin = async () => {
   try {
     await GoogleSignin.hasPlayServices();
     const userInfo = await GoogleSignin.signIn();
-    setState({ userInfo });
+      setLoaded(true)
+      setUserGoogleInfo(userInfo)
     console.log("Google user info", userInfo);
   } catch (error) {
     if (error.code === statusCodes.SIGN_IN_CANCELLED) {
@@ -85,7 +167,7 @@ const googleLogin = async () => {
   }
 };
 
-const fbLogin = (resCallback) => {
+/* const fbLogin = (resCallback) => {
   LoginManager.logOut();
   return LoginManager.logInWithPermissions(['email', 'public_profile']).then(
     result => {
@@ -116,7 +198,7 @@ const onFbLogin = async() => {
   } catch (error) {
     console.log("FB login error",error)
   }
-}
+} */
 
 const _responseInfoCallBack = async(error, result) =>{
   if(error){
@@ -131,21 +213,21 @@ const _responseInfoCallBack = async(error, result) =>{
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
       <View style={{paddingHorizontal: 25}}>
-        <View style={{alignItems: 'center', paddingTop: 30}}>
+        <View style={{alignItems: 'center', paddingTop: 45}}>
           <Image
             source={icon}
-            width={300}
-            height={300}
-            style={{transform: [{rotate: '-15deg'}]}}
+            width={270}
+            height={270}
+            style={{transform: [{rotate: '-2deg'}]}}
           />
         </View>
-        <Text>{register==="success"?showMessage({
+        {!userName? <Text>{register==="success"?showMessage({
             message: "Registration is successful, please login!",
             type: "info",
             hideOnPress: true,
             backgroundColor: "purple",
-          }):""}</Text>
-        <Text
+          }):""}</Text>:""}
+{/*         <Text
           style={{
             fontFamily: 'Roboto-Medium',
             fontSize: 28,
@@ -154,11 +236,11 @@ const _responseInfoCallBack = async(error, result) =>{
             marginBottom: 30,
           }}>
           Login
-        </Text>
+        </Text> */}
         <Text>{userToken}</Text>
-
+        {JSON.stringify(userInfo)}
         <InputField
-          label={'User name'}
+          label={'User email'}
           icon={
             <MaterialIcons
             name="alternate-email"
@@ -214,6 +296,24 @@ const _responseInfoCallBack = async(error, result) =>{
             justifyContent: 'space-between',
             marginBottom: 30,
           }}>
+         {/*  <GoogleSigninButton
+            onPress={googleLogin}
+            size={GoogleSigninButton.Size.Wide}
+            color={GoogleSigninButton.Color.Dark}
+            style={{width:100, height:100}}
+          >
+            {loaded?
+              <View>
+                <Text>{userGoogleInfo.user.name}</Text>
+                <Text>{userGoogleInfo.user.email}</Text>
+                <Image
+                  style={{width:'100', height:'100'}}
+                  source={{uri: userGoogleInfo.user.photo}}
+                ></Image>
+              </View>:
+              <Text>Not Signed</Text>
+            }
+          </GoogleSigninButton> */}
           <TouchableOpacity
             onPress={googleLogin}
             style={{
@@ -225,7 +325,8 @@ const _responseInfoCallBack = async(error, result) =>{
             }}>
             <GoogleSVG height={24} width={24} />
           </TouchableOpacity>
-          <TouchableOpacity
+          <Button title='Sign in with Google' onPress={promptAsync}></Button>
+         {/*  <TouchableOpacity
             onPress={onFbLogin}
             style={{
               borderColor: '#ddd',
@@ -246,7 +347,7 @@ const _responseInfoCallBack = async(error, result) =>{
               paddingVertical: 10,
             }}>
             <TwitterSVG height={24} width={24} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         <View
@@ -256,7 +357,7 @@ const _responseInfoCallBack = async(error, result) =>{
             marginBottom: 30,
           }}>
           <Text>New to the app?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+          <TouchableOpacity onPress={() => navigation.navigate('Register-Name')}>
             <Text style={{color: '#AD40AF', fontWeight: '700'}}> Register</Text>
           </TouchableOpacity>
         </View>
@@ -268,7 +369,7 @@ const _responseInfoCallBack = async(error, result) =>{
             marginBottom: 30,
           }}>
           <Text>Unable to login?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+          <TouchableOpacity onPress={() => navigation.navigate('Register-Name')}>
             <Text style={{color: '#AD40AF', fontWeight: '700'}}> Need Help?</Text>
           </TouchableOpacity>
         </View>

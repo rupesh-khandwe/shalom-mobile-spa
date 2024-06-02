@@ -11,15 +11,16 @@ import {
 import InputField from '../common/InputField';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import CustomButton from '../common/CustomButton';
-import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons'; 
+import { FontAwesome5, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons'; 
 import {Dropdown} from 'react-native-element-dropdown';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
-import {BASE_URL_CHURCH_API, BASE_URL_LOCATION_API} from '@env'
+import {REACT_APP_BASE_URL_API, REACT_APP_LOCATION_API} from '@env'
 import { showMessage, hideMessage  } from "react-native-flash-message";
+import moment from "moment";
 
-export default function RegisterChurch({navigation}) {
+export default function RegisterChurch({route,navigation}) {
   const {userToken, userInfo}= useContext(AuthContext);
   const [churchWebsiteUrl, setChurchWebsiteUrl] = useState('');
   const [churchName, setChurchName] = useState('');
@@ -35,11 +36,22 @@ export default function RegisterChurch({navigation}) {
   const [stateData, setStateData] = useState([]);
   const [cityData, setCityData] = useState([]);
   const [regionData, setRegionData] = useState([]);
+  const [countryName, setCountryName] = useState(null);
+  const [stateName, setStateName] = useState(null);
+  const [cityName, setCityName] = useState(null);
+  const [regionName, setRegionName] = useState('');
+  const [cityEdit, setCityEdit] = useState(true);
+  const [stateEdit, setStateEdit] = useState(true);
+  const [regionEdit, setRegionEdit] = useState(true);
   const [userId, setUserId] = useState([]);
+  const [churchId, setChurchId] = useState(null);
   const [createdBy, setCreatedBy] = useState([]);
   const [isFocus, setIsFocus] = useState(false);
   const [errors, setErrors] = useState({});
+  const [createdOn, setCreatedOn] = useState(null);
+  const [updatedOn, setUpdatedOn] = useState(null);
   const church_model = {
+    'churchId': churchId,
     'userId': userId,
     'churchName': churchName,
     'churchWebsiteUrl': churchWebsiteUrl,
@@ -51,15 +63,25 @@ export default function RegisterChurch({navigation}) {
     'stateId': stateId,
     'cityId': cityId,
     'regionId': regionId,
-    'createdBy': createdBy
+    'createdBy': createdBy,
+    'createdOn': createdOn,
+    'updatedOn': updatedOn,
   }
 
+
   useEffect(() => {
+    //const updateChurch = route.params;
+    var params = route.params
+    console.log("route.params",params);
     setUserId(userInfo.userId);
     setCreatedBy(userInfo.userName);
-    console.log("Registration launched"+BASE_URL_LOCATION_API);
+    !params && setCreatedOn(moment.utc().toISOString());
+    //console.log("updating church for existing",params.churchId,params.userId ,params.churchName,  params.addressline1,  params.addressline2, params.phone1,  params.phone2,  params.countryId,  params.regionId, params.stateId,  params.cityId, params.churchWebsiteUrl);
+    console.log("Current date ", moment(new Date()).format("YYYY-MM-DD'T'HH:mm:ss.SSS"));
+    console.log("Current date1 ", moment.utc().toISOString())
+    console.log("Registration launched"+REACT_APP_LOCATION_API);
     axios
-    .get(`${BASE_URL_LOCATION_API}/CountryList`, {
+    .get(`${REACT_APP_LOCATION_API}/CountryList`, {
       headers: { 'content-type': 'application/json'},
     })
     .then((res) => {
@@ -74,6 +96,50 @@ export default function RegisterChurch({navigation}) {
       setCountryData(countryArray);
     })
     .catch((err) => console.log(err));
+
+
+    if(params && params.churchId){
+      setStateEdit(false);
+      setCityEdit(false);
+      setRegionEdit(false);
+      setChurchId(params.churchId)
+      setChurchWebsiteUrl(params.churchWebsiteUrl);
+      setChurchName(params.churchName);
+      setPhone1(params.phone1);
+      setPhone2(params.phone2);
+      setAddressline1(params.addressline1);
+      setAddressline2(params.addressline2);
+      setUpdatedOn(moment.utc().toISOString());
+      setCountryId(params.countryId);
+      setStateId(params.stateId);
+      setStateName(params.stateName);
+      setCityId(params.cityId);
+      setCityName(params.cityName)
+      setRegionId(params.regionId);
+      setRegionName(params.regionName)
+      setCreatedOn(params.createdOn)
+      //Load state
+      axios
+        .get(`${REACT_APP_LOCATION_API}/StateList?countryId=${params.countryId}`, {
+          headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+        })
+        .then(function (response) {
+            var count = Object.keys(response.data).length;
+            let stateArray = [];
+            for (var i = 0; i < count; i++) {
+              stateArray.push({
+                value: response.data[i].stateId,
+                label: response.data[i].stateName,
+              });
+            }
+            setStateData(stateArray);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+    }
+
+
   }, []);
 
   const validateForm = () =>{
@@ -117,7 +183,7 @@ const handleSubmit = () =>{
   const handleState = countryCode => {
     var config = {
       method: 'get',
-      url: `${BASE_URL_LOCATION_API}/StateList?countryId=${countryCode}`,
+      url: `${REACT_APP_LOCATION_API}/StateList?countryId=${countryCode}`,
       headers: {
         'content-type': 'application/json',
       },
@@ -142,9 +208,10 @@ const handleSubmit = () =>{
 
   const handleCity = (countryCode, stateCode) => {
     console.log(countryCode+"=="+stateCode);
+    setCityEdit(true)
     var config = {
       method: 'get',
-      url: `${BASE_URL_LOCATION_API}/CityList?stateId=${stateCode}&countryId=${countryCode}`,
+      url: `${REACT_APP_LOCATION_API}/CityList?stateId=${stateCode}&countryId=${countryCode}`,
       headers: {
         'content-type': 'application/json',
       },
@@ -168,9 +235,10 @@ const handleSubmit = () =>{
   };
 
   const handleRegion = (cityCode) => {
+    setRegionEdit(true);
     var config = {
       method: 'get',
-      url: `${BASE_URL_LOCATION_API}/RegionList?cityId=${cityCode}`,
+      url: `${REACT_APP_LOCATION_API}/RegionList?cityId=${cityCode}`,
       headers: {
         'content-type': 'application/json',
       },
@@ -186,7 +254,7 @@ const handleSubmit = () =>{
             label: response.data[i].regionName + " - " + response.data[i].pincode,
           });
         }
-        setRegionData(regionArray);
+        setRegionData([...regionArray]);
       })
       .catch(function (error) {
         console.log(error);
@@ -196,7 +264,7 @@ const handleSubmit = () =>{
   const handleRegister = () => {
     console.log(handleRegister);
     axios
-    .post(`${BASE_URL_CHURCH_API}/register`, 
+    .post(`${REACT_APP_BASE_URL_API}/church/register`, 
       church_model,
       {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
       })
@@ -206,12 +274,37 @@ const handleSubmit = () =>{
     );
     })
     .catch((err) => showMessage({
-      message: "Church name has already been used.",
+      message: "Unable to register church, please try again.",
       type: "info",
       hideOnPress: true,
       backgroundColor: "red",
     })); 
   };
+
+  const regionOnSearchLoad = (item) =>{
+    console.log("item= ", cityId);
+    console.log(item);
+    axios
+    .get(`${REACT_APP_LOCATION_API}/RegionsByKey?cityId=${cityId}&key=${item}`, {
+      headers: {
+        'content-type': 'application/json',
+      },
+    })
+    .then((res) => {
+      var count = Object.keys(res.data).length;
+      let regionArray = [];
+      for (var i = 0; i < count; i++) {
+        regionArray.push({
+          value: res.data[i].regionId,
+          label: res.data[i].regionName + " - " + res.data[i].pincode,
+        });
+      }
+      console.log("regionArray", regionArray)
+      setRegionData([...regionArray, ...regionData])
+    })
+    .catch((err) => console.log(err));
+  }
+
 
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
@@ -343,7 +436,30 @@ const handleSubmit = () =>{
           {
             errors.countryId ? (<Text style={styles.errorText}>{errors.countryId}</Text>):null
           }
+    {!stateEdit && 
+        <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+        >
+        <InputField
+          label={'State'}
+          editable={false}
+          icon={
+            <FontAwesome5 name="city" size={20} color="black" style={{margin: 5}}/>
+          }
+          onChangeText={(text) => {setStateName(text)}}
+          value={" "+stateName}
+          error={errors.stateName}
+          fieldButtonLabel={<FontAwesome name="pencil" size={20} color="purple" />}
+          fieldButtonFunction={()=>setStateEdit(true)}
+        />
 
+      </View>
+      }
+      
+      {stateEdit &&
         <Dropdown
           style={[styles.dropdown, isFocus && {borderColor: 'black'}]}
           placeholderStyle={styles.placeholderStyle}
@@ -374,11 +490,34 @@ const handleSubmit = () =>{
             />
           )}
           error={errors.stateId}
-          />
+          />}
           {
             errors.stateId ? (<Text style={styles.errorText}>{errors.stateId}</Text>):null
           }
 
+      {!cityEdit && 
+        <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+      >
+        <InputField
+          label={'City'}
+          editable={false}
+          icon={
+            <FontAwesome5 name="city" size={20} color="black" style={{margin: 5}}/>
+          }
+          onChangeText={(text) => {setPhone1(text)}}
+          value={" "+cityName}
+          error={errors.cityName}
+          fieldButtonLabel={<FontAwesome name="pencil" size={20} color="purple" />}
+          fieldButtonFunction={()=>handleCity(countryId, stateId)}
+        />
+
+      </View>
+      }
+      {cityEdit && 
         <Dropdown
           style={[styles.dropdown, isFocus && {borderColor: 'black'}]}
           placeholderStyle={styles.placeholderStyle}
@@ -409,11 +548,35 @@ const handleSubmit = () =>{
             />
           )}
           error={errors.cityId}
-          />
+          />}
           {
             errors.cityId ? (<Text style={styles.errorText}>{errors.cityId}</Text>):null
           }
 
+      {!regionEdit && 
+        <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+      >
+        <InputField
+          label={'Region'}
+          editable={false}
+          icon={
+            <FontAwesome5 name="city" size={20} color="black" style={{margin: 5}}/>
+          }
+          onChangeText={(text) => {setRegionName(text)}}
+          value={" "+regionName}
+          error={errors.regionName}
+          fieldButtonLabel={<FontAwesome name="pencil" size={20} color="purple" />}
+          fieldButtonFunction={()=>
+            handleRegion(cityId)}
+        />
+
+      </View>
+      }
+      {regionEdit && 
         <Dropdown
           style={[styles.dropdownRegion, isFocus && {borderColor: 'black'}]}
           placeholderStyle={styles.placeholderStyle}
@@ -426,13 +589,16 @@ const handleSubmit = () =>{
           labelField="label"
           valueField="value"
           placeholder={!isFocus ? 'Select region*' : '...'}
-          searchPlaceholder="Search..."
+          searchPlaceholder="Search with region name or pincode..."
           value={regionId}
           onFocus={() => setIsFocus(true)}
           onBlur={() => setIsFocus(false)}
           onChange={item => {
             setRegionId(item.value);
             setIsFocus(false);
+          }}
+          onChangeText={item=> {
+            regionOnSearchLoad(item)
           }}
           renderLeftIcon={() => (
             <AntDesign
@@ -443,12 +609,12 @@ const handleSubmit = () =>{
             />
           )}
           error={errors.regionId}
-          />
+          />}
           {
             errors.regionId ? (<Text style={styles.errorText}>{errors.regionId}</Text>):null
           }
 
-        <CustomButton label={'Register'} onPress={handleSubmit} />
+        <CustomButton label={churchId?'Update':'Register'} onPress={handleSubmit} />
 
       </ScrollView>
     </SafeAreaView>

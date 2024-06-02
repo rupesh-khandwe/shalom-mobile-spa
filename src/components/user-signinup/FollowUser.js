@@ -7,7 +7,7 @@ import { SIZES, COLORS } from "../../constants";
 import { Card, Title, Paragraph } from 'react-native-paper'
 import { AuthContext } from '../../context/AuthContext';
 import { FontAwesome, Entypo } from "@expo/vector-icons";
-import {BASE_URL_API} from '@env'
+import {REACT_APP_BASE_URL_API} from '@env'
 import { showMessage, hideMessage  } from "react-native-flash-message";
 
 export default function FollowUser({ navigation, route }) {
@@ -31,7 +31,7 @@ export default function FollowUser({ navigation, route }) {
     useEffect(() => {
         setUserId(userInfo.userId);
         axios
-        .get(`${BASE_URL_API}/users?userId=${userInfo.userId}`, {
+        .get(`${REACT_APP_BASE_URL_API}/shalom/users?userId=${userInfo.userId}`, {
           headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
@@ -60,7 +60,7 @@ export default function FollowUser({ navigation, route }) {
         followPayload.followId=followerId;
         console.log(followPayload);
         axios
-        .put(`${BASE_URL_API}/saveFollow`, 
+        .put(`${REACT_APP_BASE_URL_API}/saveFollow`, 
             followPayload,
           {headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
         })

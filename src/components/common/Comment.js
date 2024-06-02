@@ -8,7 +8,7 @@ import { FontAwesome, AntDesign } from '@expo/vector-icons';
 import { Card, Title } from 'react-native-paper'
 export const EditorContext = createContext();
 import axios from 'axios';
-import { BASE_URL_API } from '@env'
+import { REACT_APP_BASE_URL_API } from '@env'
 
 const handleHead = ({tintColor}) => <Text style={{color: tintColor}}>H1</Text>
 const Comment = ({route, navigation}) => {
@@ -25,7 +25,7 @@ const Comment = ({route, navigation}) => {
     //Comments API call
     console.log("comment ***",register.shalomId);
     axios
-    .get(`${BASE_URL_API}/comment?id=${register.shalomId}`, {
+    .get(`${REACT_APP_BASE_URL_API}/comment?id=${register.shalomId}`, {
       headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
     })
     .then((res) => {
@@ -36,7 +36,7 @@ const Comment = ({route, navigation}) => {
 
   const likeFlow = (shalomId, slikeFlag) => {
       axios
-      .put(`${BASE_URL_API}/saveLike`, null, {
+      .put(`${REACT_APP_BASE_URL_API}/saveLike`, null, {
           params: { userId: userId, shalomId: shalomId, likeFlag: slikeFlag },
           headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
       })

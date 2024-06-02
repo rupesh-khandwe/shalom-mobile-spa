@@ -18,7 +18,7 @@ import CustomButton from '../common/CustomButton';
 import { icon } from '../../assets/images';
 import {Dropdown} from 'react-native-element-dropdown';
 import axios from 'axios';
-import {BASE_URL_LOCATION_API, BASE_URL_USER_PROFILE, BASE_URL_API} from '@env';
+import {REACT_APP_LOCATION_API, REACT_APP_USER_PROFILE, REACT_APP_BASE_URL_API} from '@env';
 import PhoneInput from "react-native-phone-number-input";
 import { FontAwesome, AntDesign, FontAwesome5 } from '@expo/vector-icons'; 
 import { AuthContext } from '../../context/AuthContext';
@@ -78,11 +78,11 @@ export default function EditProfile({navigation}) {
   }
   
   useEffect(() => {
-    console.log("Edit profile launched"+`${BASE_URL_API}/profileEdit?userId=${userInfo.userId}`);
+    console.log("Edit profile launched"+`${REACT_APP_BASE_URL_API}/profileEdit?userId=${userInfo.userId}`);
     setUserId(userInfo.userId);
  //Load profile
     axios
-    .get(`${BASE_URL_API}/profileEdit?userId=${userInfo.userId}`, {
+    .get(`${REACT_APP_BASE_URL_API}/shalom/profileEdit?userId=${userInfo.userId}`, {
       headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
     })
     .then((res) => {
@@ -106,7 +106,7 @@ export default function EditProfile({navigation}) {
 
     //Load state
       axios
-      .get(`${BASE_URL_LOCATION_API}/StateList?countryId=${res.data.countryId}`, {
+      .get(`${REACT_APP_LOCATION_API}/StateList?countryId=${res.data.countryId}`, {
         headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
       })
       .then(function (response) {
@@ -170,7 +170,7 @@ export default function EditProfile({navigation}) {
     setCityEdit(true)
     var config = {
       method: 'get',
-      url: `${BASE_URL_LOCATION_API}/CityList?stateId=${stateCode}&countryId=${countryCode}`,
+      url: `${REACT_APP_LOCATION_API}/CityList?stateId=${stateCode}&countryId=${countryCode}`,
       headers: {
         'content-type': 'application/json',
       },
@@ -198,7 +198,7 @@ export default function EditProfile({navigation}) {
     setRegionEdit(true);
     var config = {
       method: 'get',
-      url: `${BASE_URL_LOCATION_API}/RegionList?cityId=${cityCode}`,
+      url: `${REACT_APP_LOCATION_API}/RegionList?cityId=${cityCode}`,
       headers: {
         'content-type': 'application/json',
       },
@@ -214,7 +214,7 @@ export default function EditProfile({navigation}) {
             label: response.data[i].regionName + " - " + response.data[i].pincode,
           });
         }
-        setRegionData(regionArray);
+        setRegionData([...regionArray]);
       })
       .catch(function (error) {
         console.log(error);
@@ -224,7 +224,7 @@ export default function EditProfile({navigation}) {
   const handleRegister = () => {
     console.log(handleRegister);
     axios
-    .put(`${BASE_URL_API}/profileUpdate`, 
+    .put(`${REACT_APP_BASE_URL_API}/shalom/profileUpdate`, 
         updateProfilePayload,
       {headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
     })
@@ -252,6 +252,40 @@ export default function EditProfile({navigation}) {
     ); 
   };
 
+  const regionSetNext = (item) =>{
+    console.log("New item value= ",item.value)
+    setRegionId(item.value);
+    setIsFocus(false);
+  }
+
+  const regionOnSearchLoad = (item) =>{
+    console.log("item= ", cityId);
+    console.log(item);
+    axios
+    .get(`${REACT_APP_LOCATION_API}/RegionsByKey?cityId=${cityId}&key=${item}`, {
+      headers: {
+        'content-type': 'application/json',
+      },
+    })
+    .then((res) => {
+      var count = Object.keys(res.data).length;
+      let regionArray = [];
+      for (var i = 0; i < count; i++) {
+        regionArray.push({
+          value: res.data[i].regionId,
+          label: res.data[i].regionName + " - " + res.data[i].pincode,
+        });
+      }
+      console.log("regionArray", regionArray)
+      //setRegionData([]);
+      //setRegionData(regionArray)
+      //addElement(regionArray);
+      //const prevRegions = regionData.map(item => item.name);
+      setRegionData([...regionArray, ...regionData])
+      //console.log(regionData)
+    })
+    .catch((err) => console.log(err));
+  }
 
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
@@ -594,13 +628,15 @@ export default function EditProfile({navigation}) {
           labelField="label"
           valueField="value"
           placeholder={!isFocus ? 'Select region*' : '...'}
-          searchPlaceholder="Search..."
+          searchPlaceholder="Search with region name or pincode..."
           value={regionId}
           onFocus={() => setIsFocus(true)}
           onBlur={() => setIsFocus(false)}
           onChange={item => {
-            setRegionId(item.value);
-            setIsFocus(false);
+            regionSetNext(item)
+          }}
+          onChangeText={item=> {
+            regionOnSearchLoad(item)
           }}
           renderLeftIcon={() => (
             <AntDesign

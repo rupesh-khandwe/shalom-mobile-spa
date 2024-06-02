@@ -7,7 +7,7 @@ import { AuthContext } from '../../context/AuthContext';
 export const EditorContext = createContext();
 
 const handleHead = ({tintColor}) => <Text style={{color: tintColor}}>H1</Text>
-const RichTxtEditor = ({}) => {
+const RichTxtEditor = ({route}) => {
 	const richText = useRef();
   const {editorData} = useContext(AuthContext);
 
