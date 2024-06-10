@@ -49,7 +49,7 @@ export default function Shalom({ navigation }) {
           headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
-          console.log(res.data)
+          //console.log(res.data)
             setFilteredDataSource(res.data);
             setMasterDataSource(res.data);
         })
@@ -159,6 +159,18 @@ export default function Shalom({ navigation }) {
     );
   };
 
+  //render the empty list component in case the data array for the FlatList is empty
+ const renderListEmptyComponent = () => (
+      <View style={styles.emptyListContainer}>
+          <Text style={styles.noShalomsFound}>
+              No Availabe Shalom's Yet!
+          </Text>
+        <Text style={styles.noShalomsFound}>
+            Please click on add shalom icon <MaterialCommunityIcons name="home-group-plus" size={35} color="purple"   /> above to post a new shalom.
+        </Text>
+      </View>
+  );
+
   const deleteDialog = (shalomId) =>{
     Alert.alert('Delete shalom?', 'Please confirm if you wish to proceed.', [
       {
@@ -194,7 +206,7 @@ export default function Shalom({ navigation }) {
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
-                marginTop: 30,
+                marginTop: 10,
               }}>
               <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
                 Shalom's
@@ -212,7 +224,8 @@ export default function Shalom({ navigation }) {
       
               <FlatList
                 data={filteredDataSource}
-                keyExtractor={(e, index) => index.toString()}
+                keyExtractor={(item, index) => item.shalomId}
+                ListEmptyComponent={renderListEmptyComponent}
                 ItemSeparatorComponent={ItemSeparatorView}
                 renderItem={ItemView}
               />
@@ -278,5 +291,13 @@ const styles = StyleSheet.create({
       paddingHorizontal: 10,
       paddingVertical: 8,
       marginRight: 5
-    }
+    },
+    emptyListContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    noShalomsFound: {
+        fontSize: 16,
+        paddingVertical: 8,
+    },
   });

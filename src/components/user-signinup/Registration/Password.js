@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 
 import InputField from '../../common/InputField';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import CustomButton from '../../common/CustomButton';
 import { icon } from '../../../assets/images';
@@ -36,7 +36,7 @@ export default function RegisterScreen({route, navigation}) {
 
   useEffect(() => {
 
-    console.log("Registration launched"+REACT_APP_LOCATION_API);
+    console.log("Registration launched "+REACT_APP_LOCATION_API);
 
     var extUserObj =  route.params
     for ( var key in extUserObj) {
@@ -63,7 +63,7 @@ export default function RegisterScreen({route, navigation}) {
       timeout: 60000,
     })
     .then(location => {
-          console.log(location);
+          console.log("Location = ",location);
     })
     .catch(error => {
           const { code, message } = error;
@@ -86,11 +86,11 @@ export default function RegisterScreen({route, navigation}) {
 
   const handleSubmit = () =>{
     if(validateForm()){
-      setEmail("");
+/*      setEmail("");
       setFirstName("");
       setLastName("");
       setPhone1("");
-      setPassword("");
+      setPassword("");*/
       setConfirmPassword("");
       setErrors({});
       handleRegister();
@@ -145,14 +145,8 @@ export default function RegisterScreen({route, navigation}) {
 
         <InputField
           label={'Password*'}
-          icon={
-            <Ionicons
-              name="ios-lock-closed-outline"
-              size={20}
-              color="#666"
-              style={{marginRight: 5}}
-            />
-          }
+           icon={
+          <MaterialIcons name="password" size={20} color="gray" />}
           inputType="password"
           onChangeText={(text) => {setPassword(text)}}
           value={password}
@@ -164,14 +158,8 @@ export default function RegisterScreen({route, navigation}) {
 
         <InputField
           label={'Confirm Password*'}
-          icon={
-            <Ionicons
-              name="ios-lock-closed-outline"
-              size={20}
-              color="#666"
-              style={{marginRight: 5}}
-            />
-          }
+           icon={
+          <MaterialIcons name="password" size={20} color="gray" />}
           inputType="password"
           onChangeText={(text) => {setConfirmPassword(text)}}
           value={confirmPassword}

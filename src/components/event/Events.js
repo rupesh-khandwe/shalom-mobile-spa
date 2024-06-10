@@ -13,6 +13,7 @@ import { MaterialIcons, FontAwesome, Ionicons, Fontisto  } from '@expo/vector-ic
 import {REACT_APP_BASE_URL_API} from '@env'
 import { showMessage, hideMessage  } from "react-native-flash-message";
 import moment from "moment";
+import { StackActions } from '@react-navigation/native';
 
 export default function Events({ navigation, route }) {
     const {userToken, userInfo}= useContext(AuthContext);
@@ -96,11 +97,12 @@ export default function Events({ navigation, route }) {
         >
              <View style={{flexDirection:'row', flex:1}}>
                 {/*  Text */}
-                <View style={{ marginTop:5, }}><TouchableOpacity onPress={() => navigation.openDrawer()}>
+                <View style={{ marginTop:5, }}><TouchableOpacity >
                     <FontAwesome name="user-circle" size={40} color="gray"  onPress={()=>{
                   navigation.push('Profile',{
                     "extUserId": item.userId,
-                    "extUserName": item.createdBy
+                    "extUserName": item.createdBy,
+                    "route": "profile"
                   })
                 }  }   />
                   </TouchableOpacity></View>
@@ -145,7 +147,18 @@ export default function Events({ navigation, route }) {
       />
     );
   };
-  
+
+//render the empty list component in case the data array for the FlatList is empty
+const renderListEmptyComponent = () => (
+    <View style={styles.emptyListContainer}>
+        <Text style={styles.noShalomsFound}>
+            No Availabe Event's for you Yet!
+        </Text>
+      <Text style={styles.noShalomsFound}>
+          Press the search icon <Ionicons name="search-circle-sharp" size={35} color="purple" /> above to follow the one you know or click on the icon <MaterialIcons name="post-add" size={35} color="purple" /> above to add a new event.
+      </Text>
+    </View>
+);
 
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -154,7 +167,7 @@ export default function Events({ navigation, route }) {
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
-              marginTop: 30,
+              marginTop: 10,
             }}>
             <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
               Event's
@@ -165,14 +178,21 @@ export default function Events({ navigation, route }) {
                 hideOnPress: true,
                 backgroundColor: "purple",
               }):""}</Text>
-            <TouchableOpacity onPress={() => navigation.replace('Add-event')}>
-            <MaterialIcons name="post-add" size={35} color="purple" />
+             <View  style={{textAlign: 'right',  marginLeft:175}}>
+                  <TouchableOpacity style={{}} onPress={() => navigation.navigate('Follow-user')}>
+                    <Ionicons name="search-circle-sharp" size={35} color="purple" />
+                  </TouchableOpacity>
+             </View>
+            <View  style={{textAlign: 'right',  marginRight:0}}>
+                <TouchableOpacity onPress={() => navigation.replace('Add-event')}>
+                <MaterialIcons name="post-add" size={35} color="purple" />
               {/* <ImageBackground
                 source={require('../assets/images/user-profile.jpg')}
                 style={{width: 35, height: 35}}
                 imageStyle={{borderRadius: 25}}
               /> */}
-            </TouchableOpacity>
+                </TouchableOpacity>
+             </View>
             {/* <TouchableHighlight
               activeOpacity={1}
               underlayColor={"#ccd0d5"}
@@ -224,7 +244,8 @@ export default function Events({ navigation, route }) {
   
           <FlatList
             data={filteredDataSource}
-            keyExtractor={(e, index) => index.toString()}
+            keyExtractor={(item, index) => item.eventId}
+            ListEmptyComponent={renderListEmptyComponent}
             ItemSeparatorComponent={ItemSeparatorView}
             renderItem={ItemView}
           />
@@ -238,7 +259,7 @@ export default function Events({ navigation, route }) {
 const styles = StyleSheet.create({
     container: {
       backgroundColor: 'white',
-      marginTop: SIZES.medium,
+      marginTop: SIZES.small,
       gap: SIZES.small,
       borderRadius: SIZES.medium,
     },
@@ -265,4 +286,12 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center'
     },
+      emptyListContainer: {
+          alignItems: 'center',
+          justifyContent: 'center',
+      },
+      noShalomsFound: {
+          fontSize: 16,
+          paddingVertical: 8,
+      },
   });

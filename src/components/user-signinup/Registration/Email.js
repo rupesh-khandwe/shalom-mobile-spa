@@ -26,7 +26,6 @@ import PhoneInput from "react-native-phone-number-input";
 import { FontAwesome, AntDesign } from '@expo/vector-icons'; 
 import { LoginManager, GraphRequest, GraphRequestManager } from "react-native-fbsdk";
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
-import GetLocation from 'react-native-get-location'
 import BackHistory from '../../common/BackHistory';
 
 export default function Email({route, navigation}) {
@@ -57,17 +56,7 @@ export default function Email({route, navigation}) {
     }
        console.log("firstName " + firstName);
        console.log("firstName " + lastName);
-    GetLocation.getCurrentPosition({
-      enableHighAccuracy: true,
-      timeout: 60000,
-    })
-    .then(location => {
-          console.log(location);
-    })
-    .catch(error => {
-          const { code, message } = error;
-          console.warn(code, message);
-    })
+
   }, []);
 
   const validateForm = () =>{

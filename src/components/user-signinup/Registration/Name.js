@@ -44,17 +44,7 @@ export default function RegisterScreen({navigation}) {
 
     console.log("Registration launched"+REACT_APP_LOCATION_API);
 
-    GetLocation.getCurrentPosition({
-      enableHighAccuracy: true,
-      timeout: 60000,
-    })
-    .then(location => {
-          console.log(location);
-    })
-    .catch(error => {
-          const { code, message } = error;
-          console.warn(code, message);
-    })
+
   }, []);
 
   const validateForm = () =>{

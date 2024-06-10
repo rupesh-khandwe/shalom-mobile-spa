@@ -86,7 +86,7 @@ export default function EditProfile({navigation}) {
       headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
     })
     .then((res) => {
-      console.log(res.data)
+      //console.log("profileEdit res ",res.data)
       setEmail(res.data.userEmail)
       setFirstName(res.data.userFirstName)
       setMiddleName(res.data.userMiddleName?res.data.userMiddleName:"")
@@ -103,7 +103,7 @@ export default function EditProfile({navigation}) {
       setRegionId(res.data.regionId)
       setCountryId(res.data.countryId)
       setUserName(res.data.userName)
-
+      // console.log("country id=",res.data.countryId);
     //Load state
       axios
       .get(`${REACT_APP_LOCATION_API}/StateList?countryId=${res.data.countryId}`, {
@@ -276,7 +276,7 @@ export default function EditProfile({navigation}) {
           label: res.data[i].regionName + " - " + res.data[i].pincode,
         });
       }
-      console.log("regionArray", regionArray)
+      //console.log("regionArray", regionArray)
       //setRegionData([]);
       //setRegionData(regionArray)
       //addElement(regionArray);

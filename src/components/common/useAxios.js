@@ -10,7 +10,7 @@ const useAxios = () => {
 
     const axiosInstance = axios.create({
         REACT_APP_BASE_URL_API,
-        headers:{Authorization: `Bearer ${userToken}`}
+        headers:{Authorization: `Bearer ${userToken}`, 'content-type': 'application/json'}
     });
 
 

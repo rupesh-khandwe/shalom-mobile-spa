@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">shalom-mobile-spa</string>
-    <string name="facebook_app_id">801919111962470</string>
-    <string name="fb_login_protocol_scheme">fb801919111962470</string>
-    <string name="facebook_client_token">472019540a72c84421dd7110f118a1cf</string>
+  <string name="app_name">shalommobilespa</string>
+  <string name="facebook_app_id">shalommobilespa</string>
 </resources>

@@ -9,22 +9,28 @@ export const AuthContext = createContext();
 export const AuthProvider = ({children}) => {
     const [isLoading, setIsLoading] = useState(false);
     const [userToken, setUserToken] = useState(null);
-    const [userInfo, setUserInfo] = useState(null);
+    const [userInfo, setUserInfo] = useState({});
     const [userId, setUserId] = useState(null);
+    const [userName, setUserName] = useState(null);
     const [shalom, setShalom] = useState(null);
     const [shalomId , setShalomId] = useState(null);
-
+    const headers = {
+      'Content-Type': 'application/json',
+    }
     const login = (username, password) => {
         setIsLoading(true);
-        console.log("inside AuthProvider=="+REACT_APP_USER_PROFILE+"**"+username+"=password="+password);
+        console.log("inside AuthProvider=="+REACT_APP_USER_PROFILE+"/authenticate**"+username+"=password="+password);
         axios
         .post(`${REACT_APP_USER_PROFILE}/authenticate`, {
              username, 
              password
-        })
+        }, headers)
         .then((res) => {
             let userInfo = res.data;
             console.log(JSON.stringify(userInfo));
+            console.log("AuthContext login userInfo",userInfo);
+            console.log("AuthContext login serInfo.userId",userInfo.userId);
+            console.log("AuthContext login serInfo.userName",userInfo.userName);
             setCredentials(userInfo)
             setUserToken(userInfo.accessToken);
             setUserInfo(userInfo);
@@ -40,6 +46,7 @@ export const AuthProvider = ({children}) => {
      }
 
      const logout = () => {
+     console.log("Logout action called")
         setIsLoading(true);
         setUserToken(null);
         AsyncStorage.removeItem('userInfo');
@@ -54,7 +61,8 @@ export const AuthProvider = ({children}) => {
             let userInfo = await AsyncStorage.getItem('userInfo');
             let userToken = await AsyncStorage.getItem('userToken');
             userInfo = JSON.parse(userInfo);
-
+            console.log("isLoggedIn userInfo***",userInfo)
+            console.log("isLoggedIn userToken***",userToken)
             if(userInfo){
                 setUserToken(userToken);
                 setUserInfo(userInfo);
@@ -66,7 +74,13 @@ export const AuthProvider = ({children}) => {
      }
 
      useEffect(() => {
-        isLoggedIn();
+        //isLoggedIn();
+                setTimeout(() => {
+                  // do something here 1 sec after current has changed
+                  isLoggedIn();
+                          console.log("isLoggedIn2=",userInfo)
+
+                }, 2000);
      }, []);
 
      async function getAccessUsingRefresh (token) {
@@ -137,8 +151,11 @@ export const AuthProvider = ({children}) => {
      const setCredentials = async keys => {
         try {
           console.log("set credentials=", JSON.stringify(keys))
-          console.log("userId=", keys.userId)
+          console.log("userId=", keys.userId.toString())
+          console.log("userName=", keys.userName)
           await AsyncStorage.setItem('userToken', keys.accessToken)
+          await AsyncStorage.setItem('userId', keys.userId.toString())
+          await AsyncStorage.setItem('userName', keys.userName)
           await AsyncStorage.setItem('userInfo', JSON.stringify(keys))
         } catch (e) {
           console.log(e)
@@ -166,7 +183,7 @@ export const AuthProvider = ({children}) => {
 
 
     return (
-        <AuthContext.Provider value={{login, logout, isLoading, userToken, userInfo, userId,editorData, shalom, shalomId, getCredentials}}>
+        <AuthContext.Provider value={{login, logout, isLoading, userToken, userInfo, userId, userName,editorData, shalom, shalomId, getCredentials}}>
             {children}
         </AuthContext.Provider>
     );

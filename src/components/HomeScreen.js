@@ -6,7 +6,7 @@ import axios from 'axios';
 import { SIZES, COLORS } from "../constants"; 
 import { FONTS } from "../constants/theme";
 import { Card, Title } from 'react-native-paper'
-import { FontAwesome, AntDesign, Ionicons } from '@expo/vector-icons'; 
+import { FontAwesome, AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Video, ResizeMode } from 'expo-av';
 import { AuthContext } from '../context/AuthContext';
 import { REACT_APP_BASE_URL_API } from '@env'
@@ -17,7 +17,7 @@ import { shalom } from '../assets/images';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen({ navigation }) {
-    const {userToken, userInfo, userId}= useContext(AuthContext);
+    const {userToken, userInfo, userId, userName}= useContext(AuthContext);
     const SEARCH_BY_KEY = "eventByUserId?key=";
     const [search, setSearch] = useState('');
     const [filteredDataSource, setFilteredDataSource] = useState([]);
@@ -25,8 +25,8 @@ export default function HomeScreen({ navigation }) {
     const video = React.useRef(null);
     const [status, setStatus] = React.useState({});
     const [likeFlag, setLikeFlag] = React.useState(true);
-    //const [userId, setUserId]= useState('');
-    const [userName, setUserName]= useState('');
+    const [localUserId, setLocalUserId]= useState('');
+    const [localUserName, setLocalUserName]= useState('');
     const [refreshing, setRefreshing] = React.useState(false);
     var width = Dimensions.get("window");
     const scale = new Animated.Value(1);
@@ -36,11 +36,11 @@ export default function HomeScreen({ navigation }) {
       setRefreshing(true);
       setTimeout(() => {
         axios
-        .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${userId}`, {
+        .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${localUserId}`, {
           headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
-            console.log(res.data)
+            //console.log(res.data)
             setFilteredDataSource(res.data);
         })
         .catch((err) => console.log(err));
@@ -52,15 +52,38 @@ export default function HomeScreen({ navigation }) {
     const likeFlow = (shalomId, slikeFlag) => {
         axios
         .put(`${REACT_APP_BASE_URL_API}/shalom/saveLike`, null, {
-            params: { userId: userId, shalomId: shalomId, likeFlag: slikeFlag },
+            params: { userId: localUserId, shalomId: shalomId, likeFlag: slikeFlag },
             headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
-            console.log(res.data);
+            //console.log(res.data);
             setFilteredDataSource(res.data);
         })
         .catch((err) => console.log(err)); 
     };
+
+   const getAsyncData = async()=>{
+        try {
+            console.log("Home screen getAsyncData***")
+            const userId = await AsyncStorage.getItem('userId');
+            const userName = await AsyncStorage.getItem('userName');
+            setLocalUserId(userId);
+            setLocalUserName(userName);
+            axios
+            .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${userId}`, {
+              headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
+            })
+            .then((res) => {
+                //console.log(res.data);
+                setFilteredDataSource(res.data);
+            })
+            .catch((err) => console.log(err));
+            console.log("Home screen getAsyncData user Id***",userId)
+            console.log("Home screen getAsyncData user Name***",userName)
+        } catch (error) {
+            console.log(`isLogged in error ${error}`);
+        }
+     }
 
 const onShare = async () => {
     try {
@@ -100,35 +123,33 @@ const onShare = async () => {
   }
 
   let getData = async(userInfo) =>{
-    let response = await api.get(`/shalom/shalomsWithLikeComment?userId=${userInfo.userId}`)
+    let response = await api.get(`/shalom/shalomsWithLikeComment?userId=${localUserId}`)
 
     if(response.status === 200){
-      console.log("Home Screen step2=",response.data)
+      console.log("Home Screen getData=",response.data)
         setNotes(response.data)
     }
     
 }
   
-    useEffect(() => {   
+    useEffect(() => {
+  const unsubscribe = navigation.addListener('focus', () => {
+    // The screen is focused
+    // Call any action
+    console.log("Profile screen focused")
       width = Dimensions.get("window");
-      console.log("Home Screen step1=",userToken)
-   /*    console.log("Home Screen=",userToken)*/
-      console.log("Home Screen unser Info=",userId) 
-      userInfo && getData(userInfo);
+      console.log("Home Screen userToken=",userToken)
+      console.log("Home Screen userId=",userId)
+      console.log("Home Screen userName=",userName)
+
+      //userInfo && getData(userInfo);
        // getCredentials();
-       console.log("Home Screen step3=",userInfo.userId)
-       //userInfo && setUserId(userInfo.userId);
-       userInfo && setUserName(userInfo.userName);
-        axios
-        .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${userInfo.userId}`, {
-          headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
-        })
-        .then((res) => {
-            console.log(res.data);
-            setFilteredDataSource(res.data);
-        })
-        .catch((err) => console.log(err));
-      }, []);
+       getAsyncData();
+
+        });
+        // Return the function to unsubscribe from the event so it gets removed on unmount
+        return unsubscribe;
+      }, [navigation]);
 
     const ItemView = ({ item }) => {
         return (
@@ -163,7 +184,7 @@ const onShare = async () => {
                         useNativeControls
                         resizeMode={ResizeMode.CONTAIN}
                         isLooping
-                        onPlayb ackStatusUpdate={status => setStatus(() => status)}
+                        onPlaybackStatusUpdate={status => setStatus(() => status)}
                     />
                     {/* <View style={styles.buttons}>
                         <Button title="Play" onPress={() => video.current.playFromPositionAsync(10)} />
@@ -237,6 +258,17 @@ const onShare = async () => {
     );
   };
 
+  //render the empty list component in case the data array for the FlatList is empty
+ const renderListEmptyComponent = () => (
+      <View style={styles.emptyListContainer}>
+          <Text style={styles.noShalomsFound}>
+              No Availabe Shalom's for you Yet!
+          </Text>
+        <Text style={styles.noShalomsFound}>
+            Press the search icon <Ionicons name="search-circle-sharp" size={35} color="purple" /> above to follow the one you know or click on the icon <MaterialCommunityIcons name="home-group-plus" size={35} color="purple"   /> below to post a new shalom.
+        </Text>
+      </View>
+  );
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -292,7 +324,8 @@ const onShare = async () => {
           />
             <FlatList
               data={filteredDataSource}
-              keyExtractor={(e, index) => index.toString()}
+              keyExtractor={(item, index) => item.shalomId}
+              ListEmptyComponent={renderListEmptyComponent}
               ItemSeparatorComponent={ItemSeparatorView}
               renderItem={ItemView}
             />
@@ -336,6 +369,14 @@ const styles = StyleSheet.create({
         width: 300,
         //cursor: pointer,
         borderRadius: 5,
-      }
+      },
+      emptyListContainer: {
+          alignItems: 'center',
+          justifyContent: 'center',
+      },
+      noShalomsFound: {
+          fontSize: 16,
+          paddingVertical: 8,
+      },
   });
 

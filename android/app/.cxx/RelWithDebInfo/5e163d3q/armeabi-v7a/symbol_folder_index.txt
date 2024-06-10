@@ -1,1 +1,0 @@
-C:\Workspace\shalom-mobile-spa\shalom-mobile-spa\android\app\build\intermediates\cxx\RelWithDebInfo\5e163d3q\obj\armeabi-v7a

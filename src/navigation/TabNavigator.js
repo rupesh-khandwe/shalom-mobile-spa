@@ -63,7 +63,9 @@ const HomeStack = () => {
         name="Profile"
         component={Profile}
         options={{
-         
+          headerLeft: (props) => (
+                       <BackHistory name="Home"></BackHistory>
+                      ),
         }}
       />
       <Stack.Screen

@@ -113,11 +113,12 @@ export default function Church({ navigation, route }) {
                 {/*  Text */}
                 <View style={{ marginTop:5, }}><TouchableOpacity onPress={() => navigation.openDrawer()}>
                     <FontAwesome name="user-circle" size={40} color="gray"  onPress={()=>{
-                  navigation.push('Profile',{
-                    "extUserId": item.userId,
-                    "extUserName": item.createdBy
-                  })
-                }  }   />
+                        navigation.push('Profile',{
+                        "extUserId": item.userId,
+                        "extUserName": item.createdBy,
+                        "route": "profile"
+                      })
+                     }}   />
                   </TouchableOpacity></View>
                 <View style={{ marginLeft:5, }}>
                   <Title>{item.createdBy}</Title>
@@ -169,7 +170,7 @@ export default function Church({ navigation, route }) {
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
-            marginTop: 30,
+            marginTop: 10,
           }}>
           <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
             Church
@@ -200,7 +201,7 @@ export default function Church({ navigation, route }) {
   
           <FlatList
             data={filteredDataSource}
-            keyExtractor={(e, index) => index.toString()}
+            keyExtractor={(item, index) => item.churchId}
             ItemSeparatorComponent={ItemSeparatorView}
             renderItem={ItemView}
             extraData={filteredDataSource}
@@ -214,7 +215,7 @@ export default function Church({ navigation, route }) {
 const styles = StyleSheet.create({
     container: {
       backgroundColor: 'white',
-      marginTop: SIZES.medium,
+      marginTop: SIZES.small,
       gap: SIZES.small,
       borderRadius: SIZES.medium,
     },

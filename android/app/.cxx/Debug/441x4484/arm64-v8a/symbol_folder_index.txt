@@ -1,1 +1,0 @@
-C:\Workspace\shalom-mobile-spa\shalom-mobile-spa\android\app\build\intermediates\cxx\Debug\441x4484\obj\arm64-v8a
