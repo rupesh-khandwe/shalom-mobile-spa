@@ -1,16 +1,19 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList, TouchableHighlight, TextInput, Easing } from 'react-native';
+import { SafeAreaView, Text, StyleSheet, View, FlatList, Alert } from 'react-native';
 import { ScrollView } from 'react-native-virtualized-view'
 import { Icon, SearchBar } from 'react-native-elements';
 import axios from 'axios';
 import { SIZES, COLORS } from "../../constants"; 
+import { FONTS } from "../../constants/theme";
 import { Card, Title, Paragraph } from 'react-native-paper'
 import { AuthContext } from '../../context/AuthContext';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { MaterialIcons, FontAwesome, Ionicons, Fontisto  } from '@expo/vector-icons'; 
-import {BASE_URL_EVENT_API} from '@env'
+import {REACT_APP_BASE_URL_API} from '@env'
 import { showMessage, hideMessage  } from "react-native-flash-message";
+import moment from "moment";
+import { StackActions } from '@react-navigation/native';
 
 export default function Events({ navigation, route }) {
     const {userToken, userInfo}= useContext(AuthContext);
@@ -29,7 +32,7 @@ export default function Events({ navigation, route }) {
     useEffect(() => {
         console.log("Events launched");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
         axios
-        .get(`${BASE_URL_EVENT_API}/eventByUserId?id=${userInfo.userId}`, {
+        .get(`${REACT_APP_BASE_URL_API}/event/user?id=${userInfo.userId}`, {
           headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
@@ -46,7 +49,7 @@ export default function Events({ navigation, route }) {
           // Filter the masterDataSource
           // Update FilteredDataSource
           const newData = masterDataSource.filter(function (item) {
-            const itemData = item.title+","+item.addressline1+","+item.addressline2+","+item.churchName;
+            const itemData = item.title+","+item.addressLine1+","+item.addressLine2+","+item.churchName;
             const textData = text;
             return itemData.indexOf(textData) > -1;
           });
@@ -60,27 +63,74 @@ export default function Events({ navigation, route }) {
         }
       };
     
+      const deleteDialog = (eventId) =>{
+        Alert.alert('Delete event?', 'Please confirm if you wish to proceed.', [
+          {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel'),
+            style: 'cancel',
+          },
+          {text: 'OK', onPress: () => deleteEvent(eventId)},
+        ],
+        {
+          cancelable: true,
+        },
+        );
+      };
+
+      const deleteEvent = (eventId) => {
+        axios
+        .delete(`${REACT_APP_BASE_URL_API}/event/delete`, {
+            params: { id: eventId, userId: userInfo.userId  },
+            headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+        })
+        .then((res) => {
+            setFilteredDataSource(res.data);
+        })
+        .catch((err) => console.log(err)); 
+      }
 
     const ItemView = ({ item }) => {
         return (
         // Flat List Item
         <Card style={{marginTop:10, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}
         >
+             <View style={{flexDirection:'row', flex:1}}>
+                {/*  Text */}
+                <View style={{ marginTop:5, }}><TouchableOpacity >
+                    <FontAwesome name="user-circle" size={40} color="gray"  onPress={()=>{
+                  navigation.push('Profile',{
+                    "extUserId": item.userId,
+                    "extUserName": item.createdBy,
+                    "route": "profile"
+                  })
+                }  }   />
+                  </TouchableOpacity></View>
+                <View style={{ marginLeft:5, }}>
+                  <Title>{item.createdBy}</Title>
+                  <Text style={{...FONTS.body5}}>Posted on {moment(item.createdOn).format("MMMM D")}</Text>
+                </View>
+            </View>
             <View style={{flexDirection:'row',}}>
                 {/*  Text */}
                 <View style={{justifyContent:'space-around', flex:2/3, margin:5}}>
                     <Title>{item.title}</Title>
                 </View>
-                {/*  Image */}
             </View>
             <View style={{margin:8}}>
                 <Paragraph>{item.description}</Paragraph>
             </View>
             <View style={{margin:8}}>
-                <Paragraph><FontAwesome name="address-card" size={21} color="purple" /> {item.addressline1}, {item.addressline2}, {item.phone1}</Paragraph>
-                <Text><Fontisto name="date" size={24} color="purple" />  {item.eventDate} </Text>
-                <Text><Ionicons name="time-sharp" size={24} color="purple" /> {item.eventTime}</Text>
+                <Paragraph><FontAwesome name="address-card" size={21} color="purple" /> {item.addressLine1}, {item.addressLine2}, {item.userRegionName}, {item.userCityName}</Paragraph>
+                <Text><FontAwesome name="phone-square" size={24} color="purple" />  {item.phone1}, {item.phone2} </Text>
+                <Text><Fontisto name="date" size={24} color="purple" />  {item.eventDate}  <Ionicons name="time-sharp" size={24} color="purple" /> {item.eventTime}</Text>
             </View>
+            {item.userId === userInfo.userId && 
+              <View style={{flexDirection:'row', margin:10}}>
+                <Text style={{paddingLeft:5}} onPress={()=> navigation.replace('Add-event', {"eventId": item.eventId ,"userId": item.userId ,"categoryId": item.categoryId, "title": item.title, "description": item.description, "eventDate": item.eventDate, "eventTime": item.eventTime, "addressLine1": item.addressLine1, "addressLine2": item.addressLine2, "phone1": item.phone1, "phone2": item.phone2, "countryId": item.countryId, "countryName": item.userCountryName, "regionId": item.regionId, "regionName": item.userRegionName, "stateId": item.stateId, "stateName": item.userStateName, "cityId": item.cityId, "cityName": item.userCityName, "churchWebsiteUrl": item.churchWebsiteUrl, "createdOn": item.createdOn} )}><FontAwesome name="edit" size={24} color="gray" /></Text>
+                <Text style={{paddingLeft:35}} onPress={()=>{deleteDialog(item.eventId)}}><MaterialIcons name="delete-forever" size={24} color="gray" /></Text>
+              </View>
+            }
         </Card>
         ); 
     };
@@ -97,7 +147,18 @@ export default function Events({ navigation, route }) {
       />
     );
   };
-  
+
+//render the empty list component in case the data array for the FlatList is empty
+const renderListEmptyComponent = () => (
+    <View style={styles.emptyListContainer}>
+        <Text style={styles.noShalomsFound}>
+            No Availabe Event's for you Yet!
+        </Text>
+      <Text style={styles.noShalomsFound}>
+          Press the search icon <Ionicons name="search-circle-sharp" size={35} color="purple" /> above to follow the one you know or click on the icon <MaterialIcons name="post-add" size={35} color="purple" /> above to add a new event.
+      </Text>
+    </View>
+);
 
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -106,25 +167,32 @@ export default function Events({ navigation, route }) {
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
-              marginTop: 30,
+              marginTop: 10,
             }}>
             <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
               Event's
             </Text>
             <Text>{register==="success"?showMessage({
-            message: "Event has been added successfully!",
-            type: "info",
-            hideOnPress: true,
-            backgroundColor: "purple",
-          }):""}</Text>
-            <TouchableOpacity onPress={() => navigation.replace('Add-event')}>
-            <MaterialIcons name="post-add" size={35} color="purple" />
+                message: "Event has been added successfully!",
+                type: "info",
+                hideOnPress: true,
+                backgroundColor: "purple",
+              }):""}</Text>
+             <View  style={{textAlign: 'right',  marginLeft:175}}>
+                  <TouchableOpacity style={{}} onPress={() => navigation.navigate('Follow-user')}>
+                    <Ionicons name="search-circle-sharp" size={35} color="purple" />
+                  </TouchableOpacity>
+             </View>
+            <View  style={{textAlign: 'right',  marginRight:0}}>
+                <TouchableOpacity onPress={() => navigation.replace('Add-event')}>
+                <MaterialIcons name="post-add" size={35} color="purple" />
               {/* <ImageBackground
                 source={require('../assets/images/user-profile.jpg')}
                 style={{width: 35, height: 35}}
                 imageStyle={{borderRadius: 25}}
               /> */}
-            </TouchableOpacity>
+                </TouchableOpacity>
+             </View>
             {/* <TouchableHighlight
               activeOpacity={1}
               underlayColor={"#ccd0d5"}
@@ -176,7 +244,8 @@ export default function Events({ navigation, route }) {
   
           <FlatList
             data={filteredDataSource}
-            keyExtractor={(e, index) => index.toString()}
+            keyExtractor={(item, index) => item.eventId}
+            ListEmptyComponent={renderListEmptyComponent}
             ItemSeparatorComponent={ItemSeparatorView}
             renderItem={ItemView}
           />
@@ -190,7 +259,7 @@ export default function Events({ navigation, route }) {
 const styles = StyleSheet.create({
     container: {
       backgroundColor: 'white',
-      marginTop: SIZES.medium,
+      marginTop: SIZES.small,
       gap: SIZES.small,
       borderRadius: SIZES.medium,
     },
@@ -217,4 +286,12 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center'
     },
+      emptyListContainer: {
+          alignItems: 'center',
+          justifyContent: 'center',
+      },
+      noShalomsFound: {
+          fontSize: 16,
+          paddingVertical: 8,
+      },
   });

@@ -1,17 +1,23 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList, Button, Image, TouchableOpacity, ImageBackground, RefreshControl} from 'react-native';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { SafeAreaView, Text, StyleSheet, View, FlatList,TouchableOpacity, ImageBackground, RefreshControl, Dimensions, Animated, Image} from 'react-native';
 import { ScrollView } from 'react-native-virtualized-view'
 import Share from 'react-native-share';
 import axios from 'axios';
 import { SIZES, COLORS } from "../constants"; 
+import { FONTS } from "../constants/theme";
 import { Card, Title } from 'react-native-paper'
-import { FontAwesome, AntDesign, Ionicons } from '@expo/vector-icons'; 
+import { FontAwesome, AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Video, ResizeMode } from 'expo-av';
 import { AuthContext } from '../context/AuthContext';
-import { BASE_URL_API } from '@env'
+import { REACT_APP_BASE_URL_API } from '@env'
+import { PinchGestureHandler, State } from 'react-native-gesture-handler';
+import useAxios from './common/useAxios';
+import moment from "moment";
+import { shalom } from '../assets/images';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen({ navigation }) {
-    const {userToken, userInfo, getCredentials}= useContext(AuthContext);
+    const {userToken, userInfo, userId, userName}= useContext(AuthContext);
     const SEARCH_BY_KEY = "eventByUserId?key=";
     const [search, setSearch] = useState('');
     const [filteredDataSource, setFilteredDataSource] = useState([]);
@@ -19,18 +25,22 @@ export default function HomeScreen({ navigation }) {
     const video = React.useRef(null);
     const [status, setStatus] = React.useState({});
     const [likeFlag, setLikeFlag] = React.useState(true);
-    const [userId, setUserId]= useState('');
-    const [userName, setUserName]= useState('');
+    const [localUserId, setLocalUserId]= useState('');
+    const [localUserName, setLocalUserName]= useState('');
     const [refreshing, setRefreshing] = React.useState(false);
+    var width = Dimensions.get("window");
+    const scale = new Animated.Value(1);
+    let api = useAxios()
 
     const onRefresh = React.useCallback(() => {
       setRefreshing(true);
       setTimeout(() => {
         axios
-        .get(`${BASE_URL_API}/shalomsWithLikeComment?userId=${userInfo.userId}`, {
+        .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${localUserId}`, {
           headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
+            //console.log(res.data)
             setFilteredDataSource(res.data);
         })
         .catch((err) => console.log(err));
@@ -41,16 +51,39 @@ export default function HomeScreen({ navigation }) {
 
     const likeFlow = (shalomId, slikeFlag) => {
         axios
-        .put(`${BASE_URL_API}/saveLike`, null, {
-            params: { userId: userId, shalomId: shalomId, likeFlag: slikeFlag },
+        .put(`${REACT_APP_BASE_URL_API}/shalom/saveLike`, null, {
+            params: { userId: localUserId, shalomId: shalomId, likeFlag: slikeFlag },
             headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
-            console.log(res.data);
+            //console.log(res.data);
             setFilteredDataSource(res.data);
         })
         .catch((err) => console.log(err)); 
     };
+
+   const getAsyncData = async()=>{
+        try {
+            console.log("Home screen getAsyncData***")
+            const userId = await AsyncStorage.getItem('userId');
+            const userName = await AsyncStorage.getItem('userName');
+            setLocalUserId(userId);
+            setLocalUserName(userName);
+            axios
+            .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${userId}`, {
+              headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
+            })
+            .then((res) => {
+                //console.log(res.data);
+                setFilteredDataSource(res.data);
+            })
+            .catch((err) => console.log(err));
+            console.log("Home screen getAsyncData user Id***",userId)
+            console.log("Home screen getAsyncData user Name***",userName)
+        } catch (error) {
+            console.log(`isLogged in error ${error}`);
+        }
+     }
 
 const onShare = async () => {
     try {
@@ -71,40 +104,70 @@ const onShare = async () => {
       alert(error.message);
     }
   }
+
+  const onZoomEventFunction = Animated.event(
+    [{
+      nativeEvent: {scale : scale}
+    }],
+    {
+      useNativeDriver: true
+    }
+  )
+  const onZoomStateChangeFunction=(event) =>{
+    if(event.nativeEvent.oldState == State.ACTIVE){
+      Animated.spring(scale, {
+        toValue: 1,
+        useNativeDriver: true
+      }).start()
+    }
+  }
+
+  let getData = async(userInfo) =>{
+    let response = await api.get(`/shalom/shalomsWithLikeComment?userId=${localUserId}`)
+
+    if(response.status === 200){
+      console.log("Home Screen getData=",response.data)
+        setNotes(response.data)
+    }
+    
+}
   
-    useEffect(() => {   
-      console.log("Home Screen=",userToken)
-      console.log("Home Screen unser Info=",userInfo)
-        getCredentials();
-        setUserId(userInfo.userId);
-        setUserName(userInfo.userName);
-        axios
-        .get(`${BASE_URL_API}/shalomsWithLikeComment?userId=${userInfo.userId}`, {
-          headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
-        })
-        .then((res) => {
-            setFilteredDataSource(res.data);
-        })
-        .catch((err) => console.log(err));
-      }, []);
+    useEffect(() => {
+  const unsubscribe = navigation.addListener('focus', () => {
+    // The screen is focused
+    // Call any action
+    console.log("Profile screen focused")
+      width = Dimensions.get("window");
+      console.log("Home Screen userToken=",userToken)
+      console.log("Home Screen userId=",userId)
+      console.log("Home Screen userName=",userName)
+
+      //userInfo && getData(userInfo);
+       // getCredentials();
+       getAsyncData();
+
+        });
+        // Return the function to unsubscribe from the event so it gets removed on unmount
+        return unsubscribe;
+      }, [navigation]);
 
     const ItemView = ({ item }) => {
         return (
         <Card style={{marginTop:10, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}>
-            <View style={{flexDirection:'row', flex:1}}>
+          <View style={{flexDirection:'row', flex:1}}>
                 {/*  Text */}
-                <TouchableOpacity onPress={() => navigation.openDrawer()}>
-                    <FontAwesome name="user-circle" size={30} color="gray"  onPress={()=>{
+                <View style={{ marginTop:5, }}><TouchableOpacity onPress={() => navigation.openDrawer()}>
+                    <FontAwesome name="user-circle" size={40} color="gray"  onPress={()=>{
                   navigation.push('Profile',{
                     "extUserId": item.userId,
                     "extUserName": item.userName
                   })
                 }  }   />
-                  </TouchableOpacity>
-                <View style={{justifyContent:'space-around', marginLeft:5}}>
+                  </TouchableOpacity></View>
+                <View style={{ marginLeft:5, }}>
                   <Title>{item.userName}</Title>
+                  <Text style={{...FONTS.body5}}>Posted on {moment(item.createdOn).format("MMMM D")}</Text>
                 </View>
-                {/*  Image */}
             </View>
             <View style={{margin:10}}>
               <Text>{item.shalom}</Text>
@@ -121,7 +184,7 @@ const onShare = async () => {
                         useNativeControls
                         resizeMode={ResizeMode.CONTAIN}
                         isLooping
-                        onPlayb ackStatusUpdate={status => setStatus(() => status)}
+                        onPlaybackStatusUpdate={status => setStatus(() => status)}
                     />
                     {/* <View style={styles.buttons}>
                         <Button title="Play" onPress={() => video.current.playFromPositionAsync(10)} />
@@ -129,12 +192,22 @@ const onShare = async () => {
                     </View> */}
                 </View>
             }
-            {item.imageUrl &&
-                <Image
-                    style={{width: '100%', height: 200,resizeMode : 'stretch' }}
-                    source={{uri: item.imageUrl}} 
-                />        
-            }
+            {item.imageUrl ?
+              item.imageUrl.split('|').map((img) => {
+                return(  
+                  <PinchGestureHandler
+                    onGestureEvent={onZoomEventFunction}
+                    onHandlerStateChange={onZoomStateChangeFunction}
+                  >
+                    <Animated.Image
+                      style={{width: {width}, height: 200,resizeMode : 'stretch', transform: [{scale: scale}] }}
+                      source={{uri:img}} 
+                      resizeMode={'contain'}
+                    /> 
+                </PinchGestureHandler>
+                )
+              })
+            : null}
             <View style={{flexDirection:'row', margin:10}}>
 
                     <Text style={{paddingLeft:5}} >{item.likeCount} Like</Text>
@@ -185,10 +258,21 @@ const onShare = async () => {
     );
   };
 
+  //render the empty list component in case the data array for the FlatList is empty
+ const renderListEmptyComponent = () => (
+      <View style={styles.emptyListContainer}>
+          <Text style={styles.noShalomsFound}>
+              No Availabe Shalom's for you Yet!
+          </Text>
+        <Text style={styles.noShalomsFound}>
+            Press the search icon <Ionicons name="search-circle-sharp" size={35} color="purple" /> above to follow the one you know or click on the icon <MaterialCommunityIcons name="home-group-plus" size={35} color="purple"   /> below to post a new shalom.
+        </Text>
+      </View>
+  );
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-        <ScrollView style={{padding: 15}}
+        <ScrollView style={{padding: 10}}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -197,34 +281,51 @@ const onShare = async () => {
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
-              marginTop: 30,
+              marginTop: 10,
             }}>
-            <TouchableOpacity onPress={() => navigation.openDrawer()}>
-              <ImageBackground
-                source={require('../assets/images/user-profile.jpg')}
-                style={{width: 35, height: 35}}
-                imageStyle={{borderRadius: 25}}
+            <View style={{marginTop: 0}}>
+              <Image
+                source={shalom}
+                style={{ height: 50, width: 150, resizeMode: 'contain' }}
+                flex={1}
+                resizeMode="contain"
+                resizeMethod="resize"
+                
               />
-            </TouchableOpacity>
-            <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', paddingRight:130, paddingTop:5}}>
-              Hello {userName}
-            </Text>
-            <TouchableOpacity style={{paddingRight:13}} onPress={() => navigation.navigate('Follow-user')}>
+            </View>
+            <View  style={{textAlign: 'right', marginTop:10, marginLeft:120}}>
+            <TouchableOpacity style={{}} onPress={() => navigation.navigate('Follow-user')}>
               <Ionicons name="search-circle-sharp" size={35} color="purple" />
             </TouchableOpacity>
+            
+            </View>
+            <View  style={{textAlign: 'right', marginTop:10, marginRight:15}}>
+            {/* <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', paddingRight:130, paddingTop:5}}>
+              Hello {userName}
+            </Text> */}
+              <TouchableOpacity onPress={() => navigation.openDrawer()}>
+                <ImageBackground
+                  source={require('../assets/images/user-profile.jpg')}
+                  style={{width: 35, height: 35}}
+                  imageStyle={{borderRadius: 25}}
+                />
+              </TouchableOpacity>
+            </View>
+            
             
           </View>
           <View style={styles.container}>
           <View
             style={{
-              height: 5,
+              height: 2,
               width: '100%',
-              backgroundColor: '#C8C8C8',
+              backgroundColor: 'purple',
             }}
           />
             <FlatList
               data={filteredDataSource}
-              keyExtractor={(e, index) => index.toString()}
+              keyExtractor={(item, index) => item.shalomId}
+              ListEmptyComponent={renderListEmptyComponent}
               ItemSeparatorComponent={ItemSeparatorView}
               renderItem={ItemView}
             />
@@ -268,6 +369,14 @@ const styles = StyleSheet.create({
         width: 300,
         //cursor: pointer,
         borderRadius: 5,
-      }
+      },
+      emptyListContainer: {
+          alignItems: 'center',
+          justifyContent: 'center',
+      },
+      noShalomsFound: {
+          fontSize: 16,
+          paddingVertical: 8,
+      },
   });
 

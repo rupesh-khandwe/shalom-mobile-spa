@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from 'react'
 import CustomTopNavButton from './CustomTopNavButton';
 import { AuthContext } from '../../context/AuthContext';
 import axios from 'axios';
-import {BASE_URL_API} from '@env'
+import {REACT_APP_BASE_URL_API} from '@env'
 import { useNavigation } from '@react-navigation/native';
 import { showMessage, hideMessage  } from "react-native-flash-message";
 
@@ -34,7 +34,7 @@ const SavePost = (props) => {
         if(props.name === "comment"){
             if(shalom){
                 axios
-                .post(`${BASE_URL_API}/save/comment`, 
+                .post(`${REACT_APP_BASE_URL_API}/save/comment`, 
                     commentData,
                     {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
                 })
@@ -55,7 +55,7 @@ const SavePost = (props) => {
         if(props.name === "shalom"){
             if(shalom){
                 axios
-                .post(`${BASE_URL_API}/save`, 
+                .post(`${REACT_APP_BASE_URL_API}/save`, 
                     shalomData,
                     {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
                 })

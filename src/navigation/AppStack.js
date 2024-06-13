@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 
 import CustomDrawer from '../components/common/CustomDrawer';
@@ -14,7 +14,7 @@ import FollowUser from '../components/user-signinup/FollowUser';
 
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
-const AppStack = () => {
+const AppStack = ({}) => {
 
   const ProfileStack = () => {
     return (

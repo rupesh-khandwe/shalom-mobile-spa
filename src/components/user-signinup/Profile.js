@@ -17,7 +17,7 @@ import { FontAwesome, MaterialIcons, Entypo, SimpleLineIcons } from "@expo/vecto
 import { SceneMap, TabBar, TabView } from "react-native-tab-view";
 import { AuthContext } from '../../context/AuthContext';
 import axios from 'axios';
-import { BASE_URL_API } from '@env'
+import { REACT_APP_BASE_URL_API } from '@env'
 import { showMessage, hideMessage  } from "react-native-flash-message";
 
 const Profile = ({route, navigation}) => {
@@ -42,72 +42,129 @@ const Profile = ({route, navigation}) => {
     followId: followId,
     followFlag: followFlag
   }
-  let extUserId, extUserName;
+  let extUserId, extUserName, extRoute;
 
-  useEffect(() => {     
-    var extUserObj =  route.params
-    for ( var key in extUserObj) {
-       console.log(" key is : "   + key + "   and value for key is   " + extUserObj[key]);
-       if(key==="extUserId")
-        extUserId=extUserObj[key]
-       if(key==="extUserName")
-        extUserName=extUserObj[key]
-        setShowExternalFlag(true);
-    }
-    console.log(extUserId, " == ", extUserName)
-    !extUserName?setUserName(userInfo.userName):setUserName(extUserName);
-    const localExternalUser=!extUserId?userInfo.userId:extUserId;
-    console.log("Bearer "+ userToken);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
+  useEffect(() => {
+  console.log("Profile loaded")
+      var extUserObj =  route.params
+      for ( var key in extUserObj) {
+         console.log(" key is : "   + key + "   and value for key is   " + extUserObj[key]);
+         if(key==="extUserId")
+          extUserId=extUserObj[key]
+         if(key==="extUserName")
+          extUserName=extUserObj[key]
+         if(key==="route")
+          extRoute=extUserObj[key]
+         setShowExternalFlag(true);
+      }
+      console.log("route name=",extRoute);
+       if(extRoute==="profile"){
+            console.log("Profile Called from Church=",extUserObj);
+            !extUserName?setUserName(userInfo.userName):setUserName(extUserName);
+            const localExternalUser=!extUserId?userInfo.userId:extUserId;
+            console.log("Bearer "+ userToken);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
 
-    axios
-    .get(`${BASE_URL_API}/profile?userId=${localExternalUser}`, {
-      headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
-    })
-    .then((res) => {
-      console.log(res.data)
-      setFollowersCount(res.data.followersCount)
-      setFollowingsCount(res.data.followingsCount)
-      setShalomCount(res.data.shalomCount)
-      setCity(res.data.userCity)
-      setState(res.data.userState)
-      setCountry(res.data.userCountry)
-    })
-    .catch((err) => console.log(err));
+            axios
+            .get(`${REACT_APP_BASE_URL_API}/shalom/profile?userId=${localExternalUser}`, {
+              headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+            })
+            .then((res) => {
+              console.log(res.data)
+              setFollowersCount(res.data.followersCount)
+              setFollowingsCount(res.data.followingsCount)
+              setShalomCount(res.data.shalomCount)
+              setCity(res.data.userCity)
+              setState(res.data.userState)
+              setCountry(res.data.userCountry)
+            })
+            .catch((err) => console.log(err));
 
-    axios
-    .get(`${BASE_URL_API}/followers?followId=${localExternalUser}`, {
-      headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
-    })
-    .then((res) => {
-      console.log("followers= ",res.data)
-      setFilteredFollowers(res.data);
-    })
-    .catch((err) => console.log(err));
+            axios
+            .get(`${REACT_APP_BASE_URL_API}/shalom/followers?followId=${localExternalUser}`, {
+              headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+            })
+            .then((res) => {
+              console.log("followers= ",res.data)
+              setFilteredFollowers(res.data);
+            })
+            .catch((err) => console.log(err));
 
-    axios
-    .get(`${BASE_URL_API}/following?userId=${localExternalUser}`, {
-      headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
-    })
-    .then((res) => {
-      console.log("following=",res.data)
-      setFilteredFollowing(res.data);
-    })
-    .catch((err) => console.log(err));
+            axios
+            .get(`${REACT_APP_BASE_URL_API}/shalom/following?userId=${localExternalUser}`, {
+              headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+            })
+            .then((res) => {
+              console.log("following=",res.data)
+              setFilteredFollowing(res.data);
+            })
+            .catch((err) => console.log(err));
+        }
+
+      const unsubscribe = navigation.addListener('focus', () => {
+        // The screen is focused
+        // Call any action
+        console.log("Profile screen inside listner")
+          var extUserObj =  route.params
+          console.log("Profile screen items=",extUserObj);
+
+            console.log(extUserId, " == ", extUserName)
+            !extUserName?setUserName(userInfo.userName):setUserName(extUserName);
+            const localExternalUser=!extUserId?userInfo.userId:extUserId;
+            console.log("Bearer "+ userToken);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
+
+            axios
+            .get(`${REACT_APP_BASE_URL_API}/shalom/profile?userId=${localExternalUser}`, {
+              headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+            })
+            .then((res) => {
+              //console.log(res.data)
+              setFollowersCount(res.data.followersCount)
+              setFollowingsCount(res.data.followingsCount)
+              setShalomCount(res.data.shalomCount)
+              setCity(res.data.userCity)
+              setState(res.data.userState)
+              setCountry(res.data.userCountry)
+            })
+            .catch((err) => console.log(err));
+
+            axios
+            .get(`${REACT_APP_BASE_URL_API}/shalom/followers?followId=${localExternalUser}`, {
+              headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+            })
+            .then((res) => {
+             // console.log("followers= ",res.data)
+              setFilteredFollowers(res.data);
+            })
+            .catch((err) => console.log(err));
+
+            axios
+            .get(`${REACT_APP_BASE_URL_API}/shalom/following?userId=${localExternalUser}`, {
+              headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+            })
+            .then((res) => {
+             // console.log("following=",res.data)
+              setFilteredFollowing(res.data);
+            })
+            .catch((err) => console.log(err));
+      });
 
 
-  }, []);
+    // Return the function to unsubscribe from the event so it gets removed on unmount
+    return unsubscribe;
+  }, [navigation]);
 
   const removeFollower = (followerId, rmUserId, followName)=>{
     followPayload.followId=followerId;
     followPayload.userId=rmUserId;
-    console.log(followPayload)
+    //console.log(followPayload)
     axios
-    .put(`${BASE_URL_API}/updateFollower`, 
+    .put(`${REACT_APP_BASE_URL_API}/shalom/updateFollower`, 
         followPayload,
       {headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
     })
     .then((res) => {
       setFilteredFollowers(res.data);
+      setShalomCount(shalomCount-1);
         showMessage({
           message: "You are no longer following "+followName+".",
           type: "info",
@@ -131,14 +188,14 @@ const Profile = ({route, navigation}) => {
   const removeFollowing = (followerId, followName, rmUserId)=>{
     followPayload.followId=followerId;
     followPayload.userId=rmUserId;
-    console.log("removeFollowing= ",followPayload)
+    //console.log("removeFollowing= ",followPayload)
     axios
-    .put(`${BASE_URL_API}/updateFollowing`, 
+    .put(`${REACT_APP_BASE_URL_API}/shalom/updateFollowing`, 
         followPayload,
       {headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
     })
     .then((res) => {
-      console.log("Remove was success= ",res.data)
+     // console.log("Remove was success= ",res.data)
       setFilteredFollowing(res.data);
         showMessage({
           message: "You are no longer following "+followName+".",
@@ -149,7 +206,7 @@ const Profile = ({route, navigation}) => {
         })
     })
     .catch((err) => 
-      //console.log(`Login error ${err}`)
+      console.log(`Login error ${err}`),
       showMessage({
         message: "Failed to save, please try-again.",
         type: "info",
@@ -455,7 +512,7 @@ const Profile = ({route, navigation}) => {
               borderRadius: 10,
               marginHorizontal: SIZES.padding * 2,
             }}
-            onPress={()=> navigation.replace('Follow-user')}
+            onPress={()=> navigation.push('Follow-user')}
           >
             <Text
               style={{

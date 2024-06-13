@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, FlatList, Image, Button, TouchableOpacity, ImageBackground  } from 'react-native';
+import { SafeAreaView, Text, StyleSheet, View, FlatList, Image, Button, TouchableOpacity, Dimensions, Animated, Alert  } from 'react-native';
 import { ScrollView } from 'react-native-virtualized-view';
 import axios from 'axios';
 import { SIZES, COLORS } from "../constants"; 
-import { Card, Title, Paragraph } from 'react-native-paper'
-import { FontAwesome, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons'; 
+import { FONTS } from "../constants/theme";
+import { Card, Title } from 'react-native-paper'
+import { MaterialCommunityIcons, FontAwesome, MaterialIcons } from '@expo/vector-icons'; 
 import { Video, ResizeMode } from 'expo-av';
 import { AuthContext } from '../context/AuthContext';
-import {BASE_URL_API} from '@env'
+import {REACT_APP_BASE_URL_API} from '@env'
+import { PinchGestureHandler, State } from 'react-native-gesture-handler';
+import moment from "moment";
+
 
 export default function Shalom({ navigation }) {
     const {userToken, userInfo}= useContext(AuthContext);
@@ -18,14 +22,34 @@ export default function Shalom({ navigation }) {
     const [masterDataSource, setMasterDataSource] = useState([]);
     const video = React.useRef(null);
     const [status, setStatus] = React.useState({});
+    var width = Dimensions.get("window");
+    const scale = new Animated.Value(1);
+
+    const onZoomEventFunction = Animated.event(
+      [{
+        nativeEvent: {scale : scale}
+      }],
+      {
+        useNativeDriver: true
+      }
+    )
+    const onZoomStateChangeFunction=(event) =>{
+      if(event.nativeEvent.oldState == State.ACTIVE){
+        Animated.spring(scale, {
+          toValue: 1,
+          useNativeDriver: true
+        }).start()
+      }
+    }
+
 
     useEffect(() => {
-        console.log("Shalom component"+ `${BASE_URL_API}/shalomByUserId?id=${userInfo.userId}`);
         axios
-        .get(`${BASE_URL_API}/shalomByUserId?id=${userInfo.userId}`, {
+        .get(`${REACT_APP_BASE_URL_API}/shalom/user?id=${userInfo.userId}`, {
           headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
+          //console.log(res.data)
             setFilteredDataSource(res.data);
             setMasterDataSource(res.data);
         })
@@ -59,15 +83,29 @@ export default function Shalom({ navigation }) {
         // Flat List Item
         <Card style={{margin:6, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}
         >
+          <View style={{flexDirection:'row', flex:1}}>
+                {/*  Text */}
+                <View style={{ marginTop:5, }}><TouchableOpacity onPress={() => navigation.openDrawer()}>
+                    <FontAwesome name="user-circle" size={40} color="gray"  onPress={()=>{
+                  navigation.push('Profile',{
+                    "extUserId": item.userId,
+                    "extUserName": item.userName
+                  })
+                }  }   />
+                  </TouchableOpacity></View>
+                <View style={{ marginLeft:5, }}>
+                  <Title>{item.userName}</Title>
+                  <Text style={{...FONTS.body5}}>Posted on {moment(item.createdOn).format("MMMM D")}</Text>
+                </View>
+                <View style={{flex: 1}}>
+                  <Text style={{textAlign: 'right'}} onPress={()=>{deleteDialog(item.shalomId)}}><MaterialIcons name="delete-forever" size={24} color="gray" /></Text>
+                </View>
+            </View>
             <View style={{flexDirection:'row',}}>
                 {/*  Text */}
                 <View style={{justifyContent:'space-around', flex:2/3, margin:10}}>
                     <Title>{item.shalom}</Title>
                 </View>
-                {/*  Image */}
-            </View>
-            <View style={{margin:10}}>
-                <Text>Shalom posted on : {item.createdOn}</Text>
             </View>
             {item.videoUrl && 
                 <View style={styles.container}>
@@ -90,19 +128,20 @@ export default function Shalom({ navigation }) {
             }
             {item.imageUrl &&
               item.imageUrl.split('|').map((img) => {
-                  <Image
-                    style={{width: '100%', height: 200,resizeMode : 'stretch' }}
-                    source={{uri: img}} 
-                />  
+                return(  
+                  <PinchGestureHandler
+                    onGestureEvent={onZoomEventFunction}
+                    onHandlerStateChange={onZoomStateChangeFunction}
+                  >
+                    <Animated.Image
+                      style={{width: {width}, height: 200,resizeMode : 'stretch', transform: [{scale: scale}] }}
+                      source={{uri:img}} 
+                      resizeMode={'contain'}
+                    /> 
+                </PinchGestureHandler>
+                )
               })
             }
-            {/* <View style={{flexDirection:'row', margin:10}}>
-                <Text style={styles.comment}>
-                    <View style={{paddingLeft:5}} ><AntDesign name="like2" size={24} color="black"  /></View>
-                    <View style={{paddingLeft:45}}><FontAwesome name="comments-o" size={24} color="black"  /></View>
-                    <View style={{paddingLeft:45}}><FontAwesome name="share-square" size={24} color="black"   /></View>
-                </Text>
-            </View> */}
         </Card>
         ); 
     };
@@ -120,6 +159,45 @@ export default function Shalom({ navigation }) {
     );
   };
 
+  //render the empty list component in case the data array for the FlatList is empty
+ const renderListEmptyComponent = () => (
+      <View style={styles.emptyListContainer}>
+          <Text style={styles.noShalomsFound}>
+              No Availabe Shalom's Yet!
+          </Text>
+        <Text style={styles.noShalomsFound}>
+            Please click on add shalom icon <MaterialCommunityIcons name="home-group-plus" size={35} color="purple"   /> above to post a new shalom.
+        </Text>
+      </View>
+  );
+
+  const deleteDialog = (shalomId) =>{
+    Alert.alert('Delete shalom?', 'Please confirm if you wish to proceed.', [
+      {
+        text: 'Cancel',
+        onPress: () => console.log('Cancel'),
+        style: 'cancel',
+      },
+      {text: 'OK', onPress: () => deleteEvent(shalomId)},
+    ],
+    {
+      cancelable: true,
+    },
+    );
+  };
+
+  const deleteEvent = (shalomId) => {
+    axios
+    .delete(`${REACT_APP_BASE_URL_API}/shalom/delete`, {
+        params: { id: shalomId, userId: userInfo.userId  },
+        headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+    })
+    .then((res) => {
+        setFilteredDataSource(res.data);
+    })
+    .catch((err) => console.log(err)); 
+  }
+
 
     return (
         <SafeAreaView style={{  flex: 1, backgroundColor: '#fff'  }}>
@@ -128,7 +206,7 @@ export default function Shalom({ navigation }) {
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
-                marginTop: 30,
+                marginTop: 10,
               }}>
               <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
                 Shalom's
@@ -146,7 +224,8 @@ export default function Shalom({ navigation }) {
       
               <FlatList
                 data={filteredDataSource}
-                keyExtractor={(e, index) => index.toString()}
+                keyExtractor={(item, index) => item.shalomId}
+                ListEmptyComponent={renderListEmptyComponent}
                 ItemSeparatorComponent={ItemSeparatorView}
                 renderItem={ItemView}
               />
@@ -212,5 +291,13 @@ const styles = StyleSheet.create({
       paddingHorizontal: 10,
       paddingVertical: 8,
       marginRight: 5
-    }
+    },
+    emptyListContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    noShalomsFound: {
+        fontSize: 16,
+        paddingVertical: 8,
+    },
   });
