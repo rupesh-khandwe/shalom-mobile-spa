@@ -11,7 +11,7 @@ import { AuthContext } from '../context/AuthContext';
 import {REACT_APP_BASE_URL_API} from '@env'
 import { PinchGestureHandler, State } from 'react-native-gesture-handler';
 import moment from "moment";
-
+import { ActivityIndicator } from 'react-native-paper';
 
 export default function Shalom({ navigation }) {
     const {userToken, userInfo}= useContext(AuthContext);
@@ -24,6 +24,7 @@ export default function Shalom({ navigation }) {
     const [status, setStatus] = React.useState({});
     var width = Dimensions.get("window");
     const scale = new Animated.Value(1);
+    const [loader, setLoader] = useState(true);
 
     const onZoomEventFunction = Animated.event(
       [{
@@ -50,6 +51,7 @@ export default function Shalom({ navigation }) {
         })
         .then((res) => {
           //console.log(res.data)
+            setLoader(false);
             setFilteredDataSource(res.data);
             setMasterDataSource(res.data);
         })
@@ -221,7 +223,7 @@ export default function Shalom({ navigation }) {
             </TouchableOpacity>
             </View>
             <View style={styles.container}>
-      
+             {loader && <ActivityIndicator animating={loader} color='purple' size='large' style={styles.spinnerStyle}/>}
               <FlatList
                 data={filteredDataSource}
                 keyExtractor={(item, index) => item.shalomId}
@@ -300,4 +302,10 @@ const styles = StyleSheet.create({
         fontSize: 16,
         paddingVertical: 8,
     },
+    spinnerStyle: {
+      flex: 1,
+      marginTop:200,
+      justifyContent: 'center',
+      alignItems:'center'
+    }
   });
