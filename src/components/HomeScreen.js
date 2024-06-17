@@ -15,6 +15,8 @@ import useAxios from './common/useAxios';
 import moment from "moment";
 import { shalom } from '../assets/images';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ActivityIndicator } from 'react-native-paper';
+import {Avatar} from 'react-native-paper';
 
 export default function HomeScreen({ navigation }) {
     const {userToken, userInfo, userId, userName}= useContext(AuthContext);
@@ -22,28 +24,42 @@ export default function HomeScreen({ navigation }) {
     const [search, setSearch] = useState('');
     const [filteredDataSource, setFilteredDataSource] = useState([]);
     const [masterDataSource, setMasterDataSource] = useState([]);
-    const video = React.useRef(null);
-    const [status, setStatus] = React.useState({});
-    const [likeFlag, setLikeFlag] = React.useState(true);
+    const video = useRef(null);
+    const [status, setStatus] = useState({});
+    const [likeFlag, setLikeFlag] = useState(true);
     const [localUserId, setLocalUserId]= useState('');
     const [localUserName, setLocalUserName]= useState('');
-    const [refreshing, setRefreshing] = React.useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+    const [profilePic, setProfilePic] = useState('');
     var width = Dimensions.get("window");
     const scale = new Animated.Value(1);
-    let api = useAxios()
+    let api = useAxios();
+    const [loader, setLoader] = useState(true);
 
     const onRefresh = React.useCallback(() => {
       setRefreshing(true);
       setTimeout(() => {
-        axios
-        .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${localUserId}`, {
-          headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
-        })
-        .then((res) => {
-            //console.log(res.data)
-            setFilteredDataSource(res.data);
-        })
-        .catch((err) => console.log(err));
+      AsyncStorage.getItem('userId').then((userId)=>{
+          console.log("On refresh Home screen ",userId);
+            axios
+            .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${userId}`, {
+              headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
+            })
+            .then((res) => {
+                //console.log(res.data)
+                setFilteredDataSource(res.data);
+            })
+            .catch((err) => console.log(err));
+            axios
+                .get(`${REACT_APP_BASE_URL_API}/shalom/profilePic?userId=${userId}`, {
+                  headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
+                })
+            .then((res) => {
+                //console.log(res.data);
+                setProfilePic(res.data)
+            })
+                .catch((err) => console.log(err));
+      })
         setRefreshing(false);
       }, 2000);
     }, []);
@@ -65,21 +81,33 @@ export default function HomeScreen({ navigation }) {
    const getAsyncData = async()=>{
         try {
             console.log("Home screen getAsyncData***")
-            const userId = await AsyncStorage.getItem('userId');
-            const userName = await AsyncStorage.getItem('userName');
-            setLocalUserId(userId);
-            setLocalUserName(userName);
-            axios
-            .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${userId}`, {
-              headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
+            AsyncStorage.getItem('userId').then((userId)=>{
+              setLocalUserId(userId);
+              axios
+              .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${userId}`, {
+                headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
+              })
+              .then((res) => {
+                  //console.log(res.data);
+                  setLoader(false);
+                  setFilteredDataSource(res.data);
+              })
+              .catch((err) => console.log(err));
+  
+              axios
+                  .get(`${REACT_APP_BASE_URL_API}/shalom/profilePic?userId=${userId}`, {
+                    headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
+                  })
+              .then((res) => {
+                  //console.log(res.data);
+                  setProfilePic(res.data)
+              })
+              .catch((err) => console.log(err));
             })
-            .then((res) => {
-                //console.log(res.data);
-                setFilteredDataSource(res.data);
-            })
-            .catch((err) => console.log(err));
-            console.log("Home screen getAsyncData user Id***",userId)
-            console.log("Home screen getAsyncData user Name***",userName)
+
+            AsyncStorage.getItem('userName').then((userName)=>{
+              setLocalUserName(userName);
+            });
         } catch (error) {
             console.log(`isLogged in error ${error}`);
         }
@@ -122,48 +150,42 @@ const onShare = async () => {
     }
   }
 
-  let getData = async(userInfo) =>{
-    let response = await api.get(`/shalom/shalomsWithLikeComment?userId=${localUserId}`)
-
-    if(response.status === 200){
-      console.log("Home Screen getData=",response.data)
-        setNotes(response.data)
-    }
-    
-}
-  
     useEffect(() => {
-  const unsubscribe = navigation.addListener('focus', () => {
-    // The screen is focused
-    // Call any action
-    console.log("Profile screen focused")
-      width = Dimensions.get("window");
-      console.log("Home Screen userToken=",userToken)
-      console.log("Home Screen userId=",userId)
-      console.log("Home Screen userName=",userName)
+      const unsubscribe = navigation.addListener('focus', () => {
+        // The screen is focused
+        // Call any action
+        console.log("Profile screen focused")
+          width = Dimensions.get("window");
+          getAsyncData();
 
-      //userInfo && getData(userInfo);
-       // getCredentials();
-       getAsyncData();
-
-        });
-        // Return the function to unsubscribe from the event so it gets removed on unmount
-        return unsubscribe;
-      }, [navigation]);
+            });
+            // Return the function to unsubscribe from the event so it gets removed on unmount
+            return unsubscribe;
+    }, [navigation]);
 
     const ItemView = ({ item }) => {
         return (
         <Card style={{marginTop:10, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}>
           <View style={{flexDirection:'row', flex:1}}>
                 {/*  Text */}
-                <View style={{ marginTop:5, }}><TouchableOpacity onPress={() => navigation.openDrawer()}>
-                    <FontAwesome name="user-circle" size={40} color="gray"  onPress={()=>{
-                  navigation.push('Profile',{
-                    "extUserId": item.userId,
-                    "extUserName": item.userName
-                  })
-                }  }   />
-                  </TouchableOpacity></View>
+                <View style={{ marginTop:5, }}>
+                     <TouchableOpacity onPress={() => {
+                        navigation.push('Profile',{"extUserId": item.userId,
+                                                   "extUserName": item.userName
+                        })
+                      }}>
+                    <Avatar.Image
+                      size={40}
+                      style={styles.avatar}
+                      source={{
+                        uri:
+                         item.profileImageUrl==""|| item.profileImageUrl==null
+                            ? 'data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAQMAAADCCAMAAAB6zFdcAAAAM1BMVEXFzeD////Byt7L0uPByd7Q1+b7/P3j5/Dv8fbe4+3r7vTFzuDL0+P19/rn6/LZ3urW2+lU+LHUAAAFLklEQVR4nO2dC3arMAxEQXwCcfjsf7XPkLw2tEka5AEziu8CeuKpJVmyLLIskUgkEkdFbsT+HXEQKbNqOPWN59y72D9nd/z/vWqbOv/mozSY9n116vIl1acYg1++G9v+5/rzvMs+QwL/7x/O9a/lT5zL2D9uF7wAzcP1e+pP2AQi4/mZAJ6TfQ3EtY9N4D+jdQ2k6F8K4OltayDFKyP4cghmI6PzVvDnHrDuEqR9UwFPY1IEufw+C72yh8LeIUFOaxSY6K0dFt2qTXDDVJCUi0IBT2vHHmTUSWAnPjgZtBJ4p2BjJ4RIYCSHlCpEAi+CAXMowiSwIIJoguKSE7k5rD8aPWDg3gnKg8EPLrGXEUL5tGC2ijr2OkIIjAlfEJdVBLMNcmprQEnAW09YUzT5C9aNADgbfMGaPQlOgrwj1cAlDZIGGVYD2ktIpAasiRNQgzxpkOektoCMjUkDT+zFaEFqwNqohtSgiL0YHcHlVAMaoCooM6SJo/qK7RGk+yBpkGVBl2w2NAi7aEwamNEAWE5MGiQNkgZJg6RB0sCEBoj+C3YN0j5IGkyks3LKnSegdaSkQdIgaUCtwcf7RJHy02OjVG3/+knvSlxJd+uK7Emb6eqOrQVBoJvgCtu16xYasF23QXsPWDVI+yArN9CALTyW6LhAqAE8NuaEcQH2fOMbtkNS+e7IC8MaYIuJM3TnRGwxcYbvPQ+0eDBD95TFIRv3rwyx17Qa/EGRbmqSAz1xvSP2ktaDvW3MOV9xoJ0i43tftEPgc4n4U1Ls9ajAbgTOkSCh02AW1GxJ4w2gCKwSIAspF0pLmIB5BNaXvhnwnMSXMn6DqrBzBoUrqKoiXdp8B6qqWMVeSADyzijhNyDeBiinyOwSUc95uAemYZ66sl0wLYGcFPmK6gsgCTRzZJxAlJe5TQFyQiA3hQxRVuSOChPBXrEW2trBf/RDts1sg+C8iXZA1oKwc9IY++dDCDojUKcKd5T67JF6ou4C9SHBhjO4os2hiWupv1Hm0JY00LpFKx5xQmsLpjRQdisy19R/om3MsaSB9rxsSgOdBKY00E5SZOxBeoa2kGJJA+01gyEN1JmjJQ20jxnYq+p3qPNGQxqo66qtHQ3UfUlJA0MalKJ+8NnyPfh/hFzOnbpFr6vP7JeNGaALw0BJMfzemT4+IhqSYq8hFESDInNj3ky4BPSXroieLPZDAuI7nuROsUS84iAvqKmT5gWxVxEIQgJuY8BsA+6NgPmyMXVkQHXuM+cMuBEIjO98Z4K78r5pOFtVpWiRn7Qd+aop5QU9AqJuMyYVRKoNJkT58OD/cuy1vYUX4LTBvLgrzVAcXwYpthPgSjcc2ybkgjoRvKQvjqrCVl7gEU11RJMQGTeYFvicbjyaCnsrMFG3R1JBsnZjR/hEhf4gJiHi0NOg1nCOL8OejvAJ3RBTBScy7O4GHlCfXCwV4hrBkvMlQmYpZXQjWLJ7sJTyEEawZNfMsowUC/+m38kxiNtgbDCMZgfHIMUuaVEA3cYnBnx5aAu8e9xMASkYFJjoNpo/K+7oVnBPg68xuKw8zoHoPXp0pCzHg0bDV0CTa3EsjmBJjUunsB9u35Ua08wkGecmuIEIEVIReoIFwTf38JHhEQgcxuqOlx4qCBFBCnY7uKH/uhV0SHRU9CNFUO1EB0A9TMKIIczoggP+QxpRUQ0cM+MMrmiezG7x0bmoKDYCZhLqgVjf8WvhfLhkfaPnFt/di8zq6XNbfIczMqsHDW3xTdrYPFvrP7kiUsVMV4ODAAAAAElFTkSuQmCC'
+                            : item.profileImageUrl,
+                      }}
+                    />
+                      </TouchableOpacity>
+                </View>
                 <View style={{ marginLeft:5, }}>
                   <Title>{item.userName}</Title>
                   <Text style={{...FONTS.body5}}>Posted on {moment(item.createdOn).format("MMMM D")}</Text>
@@ -186,10 +208,6 @@ const onShare = async () => {
                         isLooping
                         onPlaybackStatusUpdate={status => setStatus(() => status)}
                     />
-                    {/* <View style={styles.buttons}>
-                        <Button title="Play" onPress={() => video.current.playFromPositionAsync(10)} />
-                        {/* <Button title={status.isLooping ? "Set to not loop" : "Set to loop"} onPress={() => video.current.setIsLoopingAsync(!status.isLooping)} /> 
-                    </View> */}
                 </View>
             }
             {item.imageUrl ?
@@ -293,21 +311,23 @@ const onShare = async () => {
                 
               />
             </View>
-            <View  style={{textAlign: 'right', marginTop:10, marginLeft:120}}>
+            <View  style={{textAlign: 'right', marginTop:20, marginLeft:110}}>
             <TouchableOpacity style={{}} onPress={() => navigation.navigate('Follow-user')}>
               <Ionicons name="search-circle-sharp" size={35} color="purple" />
             </TouchableOpacity>
             
             </View>
-            <View  style={{textAlign: 'right', marginTop:10, marginRight:15}}>
-            {/* <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', paddingRight:130, paddingTop:5}}>
-              Hello {userName}
-            </Text> */}
+            <View  style={{textAlign: 'right', marginTop:20, marginRight:35}}>
               <TouchableOpacity onPress={() => navigation.openDrawer()}>
-                <ImageBackground
-                  source={require('../assets/images/user-profile.jpg')}
-                  style={{width: 35, height: 35}}
-                  imageStyle={{borderRadius: 25}}
+                <Avatar.Image
+                  size={40}
+                  style={styles.avatar}
+                  source={{
+                    uri:
+                     profilePic==""|| profilePic==null
+                        ? 'data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAQMAAADCCAMAAAB6zFdcAAAAM1BMVEXFzeD////Byt7L0uPByd7Q1+b7/P3j5/Dv8fbe4+3r7vTFzuDL0+P19/rn6/LZ3urW2+lU+LHUAAAFLklEQVR4nO2dC3arMAxEQXwCcfjsf7XPkLw2tEka5AEziu8CeuKpJVmyLLIskUgkEkdFbsT+HXEQKbNqOPWN59y72D9nd/z/vWqbOv/mozSY9n116vIl1acYg1++G9v+5/rzvMs+QwL/7x/O9a/lT5zL2D9uF7wAzcP1e+pP2AQi4/mZAJ6TfQ3EtY9N4D+jdQ2k6F8K4OltayDFKyP4cghmI6PzVvDnHrDuEqR9UwFPY1IEufw+C72yh8LeIUFOaxSY6K0dFt2qTXDDVJCUi0IBT2vHHmTUSWAnPjgZtBJ4p2BjJ4RIYCSHlCpEAi+CAXMowiSwIIJoguKSE7k5rD8aPWDg3gnKg8EPLrGXEUL5tGC2ijr2OkIIjAlfEJdVBLMNcmprQEnAW09YUzT5C9aNADgbfMGaPQlOgrwj1cAlDZIGGVYD2ktIpAasiRNQgzxpkOektoCMjUkDT+zFaEFqwNqohtSgiL0YHcHlVAMaoCooM6SJo/qK7RGk+yBpkGVBl2w2NAi7aEwamNEAWE5MGiQNkgZJg6RB0sCEBoj+C3YN0j5IGkyks3LKnSegdaSkQdIgaUCtwcf7RJHy02OjVG3/+knvSlxJd+uK7Emb6eqOrQVBoJvgCtu16xYasF23QXsPWDVI+yArN9CALTyW6LhAqAE8NuaEcQH2fOMbtkNS+e7IC8MaYIuJM3TnRGwxcYbvPQ+0eDBD95TFIRv3rwyx17Qa/EGRbmqSAz1xvSP2ktaDvW3MOV9xoJ0i43tftEPgc4n4U1Ls9ajAbgTOkSCh02AW1GxJ4w2gCKwSIAspF0pLmIB5BNaXvhnwnMSXMn6DqrBzBoUrqKoiXdp8B6qqWMVeSADyzijhNyDeBiinyOwSUc95uAemYZ66sl0wLYGcFPmK6gsgCTRzZJxAlJe5TQFyQiA3hQxRVuSOChPBXrEW2trBf/RDts1sg+C8iXZA1oKwc9IY++dDCDojUKcKd5T67JF6ou4C9SHBhjO4os2hiWupv1Hm0JY00LpFKx5xQmsLpjRQdisy19R/om3MsaSB9rxsSgOdBKY00E5SZOxBeoa2kGJJA+01gyEN1JmjJQ20jxnYq+p3qPNGQxqo66qtHQ3UfUlJA0MalKJ+8NnyPfh/hFzOnbpFr6vP7JeNGaALw0BJMfzemT4+IhqSYq8hFESDInNj3ky4BPSXroieLPZDAuI7nuROsUS84iAvqKmT5gWxVxEIQgJuY8BsA+6NgPmyMXVkQHXuM+cMuBEIjO98Z4K78r5pOFtVpWiRn7Qd+aop5QU9AqJuMyYVRKoNJkT58OD/cuy1vYUX4LTBvLgrzVAcXwYpthPgSjcc2ybkgjoRvKQvjqrCVl7gEU11RJMQGTeYFvicbjyaCnsrMFG3R1JBsnZjR/hEhf4gJiHi0NOg1nCOL8OejvAJ3RBTBScy7O4GHlCfXCwV4hrBkvMlQmYpZXQjWLJ7sJTyEEawZNfMsowUC/+m38kxiNtgbDCMZgfHIMUuaVEA3cYnBnx5aAu8e9xMASkYFJjoNpo/K+7oVnBPg68xuKw8zoHoPXp0pCzHg0bDV0CTa3EsjmBJjUunsB9u35Ua08wkGecmuIEIEVIReoIFwTf38JHhEQgcxuqOlx4qCBFBCnY7uKH/uhV0SHRU9CNFUO1EB0A9TMKIIczoggP+QxpRUQ0cM+MMrmiezG7x0bmoKDYCZhLqgVjf8WvhfLhkfaPnFt/di8zq6XNbfIczMqsHDW3xTdrYPFvrP7kiUsVMV4ODAAAAAElFTkSuQmCC'
+                        : profilePic,
+                  }}
                 />
               </TouchableOpacity>
             </View>
@@ -322,6 +342,7 @@ const onShare = async () => {
               backgroundColor: 'purple',
             }}
           />
+            {loader && <ActivityIndicator animating={loader} color='purple' size='large' style={styles.spinnerStyle}/>}
             <FlatList
               data={filteredDataSource}
               keyExtractor={(item, index) => item.shalomId}
@@ -377,6 +398,25 @@ const styles = StyleSheet.create({
       noShalomsFound: {
           fontSize: 16,
           paddingVertical: 8,
+      },
+      spinnerStyle: {
+          flex: 1,
+          marginTop:200,
+          justifyContent: 'center',
+          alignItems:'center'
+      },
+      avatar: {
+        borderRadius: 40,
+        marginTop: 5,
+        backgroundColor: 'white',
+        height: 40,
+        width: 40,
+        padding: 1,
+        borderColor: '#ccc',
+        borderWidth: 0,
+        elevation: 4,
+        justifyContent: 'center',
+        alignItems: 'center',
       },
   });
 

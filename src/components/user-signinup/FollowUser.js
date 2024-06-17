@@ -94,8 +94,13 @@ export default function FollowUser({ navigation, route }) {
         <Card style={{marginTop:10, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}
         >
           <View style={{flexDirection:'row', flex:1, margin:10}}>
-            <TouchableOpacity onPress={() => navigation.openDrawer()}>
-              <FontAwesome name="user-circle" size={30} color="gray"   />
+            <TouchableOpacity >
+              <FontAwesome name="user-circle" size={40} color="gray"  onPress={()=>{
+                                navigation.push('Profile',{
+                                  "extUserId": item.userId,
+                                  "extUserName": item.userName
+                                })
+                              }  }   />
                 {/* <Image
                 key={index}
                 source={item}
@@ -146,7 +151,7 @@ export default function FollowUser({ navigation, route }) {
           />
           <FlatList
             data={filteredDataSource}
-            keyExtractor={(e, index) => index.toString()}
+            keyExtractor={(item, index) => item.userId}
             ItemSeparatorComponent={ItemSeparatorView}
             renderItem={ItemView}
             extraData={filteredDataSource}

@@ -1,4 +1,4 @@
-package com.shalommobilespa
+package com.shalom
 
 import android.os.Build
 import android.os.Bundle

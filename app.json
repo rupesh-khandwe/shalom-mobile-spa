@@ -1,16 +1,16 @@
 {
-    "name": "shalommobilespa",
+    "name": "shalom",
     "slug": "shalom",
     "version": "1.1.0",
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "bundleIdentifier": "com.shalommobilespa",
+      "bundleIdentifier": "com.shalom",
       "buildNumber": "1.0.0"
     },
     "android": {
-      "package": "com.shalommobilespa",
+      "package": "com.shalom",
       "versionCode": 2
     },
     "extra": {
