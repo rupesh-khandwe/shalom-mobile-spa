@@ -85,7 +85,7 @@ export default function Shalom({ navigation }) {
         // Flat List Item
         <Card style={{margin:6, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}
         >
-          <View style={{flexDirection:'row', flex:1}}>
+          <View style={{flexDirection:'row', flex:1}} key={item.shalomId}>
                 {/*  Text */}
                 <View style={{ marginTop:5, }}><TouchableOpacity onPress={() => navigation.openDrawer()}>
                     <FontAwesome name="user-circle" size={40} color="gray"  onPress={()=>{
@@ -134,6 +134,7 @@ export default function Shalom({ navigation }) {
                   <PinchGestureHandler
                     onGestureEvent={onZoomEventFunction}
                     onHandlerStateChange={onZoomStateChangeFunction}
+                    key={item.shalomId}
                   >
                     <Animated.Image
                       style={{width: {width}, height: 200,resizeMode : 'stretch', transform: [{scale: scale}] }}

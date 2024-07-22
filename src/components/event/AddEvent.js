@@ -5,7 +5,9 @@ import {
   View,
   StyleSheet,
   Text,
-  Keyboard
+  Keyboard,
+  Image,
+  Dimensions
 } from 'react-native';
 
 import InputField from '../common/InputField';
@@ -22,6 +24,10 @@ import { Button } from 'react-native-elements';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import moment from "moment";
+import ImagePicker from 'react-native-image-crop-picker';
+import { imageUpload } from '../../assets/images';
+import Carousel from 'react-native-reanimated-carousel';
+import ImgToBase64 from 'react-native-image-base64';
 
 export default function AddEvent({route, navigation}) {
   const {userToken, userInfo}= useContext(AuthContext);
@@ -60,6 +66,11 @@ export default function AddEvent({route, navigation}) {
   const [errors, setErrors] = useState({});
   const [createdOn, setCreatedOn] = useState(null);
   const [updatedOn, setUpdatedOn] = useState(null);
+  const [imageUrl, setImageUrl] = useState([]);
+  const [images, setImages] = useState([]);
+  const width = Dimensions.get('window').width;
+  let imageList = [];
+  let imageDataList = [];
   const event_model = {
     'eventId': eventId,
     'userId': userId,
@@ -79,6 +90,7 @@ export default function AddEvent({route, navigation}) {
     'createdBy': createdBy,
     'createdOn': createdOn,
     'updatedOn': updatedOn,
+    'imageUrl': imageUrl
   }
 
   useEffect(() => {
@@ -145,6 +157,12 @@ export default function AddEvent({route, navigation}) {
       setCreatedOn(params.createdOn)
       setEventDate(params.eventDate)
       setEventTime(params.eventTime)
+      let eventImg = [];
+      params.eventImageUrl?.split('|').map((img) => {
+        eventImg.push(img)
+      });
+      console.log("images", eventImg);
+      setImages(eventImg);
       //Load state
       axios
         .get(`${REACT_APP_LOCATION_API}/StateList?countryId=${params.countryId}`, {
@@ -364,6 +382,62 @@ const handleSubmit = () =>{
     .catch((err) => console.log(err));
   }
 
+  const openImagePicker = () => {
+    ImagePicker.openPicker({
+      multiple: true,
+      maxFiles: 5,
+      width: 300,
+      height: 400,
+      cropping: true,
+      waitAnimationEnd: false,
+      forceJpg: true,
+      mediaType: 'photo',
+      includeBase64: true
+    })
+    .then(res => {
+      res.map(image=>{
+        imageList.push({
+            path: image.path,
+            data: image.data
+      });
+      console.log("image.path  = ",image.path)
+      getBase64(image)
+      //imageDataList.push(image.data);
+    })
+      setImages(imageList);
+      setImageUrl(imageDataList);
+    })
+    .catch(e => console.log('Error: ', e.message));
+  };
+  
+  const _renderItem = ({item, index}) =>{
+    return (
+        <View key={index}>
+            <Image
+                style={{
+                    width: '88%',
+                    borderRadius: 15,
+                    height: 200,
+                }}
+                source={{uri: item?item.path?item.path:item:""}
+                }
+              />
+        </View>
+    )
+  }
+
+  const getBase64 = (image)=> {
+    ImgToBase64.getBase64String(image.path)
+    .then(base64String => {
+        const imageData = `data:${image.mime};base64,${base64String}`
+        if("image/jpeg"===image.mime){
+          //console.log("image/jpeg imageData ==",imageData);
+          imageDataList.push(imageData);
+        } 
+    })
+    .catch(err => console.log(err));
+};
+
 
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
@@ -408,6 +482,36 @@ const handleSubmit = () =>{
           {
             errors.categoryId ? (<Text style={styles.errorText}>{errors.categoryId}</Text>):null
           }
+
+
+      <TouchableOpacity onPress={openImagePicker}>
+            <View style={styles.uploadContainer}>
+                <View style={styles.imageContainer}>
+                  <Image source={imageUpload} style={styles.image} />
+                  <InputField
+                    editable={false}
+                    label={'Click to upload event pictures'}
+                  />
+                
+                </View>
+              </View>
+          </TouchableOpacity>
+          {images?.length > 0 &&
+              <View style={{ flex: 1 }}>
+                    <Carousel
+                        loop
+                        width={width}
+                        height={width / 2}
+                        autoPlay={true}
+                        data={images}
+                        mode="parallax"
+                        parallaxScrollingScale={0.9}
+                        parallaxScrollingOffset={50}
+                        scrollAnimationDuration={1000}
+                        renderItem={_renderItem}
+                    />
+              </View>
+            } 
 
         <InputField
           label={'Event title'}
@@ -798,5 +902,37 @@ const styles = StyleSheet.create({
   errorText: {
     color: 'red',
     marginBottom: 20,
-  }
+  },
+  imageUploadContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: '#ecf0f1',
+    padding: 2,
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  uploadContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  imageContainer: {
+    width: '90%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row'
+  },
+  search: {
+    width: '80%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 20,
+  },
+  image: {
+    marginRight: 2,
+    marginLeft:25,
+    alignSelf: 'center',
+    height: 50, width: 50, resizeMode: 'contain'
+  },
 });

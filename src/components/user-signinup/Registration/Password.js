@@ -124,9 +124,13 @@ export default function RegisterScreen({route, navigation}) {
         /* navigation.navigate('Login', 
           "success"
         ); */
+        console.log("response = ",res)
         login(userName, password)
     })
-    .catch((err) => console.log(`Login error ${err}`)); 
+    .catch((err) => 
+      console.log(`Login error ${err}`),
+      navigation.replace('Register-Name', "fail")
+    ); 
   };
 
   return (

@@ -23,8 +23,11 @@ import SavePost from '../components/common/SavePost';
 import RegisterChurch from '../components/church/RegisterChurch';
 import AddEvent from '../components/event/AddEvent';
 import Profile from '../components/user-signinup/Profile';
+import EventDetails from '../components/event/EventDetails';
 import BackHistory from '../components/common/BackHistory';
 import FollowUser from '../components/user-signinup/FollowUser';
+import ChurchDetails from '../components/church/ChurchDetails';
+import DonateScreen from '../components/DonateScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -103,6 +106,18 @@ const ShalomStack = () => {
   );
 };
 
+const DonationStack = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Donate"
+        component={DonateScreen}
+        options={{headerShown: false}}
+      />
+    </Stack.Navigator>
+  );
+};
+
 const EventsStack = () => {
   return (
     <Stack.Navigator>
@@ -114,6 +129,15 @@ const EventsStack = () => {
       <Stack.Screen
         name="Add-event"
         component={AddEvent}
+        options={{
+          headerLeft: (props) => (
+            <BackHistory name="Event"></BackHistory>
+           ),
+        }}
+      />
+      <Stack.Screen
+        name="Event-details"
+        component={EventDetails}
         options={{
           headerLeft: (props) => (
             <BackHistory name="Event"></BackHistory>
@@ -135,6 +159,15 @@ const ChurchStack = () => {
       <Stack.Screen
         name="Register-church"
         component={RegisterChurch}
+        options={{
+          headerLeft: (props) => (
+            <BackHistory name="Church"></BackHistory>
+           ),
+        }}
+      />
+      <Stack.Screen
+        name="Church-details"
+        component={ChurchDetails}
         options={{
           headerLeft: (props) => (
             <BackHistory name="Church"></BackHistory>
@@ -189,7 +222,7 @@ const TabNavigator = ({}) => {
         name="Shaloms"
         component={ShalomStack}
         options={{
-          tabBarBadge: 3,
+          //tabBarBadge: 3,
           tabBarBadgeStyle: {backgroundColor: 'yellow'},
           tabBarIcon: ({color, size}) => (
             <MaterialCommunityIcons name="home-group-plus" size={24} color={color} />
@@ -205,12 +238,21 @@ const TabNavigator = ({}) => {
           ),
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="GoLive"
         component={GoLive}
         options={{
           tabBarIcon: ({color, size}) => (
-            <Ionicons name="videocam-outline" color={color} size={size} />
+            <FontAwesome5 name="donate" size={24} color={color} />
+          ),
+        }}
+      /> */}
+      <Tab.Screen
+        name="Donation"
+        component={DonationStack}
+        options={{
+          tabBarIcon: ({color, size}) => (
+            <FontAwesome5 name="donate" size={24} color={color} />
           ),
         }}
       />

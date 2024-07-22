@@ -34,7 +34,7 @@ const SavePost = (props) => {
         if(props.name === "comment"){
             if(shalom){
                 axios
-                .post(`${REACT_APP_BASE_URL_API}/save/comment`, 
+                .post(`${REACT_APP_BASE_URL_API}/shalom/save/comment`, 
                     commentData,
                     {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
                 })
@@ -55,7 +55,7 @@ const SavePost = (props) => {
         if(props.name === "shalom"){
             if(shalom){
                 axios
-                .post(`${REACT_APP_BASE_URL_API}/save`, 
+                .post(`${REACT_APP_BASE_URL_API}/shalom/save`, 
                     shalomData,
                     {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
                 })

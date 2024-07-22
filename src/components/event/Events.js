@@ -1,21 +1,20 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { SafeAreaView, Text, StyleSheet, View, FlatList, Alert } from 'react-native';
 import { ScrollView } from 'react-native-virtualized-view'
-import { Icon, SearchBar } from 'react-native-elements';
+import { SearchBar } from 'react-native-elements';
 import axios from 'axios';
 import { SIZES, COLORS } from "../../constants"; 
 import { FONTS } from "../../constants/theme";
 import { Card, Title, Paragraph } from 'react-native-paper'
 import { AuthContext } from '../../context/AuthContext';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { MaterialIcons, FontAwesome, Ionicons, Fontisto  } from '@expo/vector-icons'; 
+import { MaterialIcons, FontAwesome, Ionicons, Fontisto, Entypo  } from '@expo/vector-icons'; 
 import {REACT_APP_BASE_URL_API} from '@env'
-import { showMessage, hideMessage  } from "react-native-flash-message";
+import { showMessage  } from "react-native-flash-message";
 import moment from "moment";
-import { StackActions } from '@react-navigation/native';
 import { ActivityIndicator } from 'react-native-paper';
 import {Avatar} from 'react-native-paper';
+import {Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider} from 'react-native-popup-menu';
 
 export default function Events({ navigation, route }) {
     const {userToken, userInfo}= useContext(AuthContext);
@@ -23,14 +22,9 @@ export default function Events({ navigation, route }) {
     const [search, setSearch] = useState('');
     const [filteredDataSource, setFilteredDataSource] = useState([]);
     const [masterDataSource, setMasterDataSource] = useState([]);
-    const animation = useSharedValue(0);
     const register = route.params;
-    const animatedStyle = useAnimatedStyle(() => {
-      return {
-        width: animation.value==1?withTiming(300, {duration: 500}):withTiming(0, {duration:500})
-      }
-    });
     const [loader, setLoader] = useState(true);
+    const Divider = () => <View style={styles.divider} />;
 
     useEffect(() => {
         console.log("Events launched");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
@@ -48,7 +42,7 @@ export default function Events({ navigation, route }) {
 
       const searchFilterFunction = (text) => {
         // Check if searched text is not blank
-       setTimeout(function () {
+
         if (text) {
           // Inserted text is not blank
           // Filter the masterDataSource
@@ -66,7 +60,7 @@ export default function Events({ navigation, route }) {
           setFilteredDataSource(masterDataSource);
           setSearch(text);
         }
-       }, 3000)
+
       };
     
       const deleteDialog = (eventId) =>{
@@ -100,6 +94,7 @@ export default function Events({ navigation, route }) {
         return (
         // Flat List Item
         <Card style={{marginTop:10, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}
+         
         >
              <View style={{flexDirection:'row', flex:1}}>
                 {/*  Text */}
@@ -125,7 +120,43 @@ export default function Events({ navigation, route }) {
                   <Title>{item.createdBy}</Title>
                   <Text style={{...FONTS.body5}}>Posted on {moment(item.createdOn).format("MMMM D")}</Text>
                 </View>
+                {item.userId === userInfo.userId &&  <View style={{flex: 1, alignItems: 'flex-end'}}>
+                 
+                    <MenuProvider style={styles.menu_container}>
+                      <Menu>
+                        <MenuTrigger style={{borderColor:'purple'}}  customStyles={{
+                                  triggerWrapper: {
+                                    top: -28,
+                      },}}><Entypo name="dots-three-vertical" size={20} color="gray" /></MenuTrigger>
+                        <MenuOptions customStyles={{
+                                          optionsContainer: {
+                                            borderRadius: 10,
+                                            width: 50,
+                                            height: 90,
+                                            alignItems: 'center',
+                                            marginVertical: 15
+                                          },
+                          }}>
+                          <MenuOption onSelect={()=> navigation.replace('Add-event', {"eventId": item.eventId ,"userId": item.userId ,"categoryId": item.categoryId, 
+                    "title": item.title, "description": item.description, "eventDate": item.eventDate, "eventTime": item.eventTime, "addressLine1": item.addressLine1, 
+                    "addressLine2": item.addressLine2, "phone1": item.phone1, "phone2": item.phone2, "countryId": item.countryId, "countryName": item.userCountryName, 
+                    "regionId": item.regionId, "regionName": item.userRegionName, "stateId": item.stateId, "stateName": item.userStateName, "cityId": item.cityId, 
+                    "cityName": item.userCityName, "eventImageUrl": item.eventImageUrl,"churchWebsiteUrl": item.churchWebsiteUrl, "createdOn": item.createdOn} )}  ><FontAwesome name="edit" size={20} color="gray" /></MenuOption>
+                          <Divider></Divider>
+                          <MenuOption onSelect={()=>{deleteDialog(item.eventId)}}  ><MaterialIcons name="delete-forever" size={20} color="gray" /></MenuOption>
+                        </MenuOptions>
+                      </Menu>
+                    </MenuProvider>
+                  
+                </View>}
             </View>
+            <TouchableOpacity onPress={() => {navigation.navigate('Event-details', 
+                    {"eventId": item.eventId ,"userId": item.userId ,"categoryName": item.categoryName, "title": item.title, "description": item.description, 
+                     "eventDate": item.eventDate, "eventTime": item.eventTime, "addressLine1": item.addressLine1, "addressLine2": item.addressLine2, "phone1": item.phone1, 
+                     "phone2": item.phone2, "countryName": item.userCountryName, "regionName": item.userRegionName, "stateName": item.userStateName, "cityName": item.userCityName, 
+                     "createdOn": item.createdOn, "createdBy" :item.createdBy, "eventImageUrl": item.eventImageUrl, "profileImageUrl": item.profileImageUrl}
+            )}}>
+           
             <View style={{flexDirection:'row',}}>
                 {/*  Text */}
                 <View style={{justifyContent:'space-around', flex:2/3, margin:5}}>
@@ -140,12 +171,18 @@ export default function Events({ navigation, route }) {
                 <Text><FontAwesome name="phone-square" size={24} color="purple" />  {item.phone1}, {item.phone2} </Text>
                 <Text><Fontisto name="date" size={24} color="purple" />  {item.eventDate}  <Ionicons name="time-sharp" size={24} color="purple" /> {item.eventTime}</Text>
             </View>
-            {item.userId === userInfo.userId && 
+            </TouchableOpacity>
+            {/* {item.userId === userInfo.userId && 
               <View style={{flexDirection:'row', margin:10}}>
-                <Text style={{paddingLeft:5}} onPress={()=> navigation.replace('Add-event', {"eventId": item.eventId ,"userId": item.userId ,"categoryId": item.categoryId, "title": item.title, "description": item.description, "eventDate": item.eventDate, "eventTime": item.eventTime, "addressLine1": item.addressLine1, "addressLine2": item.addressLine2, "phone1": item.phone1, "phone2": item.phone2, "countryId": item.countryId, "countryName": item.userCountryName, "regionId": item.regionId, "regionName": item.userRegionName, "stateId": item.stateId, "stateName": item.userStateName, "cityId": item.cityId, "cityName": item.userCityName, "churchWebsiteUrl": item.churchWebsiteUrl, "createdOn": item.createdOn} )}><FontAwesome name="edit" size={24} color="gray" /></Text>
-                <Text style={{paddingLeft:35}} onPress={()=>{deleteDialog(item.eventId)}}><MaterialIcons name="delete-forever" size={24} color="gray" /></Text>
+                 <Text style={{paddingLeft:5}} onPress={()=> navigation.replace('Add-event', {"eventId": item.eventId ,"userId": item.userId ,"categoryId": item.categoryId, 
+                    "title": item.title, "description": item.description, "eventDate": item.eventDate, "eventTime": item.eventTime, "addressLine1": item.addressLine1, 
+                    "addressLine2": item.addressLine2, "phone1": item.phone1, "phone2": item.phone2, "countryId": item.countryId, "countryName": item.userCountryName, 
+                    "regionId": item.regionId, "regionName": item.userRegionName, "stateId": item.stateId, "stateName": item.userStateName, "cityId": item.cityId, 
+                    "cityName": item.userCityName, "eventImageUrl": item.eventImageUrl,"churchWebsiteUrl": item.churchWebsiteUrl, "createdOn": item.createdOn} )}><FontAwesome name="edit" size={24} color="gray" /></Text>
+                   <Text style={{paddingLeft:35}} onPress={()=>{deleteDialog(item.eventId)}}><MaterialIcons name="delete-forever" size={24} color="gray" /></Text>
               </View>
-            }
+            } */}
+              
         </Card>
         ); 
     };
@@ -177,12 +214,12 @@ const renderListEmptyComponent = () => (
 
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-        <ScrollView style={{padding: 20}}>
           <View
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
               marginTop: 10,
+              padding: 10
             }}>
             <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
               Event's
@@ -193,7 +230,7 @@ const renderListEmptyComponent = () => (
                 hideOnPress: true,
                 backgroundColor: "purple",
               }):""}</Text>
-             <View  style={{textAlign: 'right',  marginLeft:175}}>
+             <View  style={{textAlign: 'right',  marginLeft:195}}>
                   <TouchableOpacity style={{}} onPress={() => navigation.navigate('Follow-user')}>
                     <Ionicons name="search-circle-sharp" size={35} color="purple" />
                   </TouchableOpacity>
@@ -201,73 +238,33 @@ const renderListEmptyComponent = () => (
             <View  style={{textAlign: 'right',  marginRight:0}}>
                 <TouchableOpacity onPress={() => navigation.replace('Add-event')}>
                 <MaterialIcons name="post-add" size={35} color="purple" />
-              {/* <ImageBackground
-                source={require('../assets/images/user-profile.jpg')}
-                style={{width: 35, height: 35}}
-                imageStyle={{borderRadius: 25}}
-              /> */}
                 </TouchableOpacity>
              </View>
-            {/* <TouchableHighlight
-              activeOpacity={1}
-              underlayColor={"#ccd0d5"}
-              onPress={this._onFocus}
-              style={styles.search_icon_box}
-            >
-              <Icon name="search" size={22} color={"#000000"}></Icon>
-            </TouchableHighlight> */}
-            {/* <Animated.View
-              style={[
-                {
-                  width: 300,
-                  height: 50,
-                  backgroundColor: '#ccd0d5',
-                  borderRadius: 10,
-                  flexDirection: 'row',
-                  alignItems: 'center'
-
-                },
-                animatedStyle
-              ]}
-            >
-              <TextInput style={{width:'80%'}} placeholder='Search..'> </TextInput>
-              <TouchableHighlight onPress={()=>{
-                if(animation.value==1){
-                  animation.value=0;
-                } else {
-                  animation.value=1;
-                }
-              }}>
-                <Icon name="search" size={22} color={"#000000"}></Icon>
-              </TouchableHighlight>
-            </Animated.View> */}
-          
           </View>
-        <View style={styles.container}>
+          <SearchBar
+                    lightTheme
+                    round
+                    inputStyle={{backgroundColor: 'white'}}
+                    containerStyle={{backgroundColor: 'white'}}
+                    inputContainerStyle={{backgroundColor: 'white'}}
+                    searchIcon={{ size: 15 }}
+                    onChangeText={searchFilterFunction}
+                    onClear={(text) => searchFilterFunction('')}
+                    placeholder="Search events by location, user..."
+                    value={search}
+                  />         
 
-          <FlatList
-            data={filteredDataSource}
-            keyExtractor={(item, index) => item.eventId}
-            ListEmptyComponent={renderListEmptyComponent}
-            ItemSeparatorComponent={ItemSeparatorView}
-            renderItem={ItemView}
-            ListHeaderComponent={
-              <SearchBar
-                lightTheme
-                round
-                inputStyle={{backgroundColor: 'white'}}
-                containerStyle={{backgroundColor: 'white'}}
-                inputContainerStyle={{backgroundColor: 'white'}}
-                searchIcon={{ size: 20 }}
-                onChangeText={searchFilterFunction}
-                onClear={(text) => searchFilterFunction('')}
-                placeholder="Search events by location, user..."
-                value={search}
-              />
-            }
-          />
-           {loader && <ActivityIndicator animating={loader} color='purple' size='large' style={styles.spinnerStyle}/>}
-        </View>
+        <ScrollView style={{padding: 10}}>
+          <View style={styles.container}>
+            <FlatList
+              data={filteredDataSource}
+              keyExtractor={(item, index) => item.eventId}
+              ListEmptyComponent={renderListEmptyComponent}
+              ItemSeparatorComponent={ItemSeparatorView}
+              renderItem={ItemView}
+            />
+            {loader && <ActivityIndicator animating={loader} color='purple' size='large' style={styles.spinnerStyle}/>}
+          </View>
         </ScrollView>
       </SafeAreaView>
 
@@ -278,8 +275,22 @@ const styles = StyleSheet.create({
     container: {
       backgroundColor: 'white',
       marginTop: SIZES.small,
+      marginBottom: SIZES.medium,
       gap: SIZES.small,
       borderRadius: SIZES.medium,
+    },
+    menu_container: {
+      flex: 1,
+      backgroundColor: "#fff",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 25,
+      flexDirection: "column",
+      flexWrap: 'wrap',
+    },
+    divider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: "#7F8487",
     },
     header: {
       flexDirection: "row",

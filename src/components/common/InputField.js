@@ -15,8 +15,11 @@ export default function InputField({
   onFocus = () => {},
   error,
   secureTextFlag,
+  multiline,
+  numberofLines
 }) {
   const [inputIsFocused, setInputIsFocused] = useState(false);
+  const [inputMultiline, setInputMultiline] = useState(false);
   return (
     <View
       style={{
@@ -53,6 +56,8 @@ export default function InputField({
           autoCorrect={false}
           style={{flex: 1, paddingVertical: 0}}
           value={value}
+          multiline={multiline}
+          numberOfLines={numberofLines}
           onChangeText={onChangeText}
           onFocus={()=>{
             onFocus();

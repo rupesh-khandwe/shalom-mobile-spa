@@ -27,11 +27,12 @@ import { FontAwesome, AntDesign } from '@expo/vector-icons';
 import { LoginManager, GraphRequest, GraphRequestManager } from "react-native-fbsdk";
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import GetLocation from 'react-native-get-location'
+import { showMessage, hideMessage  } from "react-native-flash-message";
 
-export default function RegisterScreen({navigation}) {
+export default function RegisterScreen({route, navigation}) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [isFocus, setIsFocus] = useState(false);
+  const [isFocus, setIsFocus] = useState(true);
   const [formFields, setFormFields] = useState({
     email: '',
     firstName: ''
@@ -39,6 +40,7 @@ export default function RegisterScreen({navigation}) {
   const [errors, setErrors] = useState({});
   const [secureText, setSecureText] = useState(true);
   const [confirmSecureText, setConfirmSecureText] = useState(true);
+  let registerError = route.params;
 
   useEffect(() => {
 
@@ -77,6 +79,13 @@ export default function RegisterScreen({navigation}) {
 
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
+                 {isFocus && registerError==="fail"?showMessage({
+                message: "Provided e-mail address is already in-use, please use different e-mail.",
+                type: "info",
+                hideOnPress: true,
+                autoHide: false,
+                backgroundColor: "red",
+              }):""}
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{paddingHorizontal: 25}}>
@@ -89,17 +98,6 @@ export default function RegisterScreen({navigation}) {
           />
         </View>
 
-       {/*  <Text
-          style={{
-            fontFamily: 'Roboto-Medium',
-            fontSize: 28,
-            fontWeight: '500',
-            color: '#333',
-            marginBottom: 30,
-          }}>
-          What's your name?
-        </Text> */}
-
         <InputField
           label={'First Name*'}
           icon={
@@ -111,7 +109,10 @@ export default function RegisterScreen({navigation}) {
             />
           }
           //onChangeText={(text) => {handleOnChange(text, 'firstName')}}
-          onChangeText={(text) => {setFirstName(text)}}
+          onChangeText={(text) => {
+            setFirstName(text);
+            setIsFocus(false);
+          }}
           value={firstName}
           error={errors.firstName}
         />
@@ -126,7 +127,10 @@ export default function RegisterScreen({navigation}) {
               style={{marginRight: 5}}
             />
           }
-          onChangeText={(text) => {setLastName(text)}}
+          onChangeText={(text) => {
+            setLastName(text);
+            setIsFocus(false);
+          }}
           value={lastName}
           error={errors.lastName}
         />

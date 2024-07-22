@@ -3,15 +3,12 @@ import {
   SafeAreaView,
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   Image,
   StyleSheet,
-  Button
 } from 'react-native';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import Ionicons from 'react-native-vector-icons/Ionicons'; 
 
 import CustomButton from '../common/CustomButton';
 import InputField from '../common/InputField';

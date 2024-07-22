@@ -5,7 +5,10 @@ import {
   View,
   StyleSheet,
   Keyboard, 
-  Text
+  Text,
+  Image,
+  Dimensions,
+  TouchableOpacity
 } from 'react-native';
 
 import InputField from '../common/InputField';
@@ -17,13 +20,18 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 import {REACT_APP_BASE_URL_API, REACT_APP_LOCATION_API} from '@env'
-import { showMessage, hideMessage  } from "react-native-flash-message";
+import { showMessage  } from "react-native-flash-message";
 import moment from "moment";
+import ImagePicker from 'react-native-image-crop-picker';
+import { imageUpload } from '../../assets/images';
+import Carousel from 'react-native-reanimated-carousel';
+import ImgToBase64 from 'react-native-image-base64';
 
 export default function RegisterChurch({route,navigation}) {
   const {userToken, userInfo}= useContext(AuthContext);
   const [churchWebsiteUrl, setChurchWebsiteUrl] = useState('');
   const [churchName, setChurchName] = useState('');
+  const [aboutChurch, setAboutChurch] = useState('');
   const [phone1, setPhone1] = useState('');
   const [phone2, setPhone2] = useState('');
   const [addressline1, setAddressline1] = useState('');
@@ -50,11 +58,21 @@ export default function RegisterChurch({route,navigation}) {
   const [errors, setErrors] = useState({});
   const [createdOn, setCreatedOn] = useState(null);
   const [updatedOn, setUpdatedOn] = useState(null);
+  const [imageUrl, setImageUrl] = useState([]);
+  const [images, setImages] = useState([]);
+  const [languageEdit, setLanguageEdit] = useState(true);
+  const [languageId, setLanguageId] = useState(null);
+  const [languageName, setLanguageName] = useState(null);
+  const [languageData, setLanguageData] = useState([]);
+  const width = Dimensions.get('window').width;
+  let imageList = [];
+  let imageDataList = [];
   const church_model = {
     'churchId': churchId,
     'userId': userId,
     'churchName': churchName,
     'churchWebsiteUrl': churchWebsiteUrl,
+    'aboutChurch': aboutChurch,
     'phone1': phone1,
     'phone2': phone2,
     'addressline1': addressline1,
@@ -66,6 +84,8 @@ export default function RegisterChurch({route,navigation}) {
     'createdBy': createdBy,
     'createdOn': createdOn,
     'updatedOn': updatedOn,
+    'imageUrl': imageUrl,
+    'languageId': languageId
   }
 
 
@@ -80,6 +100,25 @@ export default function RegisterChurch({route,navigation}) {
     console.log("Current date ", moment(new Date()).format("YYYY-MM-DD'T'HH:mm:ss.SSS"));
     console.log("Current date1 ", moment.utc().toISOString())
     console.log("Registration launched"+REACT_APP_LOCATION_API);
+
+    axios
+    .get(`${REACT_APP_BASE_URL_API}/church/language`, {
+        headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+    })
+    .then((res) => {
+      var count = Object.keys(res.data).length;
+      let languageArray = [];
+      for (var i = 0; i < count; i++) {
+        languageArray.push({
+          value: res.data[i].languageId,
+          label: res.data[i].languageName,
+        });
+      }
+      setLanguageData(languageArray);
+    })
+    .catch((err) => console.log(err));
+
+
     axios
     .get(`${REACT_APP_LOCATION_API}/CountryList`, {
       headers: { 'content-type': 'application/json'},
@@ -104,6 +143,7 @@ export default function RegisterChurch({route,navigation}) {
       setRegionEdit(false);
       setChurchId(params.churchId)
       setChurchWebsiteUrl(params.churchWebsiteUrl);
+      setAboutChurch(params.aboutChurch)
       setChurchName(params.churchName);
       setPhone1(params.phone1);
       setPhone2(params.phone2);
@@ -118,6 +158,15 @@ export default function RegisterChurch({route,navigation}) {
       setRegionId(params.regionId);
       setRegionName(params.regionName)
       setCreatedOn(params.createdOn)
+      setLanguageId(params.languageId)
+      setLanguageName(params.languageName)
+      setLanguageEdit(false)
+      let churchImg = [];
+      params.churchImageUrl?.split('|').map((img) => {
+        churchImg.push(img)
+      });
+      console.log("images", churchImg);
+      setImages(churchImg);
       //Load state
       axios
         .get(`${REACT_APP_LOCATION_API}/StateList?countryId=${params.countryId}`, {
@@ -305,6 +354,61 @@ const handleSubmit = () =>{
     .catch((err) => console.log(err));
   }
 
+  const openImagePicker = () => {
+    ImagePicker.openPicker({
+      multiple: true,
+      maxFiles: 5,
+      width: 300,
+      height: 400,
+      cropping: true,
+      waitAnimationEnd: false,
+      forceJpg: true,
+      mediaType: 'photo',
+      includeBase64: true
+    })
+    .then(res => {
+      res.map(image=>{
+        imageList.push({
+            path: image.path,
+            data: image.data
+      });
+      console.log("image.path  = ",image.path)
+      getBase64(image)
+      //imageDataList.push(image.data);
+    })
+      setImages(imageList);
+      setImageUrl(imageDataList);
+    })
+    .catch(e => console.log('Error: ', e.message));
+  };
+  
+  const _renderItem = ({item, index}) =>{
+    return (
+        <View key={index}>
+            <Image
+                style={{
+                    width: '88%',
+                    borderRadius: 15,
+                    height: 200,
+                }}
+                source={{uri: item?item.path?item.path:item:""}
+                }
+              />
+        </View>
+    )
+  }
+
+  const getBase64 = (image)=> {
+    ImgToBase64.getBase64String(image.path)
+    .then(base64String => {
+        const imageData = `data:${image.mime};base64,${base64String}`
+        if("image/jpeg"===image.mime){
+         // console.log("image/jpeg imageData ==",imageData);
+          imageDataList.push(imageData);
+        } 
+    })
+    .catch(err => console.log(err));
+};
 
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
@@ -328,6 +432,111 @@ const handleSubmit = () =>{
           onChangeText={(text) => {setChurchName(text)}}
           value={churchName}
           error={errors.churchName}
+        />
+
+<TouchableOpacity onPress={openImagePicker}>
+          <View style={styles.uploadContainer}>
+              <View style={styles.imageContainer}>
+                <Image source={imageUpload} style={styles.image} />
+                <InputField
+                  editable={false}
+                  label={'Click to upload church pictures'}
+                />
+              
+              </View>
+            </View>
+        </TouchableOpacity>
+        {images?.length > 0 &&
+            <View style={{ flex: 1 }}>
+                  <Carousel
+                      loop
+                      width={width}
+                      height={width / 2}
+                      autoPlay={true}
+                      data={images}
+                      mode="parallax"
+                      parallaxScrollingScale={0.9}
+                      parallaxScrollingOffset={50}
+                      scrollAnimationDuration={1000}
+                      renderItem={_renderItem}
+                  />
+            </View>
+          } 
+
+    {!languageEdit && 
+        <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+        >
+        <InputField
+          label={'State'}
+          editable={false}
+          icon={
+            <FontAwesome5 name="city" size={20} color="black" style={{margin: 5}}/>
+          }
+          onChangeText={(text) => {setLanguageName(text)}}
+          value={" "+languageName}
+          error={errors.languageName}
+          fieldButtonLabel={<FontAwesome name="pencil" size={20} color="purple" />}
+          fieldButtonFunction={()=>setLanguageEdit(true)}
+        />
+
+      </View>
+      }
+      
+      {languageEdit &&
+
+        <Dropdown
+          style={[styles.dropdownRegion, isFocus && {borderColor: 'black'}]}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          inputSearchStyle={styles.inputSearchStyle}
+          iconStyle={styles.iconStyle}
+          data={languageData}
+          search
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder={!isFocus ? 'Select church language*' : '...'}
+          searchPlaceholder="Search..."
+          value={languageId}
+          onFocus={() => setIsFocus(true)}
+          onBlur={() => setIsFocus(false)}
+          onChange={item => {
+            setLanguageId(item.value);
+            //setCategoryName(item.label);
+            setIsFocus(false);
+          }}
+          renderLeftIcon={() => (
+            <AntDesign
+              style={styles.icon}
+              color={isFocus ? '#AD40AF' : 'black'}
+              name="Safety"
+              size={20}
+            />
+          )}
+          error={errors.languageId}
+          />}
+          {
+            errors.languageId ? (<Text style={styles.errorText}>{errors.languageId}</Text>):null
+          }
+
+        <InputField
+          label={'About church...'}
+          icon={
+            <MaterialCommunityIcons
+              name="details"
+              size={20}
+              color="#666"
+              style={{marginRight: 5}}
+            />
+          }
+          inputMultiline={true}
+          numberofLines={4}
+          onChangeText={(text) => {setAboutChurch(text)}}
+          value={aboutChurch}
         />
 
 
@@ -668,5 +877,37 @@ const styles = StyleSheet.create({
   errorText: {
     color: 'red',
     marginBottom: 20,
-  }
+  },
+  imageUploadContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: '#ecf0f1',
+    padding: 2,
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  uploadContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  imageContainer: {
+    width: '90%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row'
+  },
+  search: {
+    width: '80%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 20,
+  },
+  image: {
+    marginRight: 2,
+    marginLeft:25,
+    alignSelf: 'center',
+    height: 50, width: 50, resizeMode: 'contain'
+  },
 });

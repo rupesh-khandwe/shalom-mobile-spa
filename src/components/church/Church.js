@@ -7,13 +7,14 @@ import { SIZES, COLORS } from "../../constants";
 import { FONTS } from "../../constants/theme";
 import { Card, Title, Paragraph } from 'react-native-paper'
 import { AuthContext } from '../../context/AuthContext';
-import { FontAwesome, MaterialIcons, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'; 
+import { FontAwesome, MaterialIcons, Entypo, MaterialCommunityIcons } from '@expo/vector-icons'; 
 import {REACT_APP_BASE_URL_API} from '@env'
 import { showMessage, hideMessage  } from "react-native-flash-message";
 import moment from "moment";
 import useAxios from '../common/useAxios';
 import { ActivityIndicator } from 'react-native-paper';
 import {Avatar} from 'react-native-paper';
+import {Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider} from 'react-native-popup-menu';
 
 export default function Church({ navigation, route }) {
 
@@ -26,20 +27,10 @@ export default function Church({ navigation, route }) {
     const register = route.params;
     let api = useAxios()
     const [loader, setLoader] = useState(true);
+    const Divider = () => <View style={styles.divider} />;
 
     useEffect(() => {
         console.log(REACT_APP_BASE_URL_API,"Church rendered");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
-        //getCredentials();
-        //console.log("Church new cred=== ",JSON.parse(getCredentials()))
-        //getFilteredDataSource();
-
-       /*  let response = async()=>{
-          console.log("Inside ===");
-          await api.get('/church/searchByKey?key=Bengaluru')
-        if(response.status === 200){
-          setFilteredDataSource(response.data);
-        }
-      } */
 
         axios
         .get(`${REACT_APP_BASE_URL_API}/church/searchByKey?key=Bengaluru`, {
@@ -64,7 +55,7 @@ export default function Church({ navigation, route }) {
 
       const searchFilterFunction = (text) => {
         // Check if searched text is not blank
-        setTimeout(function () {
+
           if (text) {
             // Inserted text is not blank
             // Filter the masterDataSource
@@ -81,9 +72,7 @@ export default function Church({ navigation, route }) {
             // Update FilteredDataSource with masterDataSource
             setFilteredDataSource(masterDataSource);
             setSearch(text);
-          }
-        }, 5000)
-        
+          } 
       };
 
       const deleteDialog = (churchId) =>{
@@ -143,7 +132,43 @@ export default function Church({ navigation, route }) {
                   <Title>{item.createdBy}</Title>
                   <Text style={{...FONTS.body5}}>Posted on {moment(item.createdOn).format("MMMM D")}</Text>
                 </View>
+                {item.userId === userInfo.userId &&  <View style={{flex: 1, alignItems: 'flex-end'}}>
+                 
+                    <MenuProvider style={styles.menu_container}>
+                      <Menu>
+                        <MenuTrigger style={{borderColor:'purple'}}  customStyles={{
+                                  triggerWrapper: {
+                                    top: -28,
+                      },}}><Entypo name="dots-three-vertical" size={20} color="gray" /></MenuTrigger>
+                        <MenuOptions customStyles={{
+                                          optionsContainer: {
+                                            borderRadius: 10,
+                                            width: 50,
+                                            height: 90,
+                                            alignItems: 'center',
+                                            marginVertical: 15
+                                          },
+                          }}>
+                          <MenuOption onSelect={()=> navigation.replace('Register-church', 
+                {"churchId": item.churchId ,"userId": item.userId ,"churchName": item.churchName, "addressline1": item.addressLine1, "addressline2": item.addressLine2, 
+                "phone1": item.phone1, "phone2": item.phone2, "countryId": item.countryId, "countryName": item.userCountryName, "regionId": item.regionId, 
+                "regionName": item.userRegionName, "stateId": item.stateId, "stateName": item.userStateName, "cityId": item.cityId, "cityName": item.userCityName, 
+                "churchWebsiteUrl": item.churchWebsiteUrl, "createdOn": item.createdOn, "languageId": item.languageId, "languageName": item.languageName,
+                "churchImageUrl": item.churchImageUrl, "aboutChurch":item.aboutChurch} )}  ><FontAwesome name="edit" size={20} color="gray" /></MenuOption>
+                          <Divider></Divider>
+                          <MenuOption onSelect={()=>{deleteDialog(item.churchId)}}  ><MaterialIcons name="delete-forever" size={20} color="gray" /></MenuOption>
+                        </MenuOptions>
+                      </Menu>
+                    </MenuProvider>
+                  
+                </View>}
             </View>
+            <TouchableOpacity onPress={() => {navigation.navigate('Church-details', 
+                    {"userId": item.userId ,"churchName": item.churchName, "churchWebsiteUrl": item.churchWebsiteUrl, "createdOn": item.createdOn, "createdBy" :item.createdBy,
+                     "phone1": item.phone1, "phone2": item.phone2, "addressLine1": item.addressLine1, "addressLine2": item.addressLine2,  
+                     "countryName": item.userCountryName, "regionName": item.userRegionName, "stateName": item.userStateName, "cityName": item.userCityName,  
+                     "churchImageUrl": item.churchImageUrl, "profileImageUrl": item.profileImageUrl, "languageName": item.languageName, "aboutChurch":item.aboutChurch}
+            )}}>
             <View style={{flexDirection:'row',}}>
                 {/*  Text */}
                 <View style={{justifyContent:'space-around', flex:2/3, margin:10}}>
@@ -151,14 +176,23 @@ export default function Church({ navigation, route }) {
                 </View>
             </View>
             <View style={{margin:10}}>
+              <Text><Entypo name="language" size={24} color="purple" />  {item.languageName}</Text>
+              <Paragraph> <MaterialCommunityIcons name="details" size={20} color="purple" style={{marginRight: 5}}/>  {item.aboutChurch}</Paragraph>
+               
                 <Paragraph><FontAwesome name="address-card" size={21} color="purple" /> {item.addressLine1}, {item.addressLine2}, {item.userRegionName}, {item.userCityName}, {item.userStateName}, {item.userCountryName}</Paragraph>
 {/*                 <Text><Ionicons name="time-sharp" size={24} color="purple" /> {item.churchTime}</Text> */}
                 <Text><FontAwesome name="phone-square" size={24} color="purple" /> {item.phone1}, {item.phone2}</Text>
             </View>
-            {item.userId === userInfo.userId && <View style={{flexDirection:'row', margin:10}}>
-            <Text style={{paddingLeft:5}} onPress={()=> navigation.replace('Register-church', {"churchId": item.churchId ,"userId": item.userId ,"churchName": item.churchName, "addressline1": item.addressLine1, "addressline2": item.addressLine2, "phone1": item.phone1, "phone2": item.phone2, "countryId": item.countryId, "countryName": item.userCountryName, "regionId": item.regionId, "regionName": item.userRegionName, "stateId": item.stateId, "stateName": item.userStateName, "cityId": item.cityId, "cityName": item.userCityName, "churchWebsiteUrl": item.churchWebsiteUrl, "createdOn": item.createdOn} )}><FontAwesome name="edit" size={24} color="gray" /></Text>
+            </TouchableOpacity>
+            {/* {item.userId === userInfo.userId && <View style={{flexDirection:'row', margin:10}}>
+            <Text style={{paddingLeft:5}} onPress={()=> navigation.replace('Register-church', 
+                {"churchId": item.churchId ,"userId": item.userId ,"churchName": item.churchName, "addressline1": item.addressLine1, "addressline2": item.addressLine2, 
+                "phone1": item.phone1, "phone2": item.phone2, "countryId": item.countryId, "countryName": item.userCountryName, "regionId": item.regionId, 
+                "regionName": item.userRegionName, "stateId": item.stateId, "stateName": item.userStateName, "cityId": item.cityId, "cityName": item.userCityName, 
+                "churchWebsiteUrl": item.churchWebsiteUrl, "createdOn": item.createdOn, "languageId": item.languageId, "languageName": item.languageName,
+                "churchImageUrl": item.churchImageUrl, "aboutChurch":item.aboutChurch} )}><FontAwesome name="edit" size={24} color="gray" /></Text>
             <Text style={{paddingLeft:35}} onPress={()=>{deleteDialog(item.churchId)}}><MaterialIcons name="delete-forever" size={24} color="gray" /></Text>
-            </View>}
+            </View>} */}
         </Card>
         ); 
     };
@@ -179,10 +213,7 @@ export default function Church({ navigation, route }) {
 
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <ScrollView style={{padding: 20}}
-        
-      >
-        {/* refreshControl={
+          {/* refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         } */}
         <View
@@ -190,6 +221,7 @@ export default function Church({ navigation, route }) {
             flexDirection: 'row',
             justifyContent: 'space-between',
             marginTop: 10,
+            padding: 10
           }}>
           <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
             Church
@@ -204,6 +236,19 @@ export default function Church({ navigation, route }) {
             <MaterialIcons name="post-add" size={35} color="purple" />
           </TouchableOpacity>
         </View>
+        <SearchBar
+                lightTheme
+                round
+                inputStyle={{backgroundColor: 'white'}}
+                containerStyle={{backgroundColor: 'white'}}
+                inputContainerStyle={{backgroundColor: 'white'}}
+                searchIcon={{ size: 20 }}
+                onChangeText={query=> searchFilterFunction(query)}
+                onClear={(text) => searchFilterFunction('')}
+                placeholder="Search by Church, address and user..."
+                value={search}
+              />
+      <ScrollView style={{padding: 10}}>
         <View style={styles.container}>
           <FlatList
             data={filteredDataSource}
@@ -211,20 +256,6 @@ export default function Church({ navigation, route }) {
             ItemSeparatorComponent={ItemSeparatorView}
             renderItem={ItemView}
             extraData={filteredDataSource}
-            ListHeaderComponent={
-              <SearchBar
-                lightTheme
-                round
-                inputStyle={{backgroundColor: 'white'}}
-                containerStyle={{backgroundColor: 'white'}}
-                inputContainerStyle={{backgroundColor: 'white'}}
-                searchIcon={{ size: 20 }}
-                onChangeText={searchFilterFunction}
-                onClear={(text) => searchFilterFunction('')}
-                placeholder="Search by Church, address and user..."
-                value={search}
-              />
-            }
           />
            {loader && <ActivityIndicator animating={loader} color='purple' size='large' style={styles.spinnerStyle}/>}
         </View>
@@ -239,6 +270,19 @@ const styles = StyleSheet.create({
       marginTop: SIZES.small,
       gap: SIZES.small,
       borderRadius: SIZES.medium,
+    },
+    menu_container: {
+      flex: 1,
+      backgroundColor: "#fff",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 25,
+      flexDirection: "column",
+      flexWrap: 'wrap',
+    },
+    divider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: "#7F8487",
     },
     header: {
       flexDirection: "row",
