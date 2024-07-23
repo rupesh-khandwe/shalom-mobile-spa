@@ -12,11 +12,10 @@ import {
   Pressable
 } from 'react-native';
 
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { FontAwesome5 } from '@expo/vector-icons'; 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import axios from 'axios';
-import {REACT_APP_LOCATION_API} from '@env'
 import { showMessage  } from "react-native-flash-message";
 import InputField from './common/InputField';
 import PhonePePaymentSDK from 'react-native-phonepe-pg';
@@ -145,7 +144,7 @@ export default function DonateScreen() {
         showsVerticalScrollIndicator={false}
         style={{paddingHorizontal: 25}}>
         <View style={{alignItems: 'center', marginTop: 30, marginBottom: 20}}>
-          <MaterialIcons name="event" size={50} color="purple" />
+          <FontAwesome5 name="donate" size={50} color="purple" />
         </View>
         {phonepeResCode && <View style={styles.centeredView}>
             <View style={styles.modalView}>
