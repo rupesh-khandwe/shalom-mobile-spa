@@ -26,7 +26,7 @@ import { FontAwesome } from '@expo/vector-icons';
 const LoginScreen = ({navigation, route}) => {
   const [userName, setUserName] = useState('');
   const [userPassword, setUserPassword] = useState('');
-  const {login, userToken}= useContext(AuthContext);
+  const {login, userToken, googleLogin}= useContext(AuthContext);
   const register = route.params;
   const [errors, setErrors] = useState({});
   const [secureText, setSecureText] = useState(true);
@@ -38,7 +38,14 @@ const LoginScreen = ({navigation, route}) => {
     androidClientId: "11084367898-ksku5j6u19pbkpbhk7bg5tk8lot9jbug.apps.googleusercontent.com",
     iosClientId: "11084367898-dqa37c1dkj9m41slg6l69b9gejo97k3h.apps.googleusercontent.com"
   })*/
-
+    useEffect(() => {
+        GoogleSignin.configure({
+            webClientId:
+                '722628552321-t1hluouucdv63re40q76ja4eknp92ipj.apps.googleusercontent.com',
+            offlineAccess: true,
+            forceCodeForRefreshToken: true,
+        });
+    });
   const validateForm = () =>{
     let errors = {}
     const requireFieldMsg = " Required field*"
@@ -65,19 +72,32 @@ const LoginScreen = ({navigation, route}) => {
     setSecureText(!secureText)
   }
 
-/*
-useEffect(()=>{
+    const signIn = async () => {
+        try {
+            await GoogleSignin.hasPlayServices();
+            const userInfo = await GoogleSignin.signIn();
 
-  handleSignIn();
+            console.log(userInfo);
+            googleLogin(userInfo);
+        } catch (error) {
+            if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+                console.log('User cancelled the login flow');
+            } else if (error.code === statusCodes.IN_PROGRESS) {
+                console.log('Signing in');
+            } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+                console.log('Play services not available');
+            } else {
+                console.log('Some other error happened');
+                console.log(error.message);
+                console.log(error.code);
+            }
+        }
+    }
 
-  GoogleSignin.configure({
-    scopes: ['https://www.googleapis.com/auth/drive'],
-    offlineAccess: false,
-    webClientId: 'YOUR WEB CLIENTID, NOT YOUR ANDROID CLIENTID FROM GOOGLE CONSOLE',
-
-})
-}, []);
-*/
+    const signOut = async () => {
+        GoogleSignin.signOut();
+        console.log("User signed out");
+    }
 
 //androidClientId: '11084367898-ksku5j6u19pbkpbhk7bg5tk8lot9jbug.apps.googleusercontent.com',
 // iOS 11084367898-dqa37c1dkj9m41slg6l69b9gejo97k3h.apps.googleusercontent.com
@@ -156,6 +176,19 @@ useEffect(()=>{
             <Text style={{color: '#AD40AF', fontWeight: '700'}}> Register</Text>
           </TouchableOpacity>
         </View>
+
+      <View style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          marginBottom: 30,
+      }}>
+          <GoogleSigninButton
+              style={{width: 192, height: 48, marginTop: 30}}
+              size={GoogleSigninButton.Size.Wide}
+              color={GoogleSigninButton.Color.Dark}
+              onPress={signIn}
+          />
+      </View>
 
         <View
           style={{

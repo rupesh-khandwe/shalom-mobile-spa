@@ -4,10 +4,12 @@ import axios from 'axios';
 import { REACT_APP_USER_PROFILE } from '@env'
 import jwt_decode from "jwt-decode";
 import dayjs from 'dayjs'
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 export const AuthContext = createContext();
 export const AuthProvider = ({children}) => {
     const [isLoading, setIsLoading] = useState(false);
+    const [isGoogleSignin, setIsGoogleSignin] = useState(false);
     const [userToken, setUserToken] = useState(null);
     const [userInfo, setUserInfo] = useState({});
     const [userId, setUserId] = useState(null);
@@ -16,6 +18,25 @@ export const AuthProvider = ({children}) => {
     const [shalomId , setShalomId] = useState(null);
     const headers = {
       'Content-Type': 'application/json',
+    }
+    const googleLogin = (userInfo) => {
+        setIsGoogleSignin(true);
+
+        let postUserParam = userInfo.user;
+        postUserParam.firstName = postUserParam.givenName;
+        postUserParam.lastName = postUserParam.familyName;
+        postUserParam.userName = postUserParam.email;
+        axios
+            .post(`${REACT_APP_USER_PROFILE}/register`, postUserParam)
+            .then((res) => {
+                let resUserInfo = res.data;
+                setUserToken(userInfo.idToken);
+                setUserInfo(resUserInfo);
+                setUserId(resUserInfo.userId);
+                setUserName(userInfo.email);
+                setCredentials(resUserInfo, userInfo.idToken);
+            })
+            .catch((err) => console.log(`Login error ${err}`));
     }
     const login = (username, password) => {
         setIsLoading(true);
@@ -31,7 +52,7 @@ export const AuthProvider = ({children}) => {
             console.log("AuthContext login userInfo",userInfo);
             console.log("AuthContext login serInfo.userId",userInfo.userId);
             console.log("AuthContext login serInfo.userName",userInfo.userName);
-            setCredentials(userInfo)
+            setCredentials(userInfo, null)
             setUserToken(userInfo.accessToken);
             setUserInfo(userInfo);
             setUserId(userInfo.userId);
@@ -47,6 +68,10 @@ export const AuthProvider = ({children}) => {
 
      const logout = () => {
      console.log("Logout action called")
+         if (isGoogleSignin) {
+            GoogleSignin.revokeAccess();
+            GoogleSignin.signOut();
+         }
         setIsLoading(true);
         setUserToken(null);
         AsyncStorage.removeItem('userInfo');
@@ -148,14 +173,15 @@ export const AuthProvider = ({children}) => {
        // }
       }
       
-     const setCredentials = async keys => {
+     const setCredentials = async (keys, idToken) => {
         try {
           console.log("set credentials=", JSON.stringify(keys))
           console.log("userId=", keys.userId.toString())
-          console.log("userName=", keys.userName)
-          await AsyncStorage.setItem('userToken', keys.accessToken)
+          console.log("userName or email=", keys.userName || keys.email)
+          console.log("idToken=", keys.accessToken || idToken)
+          await AsyncStorage.setItem('userToken', keys.accessToken || idToken)
           await AsyncStorage.setItem('userId', keys.userId.toString())
-          await AsyncStorage.setItem('userName', keys.userName)
+          await AsyncStorage.setItem('userName', keys.userName || keys.email)
           await AsyncStorage.setItem('userInfo', JSON.stringify(keys))
         } catch (e) {
           console.log(e)
@@ -183,7 +209,7 @@ export const AuthProvider = ({children}) => {
 
 
     return (
-        <AuthContext.Provider value={{login, logout, isLoading, userToken, userInfo, userId, userName,editorData, shalom, shalomId, getCredentials}}>
+        <AuthContext.Provider value={{login, logout, isLoading, userToken, userInfo, userId, userName,editorData, shalom, shalomId, getCredentials, googleLogin}}>
             {children}
         </AuthContext.Provider>
     );

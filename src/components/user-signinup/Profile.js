@@ -416,7 +416,7 @@ const Profile = ({route, navigation}) => {
                     : image,
               }}
             />
-          
+
         </View>}
         <Text
           style={{
