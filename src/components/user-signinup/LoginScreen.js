@@ -42,6 +42,8 @@ const LoginScreen = ({navigation, route}) => {
         GoogleSignin.configure({
             webClientId:
                 '722628552321-t1hluouucdv63re40q76ja4eknp92ipj.apps.googleusercontent.com',
+            androidClientId:
+                '722628552321-t1hluouucdv63re40q76ja4eknp92ipj.apps.googleusercontent.com',
             offlineAccess: true,
             forceCodeForRefreshToken: true,
         });

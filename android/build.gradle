@@ -22,7 +22,14 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+apply plugin: 'java'
 
+// Add this block to use the Java toolchain feature
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17)) // Set your desired Java version here
+    }
+}
 allprojects {
     repositories {
         maven {

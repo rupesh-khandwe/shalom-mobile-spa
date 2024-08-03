@@ -15,6 +15,8 @@ import useAxios from '../common/useAxios';
 import { ActivityIndicator } from 'react-native-paper';
 import {Avatar} from 'react-native-paper';
 import {Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider} from 'react-native-popup-menu';
+import AntDesign from "@expo/vector-icons/AntDesign";
+import {Dropdown} from "react-native-element-dropdown";
 
 export default function Church({ navigation, route }) {
 
@@ -24,6 +26,12 @@ export default function Church({ navigation, route }) {
     const [filteredDataSource, setFilteredDataSource] = useState([]);
     const [masterDataSource, setMasterDataSource] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
+    const [languageId, setLanguageId] = useState(null);
+    const [languageName, setLanguageName] = useState(null);
+    const [languageData, setLanguageData] = useState([]);
+    const [isFocus, setIsFocus] = useState(false);
+    const [errors, setErrors] = useState({});
+
     const register = route.params;
     let api = useAxios()
     const [loader, setLoader] = useState(true);
@@ -31,6 +39,24 @@ export default function Church({ navigation, route }) {
 
     useEffect(() => {
         console.log(REACT_APP_BASE_URL_API,"Church rendered");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
+
+        axios
+            .get(`${REACT_APP_BASE_URL_API}/church/language`, {
+                headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+            })
+            .then((res) => {
+                var count = Object.keys(res.data).length;
+                let languageArray = [];
+                languageArray.push({ label : 'All', value: null});
+                for (var i = 0; i < count; i++) {
+                    languageArray.push({
+                        value: res.data[i].languageId,
+                        label: res.data[i].languageName,
+                    });
+                }
+                setLanguageData(languageArray);
+            })
+            .catch((err) => console.log(err));
 
         axios
         .get(`${REACT_APP_BASE_URL_API}/church/searchByKey?key=Bengaluru`, {
@@ -53,6 +79,18 @@ export default function Church({ navigation, route }) {
         }
       }
 
+      const searchWithLanguageFunction = (languageName) => {
+          if (languageName != null && languageName !== 'All') {
+              const newData = masterDataSource.filter(function (item) {
+                  return item.languageName === languageName;
+              });
+              setFilteredDataSource(newData);
+          } else {
+              setFilteredDataSource(masterDataSource);
+          }
+          setSearch('');
+      }
+
       const searchFilterFunction = (text) => {
         // Check if searched text is not blank
 
@@ -61,18 +99,23 @@ export default function Church({ navigation, route }) {
             // Filter the masterDataSource
             // Update FilteredDataSource
             const newData = masterDataSource.filter(function (item) {
-              const itemData = item.createdBy+","+item.addressline1+","+item.userRegionName+","+item.userCityName+","+item.churchName;
-              const textData = text;
-              return itemData.indexOf(textData) > -1;
+                const itemData = item.createdBy+","+item.addressline1+","+item.userRegionName+","+item.userCityName+","+item.churchName;
+                const textData = text;
+                if (languageName == null || languageName === 'All') {
+                    return itemData.indexOf(textData) > -1;
+                }
+                return item.languageName === languageName && itemData.indexOf(textData) > -1;
             });
             setFilteredDataSource(newData);
             setSearch(text);
-          } else {
+          } else if (languageName != null && languageName !== 'All') {
+            searchWithLanguageFunction(languageName);
+          }  else {
             // Inserted text is blank
             // Update FilteredDataSource with masterDataSource
             setFilteredDataSource(masterDataSource);
             setSearch(text);
-          } 
+          }
       };
 
       const deleteDialog = (churchId) =>{
@@ -236,6 +279,38 @@ export default function Church({ navigation, route }) {
             <MaterialIcons name="post-add" size={35} color="purple" />
           </TouchableOpacity>
         </View>
+          <Dropdown
+              style={[styles.dropdownRegion, isFocus && {borderColor: 'black'}]}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              inputSearchStyle={styles.inputSearchStyle}
+              iconStyle={styles.iconStyle}
+              data={languageData}
+              search
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder={!isFocus ? 'Filter by church language' : '...'}
+              searchPlaceholder="Search..."
+              value={languageId}
+              onFocus={() => setIsFocus(true)}
+              onBlur={() => setIsFocus(false)}
+              onChange={item => {
+                  setLanguageId(item.value);
+                  setLanguageName(item.label);
+                  setIsFocus(false);
+                  searchWithLanguageFunction(item.label);
+              }}
+              renderLeftIcon={() => (
+                  <AntDesign
+                      style={styles.icon}
+                      color={isFocus ? '#AD40AF' : 'black'}
+                      name="Safety"
+                      size={20}
+                  />
+              )}
+              error={errors.languageId}
+          />
         <SearchBar
                 lightTheme
                 round

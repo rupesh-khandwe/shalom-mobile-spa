@@ -86,6 +86,7 @@ android {
     namespace 'com.shalom'
     defaultConfig {
         applicationId 'com.shalom'
+        namespace 'com.shalom'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 7
