@@ -290,7 +290,7 @@ export default function Church({ navigation, route }) {
               maxHeight={300}
               labelField="label"
               valueField="value"
-              placeholder={!isFocus ? 'Filter by church language' : '...'}
+              placeholder={!isFocus ? 'Filter by language' : '...'}
               searchPlaceholder="Search..."
               value={languageId}
               onFocus={() => setIsFocus(true)}

@@ -200,7 +200,7 @@ const TabNavigator = ({}) => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarShowLabel: false,
+        tabBarShowLabel: true,
         tabBarStyle: {backgroundColor: '#AD40AF'},
         tabBarInactiveTintColor: '#fff',
         tabBarActiveTintColor: 'yellow',
@@ -213,6 +213,7 @@ const TabNavigator = ({}) => {
             display: 'flex',
             backgroundColor: '#AD40AF',
           },
+            tabBarLabel: 'Home',
           tabBarIcon: ({color, size}) => (
             <Ionicons name="home-outline" color={color} size={size} />
           ),
@@ -224,6 +225,7 @@ const TabNavigator = ({}) => {
         options={{
           //tabBarBadge: 3,
           tabBarBadgeStyle: {backgroundColor: 'yellow'},
+            tabBarLabel: 'Posts',
           tabBarIcon: ({color, size}) => (
             <MaterialCommunityIcons name="home-group-plus" size={24} color={color} />
           ),
@@ -236,6 +238,7 @@ const TabNavigator = ({}) => {
           tabBarIcon: ({color, size}) => (
             <MaterialIcons name="event" color={color} size={size} />
           ),
+            tabBarLabel: 'Events'
         }}
       />
       {/* <Tab.Screen
@@ -254,6 +257,7 @@ const TabNavigator = ({}) => {
           tabBarIcon: ({color, size}) => (
             <FontAwesome5 name="donate" size={24} color={color} />
           ),
+            tabBarLabel: 'Donate'
         }}
       />
       <Tab.Screen
@@ -263,6 +267,7 @@ const TabNavigator = ({}) => {
           tabBarIcon: ({color, size}) => (
             <FontAwesome5 name="church" size={24} color={color} />
           ),
+            tabBarLabel: 'Church'
         }}
       />
     </Tab.Navigator>
