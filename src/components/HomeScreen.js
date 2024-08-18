@@ -83,39 +83,41 @@ export default function HomeScreen({ navigation }) {
    const getAsyncData = async()=>{
         try {
             console.log("Home screen getAsyncData***")
-            AsyncStorage.getItem('userId').then((userId)=>{
-              setLocalUserId(userId);
-              axios
-              .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${userId}`, {
-                headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
-              })
-              .then((res) => {
-                  //console.log(res.data);
-                  setLoader(false);
-                  setFilteredDataSource(res.data);
-              })
-              .catch((err) => console.log(err));
-  
-              axios
-                  .get(`${REACT_APP_BASE_URL_API}/shalom/profilePic?userId=${userId}`, {
-                    headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
-                  })
-              .then((res) => {
-                  //console.log(res.data);
-                  setProfilePic(res.data)
-              })
-              .catch((err) => console.log(err));
+            AsyncStorage.getItem('userId').then((userId)=> {
+                if (userId != null) {
+                    setLocalUserId(userId);
+                    axios
+                        .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${userId}`, {
+                            headers: {'Authorization': "Bearer " + userToken, 'content-type': 'application/json'},
+                        })
+                        .then((res) => {
+                            //console.log(res.data);
+                            setLoader(false);
+                            setFilteredDataSource(res.data);
+                        })
+                        .catch((err) => console.log(err));
 
-              console.log("Loaded EventNotifications*************", userId);
-              axios
-              .get(`${REACT_APP_BASE_URL_API}/event/notification?id=${userId}`, {
-                headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
-              })
-              .then((res) => {
-                setFilteredEventNotifyDataSource(res.data);
-              })
-              .catch((err) => console.log(err));
-            })
+                    axios
+                        .get(`${REACT_APP_BASE_URL_API}/shalom/profilePic?userId=${userId}`, {
+                            headers: {'Authorization': "Bearer " + userToken, 'content-type': 'application/json'},
+                        })
+                        .then((res) => {
+                            //console.log(res.data);
+                            setProfilePic(res.data)
+                        })
+                        .catch((err) => console.log(err));
+
+                    console.log("Loaded EventNotifications*************", userId);
+                    axios
+                        .get(`${REACT_APP_BASE_URL_API}/event/notification?id=${userId}`, {
+                            headers: {'Authorization': "Bearer " + userToken, 'content-type': 'application/json'},
+                        })
+                        .then((res) => {
+                            setFilteredEventNotifyDataSource(res.data);
+                        })
+                        .catch((err) => console.log(err));
+                }
+            });
 
             AsyncStorage.getItem('userName').then((userName)=>{
               setLocalUserName(userName);
@@ -168,7 +170,18 @@ const onShare = async () => {
         // Call any action
         console.log("Profile screen focused")
           width = Dimensions.get("window");
-          getAsyncData();
+        var i=0;
+        var asyncDataTimer = setInterval(function() {
+            AsyncStorage.getItem('userId').then((userId)=> {
+                if (userId != null) {
+                    getAsyncData();
+                    clearInterval(asyncDataTimer);
+                }
+                if (i++ > 10) {
+                    clearInterval(asyncDataTimer);
+                }
+            });
+        }, 500)
 
             });
             // Return the function to unsubscribe from the event so it gets removed on unmount
