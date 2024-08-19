@@ -27,7 +27,7 @@ import { FontAwesome, AntDesign } from '@expo/vector-icons';
 import { LoginManager, GraphRequest, GraphRequestManager } from "react-native-fbsdk";
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import GetLocation from 'react-native-get-location'
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import {getCountryList, getStateList} from "../../common/Utils";
 
 export default function RegisterScreen({navigation}) {
   // const [date, setDate] = useState(new Date(1598051730000));
@@ -90,31 +90,9 @@ export default function RegisterScreen({navigation}) {
     })
 
       handleState(defaultCountryId);
-      AsyncStorage.getItem("CountryList", function(error, list) {
-          if (list !== null) {
-              console.log("Retrieve CountryList from cache");
-              setCountryData(JSON.parse(list));
-          } else {
-              axios
-                  .get(`${REACT_APP_LOCATION_API}/CountryList`, {
-                      headers: { 'content-type': 'application/json'},
-                  })
-                  .then((res) => {
-                      var count = Object.keys(res.data).length;
-                      let countryArray = [];
-                      for (var i = 0; i < count; i++) {
-                          countryArray.push({
-                              value: res.data[i].countryId,
-                              label: res.data[i].countryName,
-                          });
-                      }
-                      setCountryData(countryArray);
-                      AsyncStorage.setItem("CountryList", JSON.stringify(countryArray));
-                  })
-                  .catch((err) => console.log(err));
-          }
-      });
-
+    getCountryList(function() {
+        setCountryData(list);
+    });
     GoogleSignin.configure();
   }, []);
 
@@ -252,29 +230,9 @@ const _responseInfoCallBack = async(error, result) =>{
 
   const handleState = countryCode => {
     console.log(countryCode);
-    var config = {
-      method: 'get',
-      url: `${REACT_APP_LOCATION_API}/StateList?countryId=${countryCode}`,
-      headers: {
-        'content-type': 'application/json',
-      },
-    };
-
-    axios(config)
-      .then(function (response) {
-        var count = Object.keys(response.data).length;
-        let stateArray = [];
-        for (var i = 0; i < count; i++) {
-          stateArray.push({
-            value: response.data[i].stateId,
-            label: response.data[i].stateName,
-          });
-        }
-        setStateData(stateArray);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    getStateList(countryCode, function(list) {
+        setStateData(list);
+    });
   };
 
   const handleCity = (countryCode, stateCode) => {

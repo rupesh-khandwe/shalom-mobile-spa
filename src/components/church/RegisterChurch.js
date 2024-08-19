@@ -26,7 +26,7 @@ import ImagePicker from 'react-native-image-crop-picker';
 import { imageUpload } from '../../assets/images';
 import Carousel from 'react-native-reanimated-carousel';
 import ImgToBase64 from 'react-native-image-base64';
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import {getCountryList, getStateList} from "../common/Utils";
 
 export default function RegisterChurch({route,navigation}) {
   const defaultCountryId = 78; //India
@@ -122,31 +122,9 @@ export default function RegisterChurch({route,navigation}) {
 
 
     handleState(defaultCountryId);
-    AsyncStorage.getItem("CountryList", function(error, list) {
-      if (list !== null) {
-        console.log("Retrieve CountryList from cache");
-        setCountryData(JSON.parse(list));
-      } else {
-        axios
-            .get(`${REACT_APP_LOCATION_API}/CountryList`, {
-              headers: { 'content-type': 'application/json'},
-            })
-            .then((res) => {
-              var count = Object.keys(res.data).length;
-              let countryArray = [];
-              for (var i = 0; i < count; i++) {
-                countryArray.push({
-                  value: res.data[i].countryId,
-                  label: res.data[i].countryName,
-                });
-              }
-              setCountryData(countryArray);
-              AsyncStorage.setItem("CountryList", JSON.stringify(countryArray));
-            })
-            .catch((err) => console.log(err));
-      }
+    getCountryList(function(list) {
+      setCountryData(list);
     });
-
 
     if(params && params.churchId){
       setStateEdit(false);
@@ -179,24 +157,9 @@ export default function RegisterChurch({route,navigation}) {
       console.log("images", churchImg);
       setImages(churchImg);
       //Load state
-      axios
-        .get(`${REACT_APP_LOCATION_API}/StateList?countryId=${params.countryId}`, {
-          headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
-        })
-        .then(function (response) {
-            var count = Object.keys(response.data).length;
-            let stateArray = [];
-            for (var i = 0; i < count; i++) {
-              stateArray.push({
-                value: response.data[i].stateId,
-                label: response.data[i].stateName,
-              });
-            }
-            setStateData(stateArray);
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
+      getStateList(params.countryId, (stateArray) => {
+        setStateData(stateArray);
+      });
     }
 
 
