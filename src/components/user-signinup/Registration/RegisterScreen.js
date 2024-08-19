@@ -27,12 +27,14 @@ import { FontAwesome, AntDesign } from '@expo/vector-icons';
 import { LoginManager, GraphRequest, GraphRequestManager } from "react-native-fbsdk";
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import GetLocation from 'react-native-get-location'
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function RegisterScreen({navigation}) {
   // const [date, setDate] = useState(new Date(1598051730000));
   // const [dateString, setDateString] = useState('Date of Birth');
   // const [mode, setMode] = useState('date');
   // const [show, setShow] = useState(false);
+    const defaultCountryId = 78; //India
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [middleName, setMiddleName] = useState('');
@@ -42,7 +44,7 @@ export default function RegisterScreen({navigation}) {
   const [phone2, setPhone2] = useState('');
   const [addressLine1, setAddressLine1] = useState('');
   const [addressLine2, setAddressLine2] = useState('');
-  const [countryId, setCountryId] = useState(null);
+  const [countryId, setCountryId] = useState(defaultCountryId);
   const [stateId, setStateId] = useState(null);
   const [cityId, setCityId] = useState(null);
   const [regionId, setRegionId] = useState('');
@@ -87,22 +89,31 @@ export default function RegisterScreen({navigation}) {
           console.warn(code, message);
     })
 
-    axios
-    .get(`${REACT_APP_LOCATION_API}/CountryList`, {
-      headers: { 'content-type': 'application/json'},
-    })
-    .then((res) => {
-      var count = Object.keys(res.data).length;
-      let countryArray = [];
-      for (var i = 0; i < count; i++) {
-        countryArray.push({
-          value: res.data[i].countryId,
-          label: res.data[i].countryName,
-        });
-      }
-      setCountryData(countryArray);
-    })
-    .catch((err) => console.log(err));
+      handleState(defaultCountryId);
+      AsyncStorage.getItem("CountryList", function(error, list) {
+          if (list !== null) {
+              console.log("Retrieve CountryList from cache");
+              setCountryData(JSON.parse(list));
+          } else {
+              axios
+                  .get(`${REACT_APP_LOCATION_API}/CountryList`, {
+                      headers: { 'content-type': 'application/json'},
+                  })
+                  .then((res) => {
+                      var count = Object.keys(res.data).length;
+                      let countryArray = [];
+                      for (var i = 0; i < count; i++) {
+                          countryArray.push({
+                              value: res.data[i].countryId,
+                              label: res.data[i].countryName,
+                          });
+                      }
+                      setCountryData(countryArray);
+                      AsyncStorage.setItem("CountryList", JSON.stringify(countryArray));
+                  })
+                  .catch((err) => console.log(err));
+          }
+      });
 
     GoogleSignin.configure();
   }, []);
@@ -832,7 +843,6 @@ const styles = StyleSheet.create({
   phoneInput: {
     width:'100%',
     height: 55,
-    borderColor: 'gray',
     borderWidth: 1,
     borderRadius: 8,
     borderColor: '#ccc', 

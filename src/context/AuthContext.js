@@ -78,6 +78,7 @@ export const AuthProvider = ({children}) => {
         AsyncStorage.removeItem('userToken');
         AsyncStorage.removeItem('userId');
         AsyncStorage.removeItem('userName');
+        AsyncStorage.clear();
         setIsLoading(false);
      }
 

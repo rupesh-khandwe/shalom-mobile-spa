@@ -28,8 +28,10 @@ import ImagePicker from 'react-native-image-crop-picker';
 import { imageUpload } from '../../assets/images';
 import Carousel from 'react-native-reanimated-carousel';
 import ImgToBase64 from 'react-native-image-base64';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function AddEvent({route, navigation}) {
+  const defaultCountryId = 78; //India
   const {userToken, userInfo}= useContext(AuthContext);
   const [eventId, setEventId] = useState(null);
   const [title, setTitle] = useState('');
@@ -39,7 +41,7 @@ export default function AddEvent({route, navigation}) {
   const [addressline1, setAddressline1] = useState('');
   const [addressline2, setAddressline2] = useState('');
   const [categoryId, setCategoryId] = useState(null);
-  const [countryId, setCountryId] = useState(null);
+  const [countryId, setCountryId] = useState(defaultCountryId);
   const [stateId, setStateId] = useState(null);
   const [cityId, setCityId] = useState(null);
   const [regionId, setRegionId] = useState('');
@@ -96,6 +98,7 @@ export default function AddEvent({route, navigation}) {
   useEffect(() => {
     setUserId(userInfo.userId);
     setCreatedBy(userInfo.userName);
+    handleState(countryId);
     var params = route.params
     console.log("route.params",params);
     !params && setCreatedOn(moment.utc().toISOString());
@@ -117,23 +120,30 @@ export default function AddEvent({route, navigation}) {
     })
     .catch((err) => console.log(err));
 
-    axios
-    .get(`${REACT_APP_LOCATION_API}/CountryList`, {
-      headers: { 'content-type': 'application/json'},
-    })
-    .then((res) => {
-      var count = Object.keys(res.data).length;
-      let countryArray = [];
-      for (var i = 0; i < count; i++) {
-        countryArray.push({
-          value: res.data[i].countryId,
-          label: res.data[i].countryName,
-        });
+    AsyncStorage.getItem("CountryList", function(error, list) {
+      if (list !== null) {
+        console.log("Retrieve CountryList from cache");
+        setCountryData(JSON.parse(list));
+      } else {
+        axios
+            .get(`${REACT_APP_LOCATION_API}/CountryList`, {
+              headers: { 'content-type': 'application/json'},
+            })
+            .then((res) => {
+              var count = Object.keys(res.data).length;
+              let countryArray = [];
+              for (var i = 0; i < count; i++) {
+                countryArray.push({
+                  value: res.data[i].countryId,
+                  label: res.data[i].countryName,
+                });
+              }
+              setCountryData(countryArray);
+              AsyncStorage.setItem("CountryList", JSON.stringify(countryArray));
+            })
+            .catch((err) => console.log(err));
       }
-      setCountryData(countryArray);
-    })
-    .catch((err) => console.log(err));
-
+    });
     if(params && params.eventId){
       setStateEdit(false);
       setCityEdit(false);
@@ -224,7 +234,7 @@ const handleSubmit = () =>{
     setPhone2("");
     setAddressline1("");
     setAddressline2("");
-    setCountryId("");
+    setCountryId(defaultCountryId);
     setCityId("");
     setStateId("");
     setRegionId("");
