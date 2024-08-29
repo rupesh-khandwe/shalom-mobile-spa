@@ -124,7 +124,7 @@ const LoginScreen = ({navigation, route}) => {
           }):""}</Text>:""}
 
         <InputField
-          label={'User email'}
+          label={' User email'}
           icon={
             <MaterialIcons
             name="alternate-email"
@@ -143,7 +143,7 @@ const LoginScreen = ({navigation, route}) => {
         } */}
 
        <InputField
-          label={'Password'}
+          label={' Password'}
            icon={
           <MaterialIcons name="password" size={20} color="gray" />}
           inputType="password"
@@ -199,7 +199,7 @@ const LoginScreen = ({navigation, route}) => {
             marginBottom: 30,
           }}>
           <Text>Unable to login?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register-Name')}>
+          <TouchableOpacity onPress={() => navigation.navigate('Need-Help')}>
             <Text style={{color: '#AD40AF', fontWeight: '700'}}> Need Help?</Text>
           </TouchableOpacity>
         </View>

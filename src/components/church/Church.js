@@ -263,10 +263,10 @@ export default function Church({ navigation, route }) {
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
-            marginTop: 10,
-            padding: 10
+            marginTop: 25,
+            padding: 15
           }}>
-          <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
+          <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold', color: 'purple'}}>
             Church
           </Text>
           <Text>{register==="success"?showMessage({
@@ -280,7 +280,7 @@ export default function Church({ navigation, route }) {
           </TouchableOpacity>
         </View>
           <Dropdown
-              style={[styles.dropdownRegion, isFocus && {borderColor: 'black'}]}
+              style={[styles.dropdownLanguage, isFocus && {borderColor: 'black'}]}
               placeholderStyle={styles.placeholderStyle}
               selectedTextStyle={styles.selectedTextStyle}
               inputSearchStyle={styles.inputSearchStyle}
@@ -391,5 +391,28 @@ const styles = StyleSheet.create({
         elevation: 4,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    dropdownLanguage: {
+      height: 40,
+      borderColor: 'gray',
+      borderWidth: 0,
+      borderRadius: 8,
+      paddingHorizontal: 8,
+      marginBottom: 5,
+    },
+    icon: {
+      paddingLeft: 5,
+      marginRight: 15,
+    },
+    iconStyle: {
+      width: 20,
+      height: 20,
+    },
+    placeholderStyle: {
+      fontSize: 16,
+      color: 'gray'
+    },
+    selectedTextStyle: {
+      fontSize: 16,
     },
   });

@@ -15,19 +15,45 @@ import moment from "moment";
 import { ActivityIndicator } from 'react-native-paper';
 import {Avatar} from 'react-native-paper';
 import {Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider} from 'react-native-popup-menu';
+import {Dropdown} from "react-native-element-dropdown";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 export default function Events({ navigation, route }) {
     const {userToken, userInfo}= useContext(AuthContext);
     const SEARCH_BY_KEY = "eventByUserId?key=";
     const [search, setSearch] = useState('');
+    const [languageId, setLanguageId] = useState(null);
+    const [languageName, setLanguageName] = useState(null);
+    const [languageData, setLanguageData] = useState([]);
     const [filteredDataSource, setFilteredDataSource] = useState([]);
     const [masterDataSource, setMasterDataSource] = useState([]);
     const register = route.params;
     const [loader, setLoader] = useState(true);
+    const [isFocus, setIsFocus] = useState(false);
     const Divider = () => <View style={styles.divider} />;
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         console.log("Events launched");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
+
+        axios
+        .get(`${REACT_APP_BASE_URL_API}/church/language`, {
+            headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+        })
+        .then((res) => {
+            var count = Object.keys(res.data).length;
+            let languageArray = [];
+            languageArray.push({ label : 'All', value: null});
+            for (var i = 0; i < count; i++) {
+                languageArray.push({
+                    value: res.data[i].languageId,
+                    label: res.data[i].languageName,
+                });
+            }
+            setLanguageData(languageArray);
+        })
+        .catch((err) => console.log(err));
+
         axios
         .get(`${REACT_APP_BASE_URL_API}/event/user?id=${userInfo.userId}`, {
           headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
@@ -39,6 +65,18 @@ export default function Events({ navigation, route }) {
         })
         .catch((err) => console.log(err));
       }, []);
+
+      const searchWithLanguageFunction = (languageName) => {
+        if (languageName != null && languageName !== 'All') {
+            const newData = masterDataSource.filter(function (item) {
+                return item.languageName === languageName;
+            });
+            setFilteredDataSource(newData);
+        } else {
+            setFilteredDataSource(masterDataSource);
+        }
+        setSearch('');
+    }
 
       const searchFilterFunction = (text) => {
         // Check if searched text is not blank
@@ -54,13 +92,14 @@ export default function Events({ navigation, route }) {
           });
           setFilteredDataSource(newData);
           setSearch(text);
-        } else {
+        } else if (languageName != null && languageName !== 'All') {
+          searchWithLanguageFunction(languageName);
+        }  else {
           // Inserted text is blank
           // Update FilteredDataSource with masterDataSource
           setFilteredDataSource(masterDataSource);
           setSearch(text);
         }
-
       };
     
       const deleteDialog = (eventId) =>{
@@ -141,7 +180,7 @@ export default function Events({ navigation, route }) {
                     "title": item.title, "description": item.description, "eventDate": item.eventDate, "eventTime": item.eventTime, "addressLine1": item.addressLine1, 
                     "addressLine2": item.addressLine2, "phone1": item.phone1, "phone2": item.phone2, "countryId": item.countryId, "countryName": item.userCountryName, 
                     "regionId": item.regionId, "regionName": item.userRegionName, "stateId": item.stateId, "stateName": item.userStateName, "cityId": item.cityId, 
-                    "cityName": item.userCityName, "eventImageUrl": item.eventImageUrl,"churchWebsiteUrl": item.churchWebsiteUrl, "createdOn": item.createdOn} )}  ><FontAwesome name="edit" size={20} color="gray" /></MenuOption>
+                    "cityName": item.userCityName, "eventImageUrl": item.eventImageUrl,"churchWebsiteUrl": item.churchWebsiteUrl, "createdOn": item.createdOn, "languageId": item.languageId, "languageName": item.languageName} )}  ><FontAwesome name="edit" size={20} color="gray" /></MenuOption>
                           <Divider></Divider>
                           <MenuOption onSelect={()=>{deleteDialog(item.eventId)}}  ><MaterialIcons name="delete-forever" size={20} color="gray" /></MenuOption>
                         </MenuOptions>
@@ -154,7 +193,7 @@ export default function Events({ navigation, route }) {
                     {"eventId": item.eventId ,"userId": item.userId ,"categoryName": item.categoryName, "title": item.title, "description": item.description, 
                      "eventDate": item.eventDate, "eventTime": item.eventTime, "addressLine1": item.addressLine1, "addressLine2": item.addressLine2, "phone1": item.phone1, 
                      "phone2": item.phone2, "countryName": item.userCountryName, "regionName": item.userRegionName, "stateName": item.userStateName, "cityName": item.userCityName, 
-                     "createdOn": item.createdOn, "createdBy" :item.createdBy, "eventImageUrl": item.eventImageUrl, "profileImageUrl": item.profileImageUrl}
+                     "createdOn": item.createdOn, "createdBy" :item.createdBy, "eventImageUrl": item.eventImageUrl, "profileImageUrl": item.profileImageUrl, "languageName": item.languageName}
             )}}>
            
             <View style={{flexDirection:'row',}}>
@@ -167,6 +206,7 @@ export default function Events({ navigation, route }) {
                 <Paragraph>{item.description}</Paragraph>
             </View>
             <View style={{margin:8}}>
+                <Text><Entypo name="language" size={24} color="purple" />  {item.languageName}</Text>
                 <Paragraph><FontAwesome name="address-card" size={21} color="purple" /> {item.addressLine1}, {item.addressLine2}, {item.userRegionName}, {item.userCityName}</Paragraph>
                 <Text><FontAwesome name="phone-square" size={24} color="purple" />  {item.phone1}, {item.phone2} </Text>
                 <Text><Fontisto name="date" size={24} color="purple" />  {item.eventDate}  <Ionicons name="time-sharp" size={24} color="purple" /> {item.eventTime}</Text>
@@ -218,10 +258,10 @@ const renderListEmptyComponent = () => (
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
-              marginTop: 10,
-              padding: 10
+              marginTop: 25,
+              padding: 15
             }}>
-            <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold'}}>
+            <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold', color: 'purple'}}>
               Event's
             </Text>
             <Text>{register==="success"?showMessage({
@@ -241,6 +281,40 @@ const renderListEmptyComponent = () => (
                 </TouchableOpacity>
              </View>
           </View>
+
+          <Dropdown
+              style={[styles.dropdownLanguage, isFocus && {borderColor: 'black'}]}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              inputSearchStyle={styles.inputSearchStyle}
+              iconStyle={styles.iconStyle}
+              data={languageData}
+              search
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder={!isFocus ? 'Filter by language' : '...'}
+              searchPlaceholder="Search..."
+              value={languageId}
+              onFocus={() => setIsFocus(true)}
+              onBlur={() => setIsFocus(false)}
+              onChange={item => {
+                  setLanguageId(item.value);
+                  setLanguageName(item.label);
+                  setIsFocus(false);
+                  searchWithLanguageFunction(item.label);
+              }}
+              renderLeftIcon={() => (
+                  <AntDesign
+                      style={styles.icon}
+                      color={isFocus ? '#AD40AF' : 'black'}
+                      name="Safety"
+                      size={20}
+                  />
+              )}
+              error={errors.languageId}
+          />
+
           <SearchBar
                     lightTheme
                     round
@@ -341,5 +415,28 @@ const styles = StyleSheet.create({
         elevation: 4,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    dropdownLanguage: {
+      height: 40,
+      borderColor: 'gray',
+      borderWidth: 0,
+      borderRadius: 8,
+      paddingHorizontal: 8,
+      marginBottom: 5,
+    },
+    icon: {
+      paddingLeft: 5,
+      marginRight: 15,
+    },
+    iconStyle: {
+      width: 20,
+      height: 20,
+    },
+    placeholderStyle: {
+      fontSize: 16,
+      color: 'gray'
+    },
+    selectedTextStyle: {
+      fontSize: 16,
     },
   });

@@ -45,8 +45,6 @@ export default function DonateScreen() {
 
   useEffect(() => {
       setUserId(userInfo.userId);
-    console.log("Donation launched"+userId);
-
 
   }, []);
 
@@ -148,18 +146,21 @@ export default function DonateScreen() {
         </View>
         {phonepeResCode && <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalText}>Dear Shalomers,{'\n'}{'\n'}
+              <Text style={styles.modalText}>Dear Shalomer's,{'\n'}{'\n'}
                 Shalom is a free service and a mean to connect to GOD, brought to you by <Text style={{ fontSize: 18, fontWeight: 'bold', color:'purple'}}>"Shalom - A Believer’s Hub"</Text>.{'\n'}{'\n'}
                 
-                If you're blessed by this service and would like to support our ministry, we invite you to partner with us. {'\n'}{'\n'}
+                If you're blessed by this service and would like to support our ministry, we invite you to partner with us. {'\n'}{'\n'}{'\n'}
 
-                Click on Donate button and support this ministry to serve better. {'\n'}{'\n'}
-
-                May God bless you as you decided to partner with us.</Text>
+                {/*Click on Donate button and support this ministry to serve better. {'\n'}{'\n'}*/}
+                Please use below account details to support this ministry to serve better. {'\n'}{'\n'}
+                A/C Name:<Text style={{ fontSize: 18, fontWeight: 'bold', color:'purple'}}> Shalom - A Believer’s Hub</Text>{'\n'}{'\n'}
+                A/C #: <Text style={{ fontSize: 18, fontWeight: 'bold', color:'purple'}}>5 5 9 7 3 6 8 4 5 5</Text>{'\n'}{'\n'}
+                IFSC: <Text style={{ fontSize: 18, fontWeight: 'bold', color:'purple'}}>CBI N0 283975 </Text>{'\n'}{'\n'}
+                May God bless you as you decided to partner with us!</Text>
             </View>
         </View>}
 
-        {!phonepeResCode && <View style={styles.centeredView}>
+        {/* {!phonepeResCode && <View style={styles.centeredView}>
             <View style={styles.modalView}>
               <Text style={styles.modalSuccessText}>Dear Shalomer!{'\n'}{'\n'}
                 On behalf of entire Shalom group, we want to extend our sincerest gratitude for your recent gift. Without the support of congregants like you, we wouldn’t be able to spread God’s word and touch the lives of everyone in our community. {'\n'}{'\n'}
@@ -211,7 +212,7 @@ export default function DonateScreen() {
           error={errors.amount}
         />
         }
-       {phonepeResCode && <CustomButton label={'Donate'} onPress={handleSubmit} /> }
+       {phonepeResCode && <CustomButton label={'Donate'} onPress={handleSubmit} /> } */}
 
         <View
           style={{
@@ -242,7 +243,7 @@ export default function DonateScreen() {
 
                   If you're blessed by this service and would like to support our ministry, we invite you to partner with us. {'\n'}{'\n'}
 
-                  Click on Donate button and support this ministry to serve better. {'\n'}{'\n'}
+                  Click on Donate button and support this ministry to serve better. {'\n'}{'\n'} 
 
                   May God bless you as you decided to partner with us.</Text>
                 <Pressable

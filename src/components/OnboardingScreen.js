@@ -51,7 +51,7 @@ const OnboardingScreen = ({navigation}) => {
             fontWeight: 'bold',
             fontFamily: 'Roboto-MediumItalic',
           }}>
-          Let's Begin
+          A Believer’s Hub
         </Text>
         <MaterialIcons name="arrow-forward-ios" size={22} color="#fff" />
       </TouchableOpacity>

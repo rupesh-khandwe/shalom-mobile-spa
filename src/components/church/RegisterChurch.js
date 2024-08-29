@@ -361,9 +361,9 @@ const handleSubmit = () =>{
         <View key={index}>
             <Image
                 style={{
-                    width: '88%',
-                    borderRadius: 15,
-                    height: 200,
+                    width: '90%',
+                    borderRadius: 0,
+                    height: 400,
                 }}
                 source={{uri: item?item.path?item.path:item:""}
                 }
@@ -407,35 +407,6 @@ const handleSubmit = () =>{
           value={churchName}
           error={errors.churchName}
         />
-
-<TouchableOpacity onPress={openImagePicker}>
-          <View style={styles.uploadContainer}>
-              <View style={styles.imageContainer}>
-                <Image source={imageUpload} style={styles.image} />
-                <InputField
-                  editable={false}
-                  label={'Click to upload church pictures'}
-                />
-              
-              </View>
-            </View>
-        </TouchableOpacity>
-        {images?.length > 0 &&
-            <View style={{ flex: 1 }}>
-                  <Carousel
-                      loop
-                      width={width}
-                      height={width / 2}
-                      autoPlay={true}
-                      data={images}
-                      mode="parallax"
-                      parallaxScrollingScale={0.9}
-                      parallaxScrollingOffset={50}
-                      scrollAnimationDuration={1000}
-                      renderItem={_renderItem}
-                  />
-            </View>
-          } 
 
     {!languageEdit && 
         <View
@@ -496,6 +467,35 @@ const handleSubmit = () =>{
           {
             errors.languageId ? (<Text style={styles.errorText}>{errors.languageId}</Text>):null
           }
+
+      <TouchableOpacity onPress={openImagePicker}>
+          <View style={styles.uploadContainer}>
+              <View style={styles.imageContainer}>
+                <Image source={imageUpload} style={styles.image} />
+                <InputField
+                  editable={false}
+                  label={'Click to upload church pictures'}
+                />
+              
+              </View>
+            </View>
+        </TouchableOpacity>
+        {images?.length > 0 &&
+            <View style={{ flex: 1 }}>
+                  <Carousel
+                      loop
+                      width={width}
+                      height={350}
+                      autoPlay={true}
+                      data={images}
+                      mode="advanced-parallax"
+                      parallaxScrollingScale={0.9}
+                      parallaxScrollingOffset={50}
+                      scrollAnimationDuration={1000}
+                      renderItem={_renderItem}
+                  />
+            </View>
+          } 
 
         <InputField
           label={'About church...'}

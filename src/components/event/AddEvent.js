@@ -71,6 +71,10 @@ export default function AddEvent({route, navigation}) {
   const [imageUrl, setImageUrl] = useState([]);
   const [images, setImages] = useState([]);
   const width = Dimensions.get('window').width;
+  const [languageEdit, setLanguageEdit] = useState(true);
+  const [languageId, setLanguageId] = useState(null);
+  const [languageName, setLanguageName] = useState(null);
+  const [languageData, setLanguageData] = useState([]);
   let imageList = [];
   let imageDataList = [];
   const event_model = {
@@ -92,7 +96,8 @@ export default function AddEvent({route, navigation}) {
     'createdBy': createdBy,
     'createdOn': createdOn,
     'updatedOn': updatedOn,
-    'imageUrl': imageUrl
+    'imageUrl': imageUrl,
+    'languageId': languageId
   }
 
   useEffect(() => {
@@ -117,6 +122,23 @@ export default function AddEvent({route, navigation}) {
         });
       }
       setCategoryData(categoryArray);
+    })
+    .catch((err) => console.log(err));
+
+    axios
+    .get(`${REACT_APP_BASE_URL_API}/church/language`, {
+        headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+    })
+    .then((res) => {
+      var count = Object.keys(res.data).length;
+      let languageArray = [];
+      for (var i = 0; i < count; i++) {
+        languageArray.push({
+          value: res.data[i].languageId,
+          label: res.data[i].languageName,
+        });
+      }
+      setLanguageData(languageArray);
     })
     .catch((err) => console.log(err));
 
@@ -146,6 +168,9 @@ export default function AddEvent({route, navigation}) {
       setCreatedOn(params.createdOn)
       setEventDate(params.eventDate)
       setEventTime(params.eventTime)
+      setLanguageId(params.languageId)
+      setLanguageName(params.languageName)
+      setLanguageEdit(false)
       let eventImg = [];
       params.eventImageUrl?.split('|').map((img) => {
         eventImg.push(img)
@@ -157,9 +182,6 @@ export default function AddEvent({route, navigation}) {
         setStateData(list);
       });
     }
-
-
-
   }, []);
 
 
@@ -274,7 +296,7 @@ const handleSubmit = () =>{
   };
 
   const handleAddEvent = () => {
-    console.log(handleAddEvent);
+    console.log("handleAddEvent ", event_model);
     axios
     .post(`${REACT_APP_BASE_URL_API}/event/add`, 
       event_model,
@@ -370,9 +392,9 @@ const handleSubmit = () =>{
         <View key={index}>
             <Image
                 style={{
-                    width: '88%',
-                    borderRadius: 15,
-                    height: 200,
+                  width: '90%',
+                  borderRadius: 0,
+                  height: 400,
                 }}
                 source={{uri: item?item.path?item.path:item:""}
                 }
@@ -438,6 +460,65 @@ const handleSubmit = () =>{
             errors.categoryId ? (<Text style={styles.errorText}>{errors.categoryId}</Text>):null
           }
 
+{!languageEdit && 
+        <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+        >
+        <InputField
+          label={'State'}
+          editable={false}
+          icon={
+            <FontAwesome5 name="city" size={20} color="black" style={{margin: 5}}/>
+          }
+          onChangeText={(text) => {setLanguageName(text)}}
+          value={" "+languageName}
+          error={errors.languageName}
+          fieldButtonLabel={<FontAwesome name="pencil" size={20} color="purple" />}
+          fieldButtonFunction={()=>setLanguageEdit(true)}
+        />
+
+      </View>
+      }
+      
+      {languageEdit &&
+
+        <Dropdown
+          style={[styles.dropdownRegion, isFocus && {borderColor: 'black'}]}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          inputSearchStyle={styles.inputSearchStyle}
+          iconStyle={styles.iconStyle}
+          data={languageData}
+          search
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder={!isFocus ? 'Select event language*' : '...'}
+          searchPlaceholder="Search..."
+          value={languageId}
+          onFocus={() => setIsFocus(true)}
+          onBlur={() => setIsFocus(false)}
+          onChange={item => {
+            setLanguageId(item.value);
+            //setCategoryName(item.label);
+            setIsFocus(false);
+          }}
+          renderLeftIcon={() => (
+            <AntDesign
+              style={styles.icon}
+              color={isFocus ? '#AD40AF' : 'black'}
+              name="Safety"
+              size={20}
+            />
+          )}
+          error={errors.languageId}
+          />}
+          {
+            errors.languageId ? (<Text style={styles.errorText}>{errors.languageId}</Text>):null
+          }
 
       <TouchableOpacity onPress={openImagePicker}>
             <View style={styles.uploadContainer}>
@@ -456,10 +537,10 @@ const handleSubmit = () =>{
                     <Carousel
                         loop
                         width={width}
-                        height={width / 2}
+                        height={350}
                         autoPlay={true}
                         data={images}
-                        mode="parallax"
+                        mode="advanced-parallax"
                         parallaxScrollingScale={0.9}
                         parallaxScrollingOffset={50}
                         scrollAnimationDuration={1000}
@@ -522,7 +603,7 @@ const handleSubmit = () =>{
       </TouchableOpacity>
           {show && (<DateTimePicker
             testID="dateTimePicker"
-            minimumDate={new Date(1947, 0, 1)}
+            minimumDate={new Date()}
             value={date}
             mode={mode}
             is24Hour={true}

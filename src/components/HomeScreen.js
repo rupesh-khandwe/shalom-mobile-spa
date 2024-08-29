@@ -244,7 +244,7 @@ const onShare = async () => {
                     key={item.shalomId}
                   >
                     <Animated.Image
-                      style={{width: {width}, height: 200,resizeMode : 'stretch', transform: [{scale: scale}] }}
+                      style={{width: '100%', height: 300,resizeMode : 'stretch', transform: [{scale: scale}] }}
                       source={{uri:img}} 
                       resizeMode={'contain'}
                     /> 
@@ -272,7 +272,7 @@ const onShare = async () => {
                         color={item.likeFlag===null || !item.likeFlag ?"gray": "purple"}  
                       />
                     </Text>
-                    <Text style={{paddingLeft:45}} onPress={()=> navigation.replace('Comment', {"userId": userId ,"userName": item.userName, "shalomId": item.shalomId, "shalom": item.shalom, "imageUrl": item.imageUrl, "likeCount": item.likeCount, "likeFlag": item.likeFlag} )}><FontAwesome name={item.commentCount>0 ? "comments-o": "comments"} size={24} color={item.commentCount>0 ?"purple":"gray"}   /></Text>
+                    <Text style={{paddingLeft:45}} onPress={()=> navigation.replace('Comment', {"userId": userId ,"userName": item.userName, "shalomId": item.shalomId, "shalom": item.shalom, "imageUrl": item.imageUrl, "likeCount": item.likeCount, "likeFlag": item.likeFlag, "profileImageUrl": item.profileImageUrl, "shalomCreatedOn": item.createdOn} )}><FontAwesome name={item.commentCount>0 ? "comments-o": "comments"} size={24} color={item.commentCount>0 ?"purple":"gray"}   /></Text>
                     <Text style={{paddingLeft:45}} onPress={onShare}><FontAwesome name="share-square" size={24} color="gray"   /></Text>
                     {/* item.likeFlag=item.likeFlag===null?true:item.likeFlag===true?false:true; setLikeFlag(item.likeFlag); */}
             </View>

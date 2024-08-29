@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Card, Title, Paragraph } from 'react-native-paper'
 import { FONTS } from "../../constants/theme";
-import { MaterialIcons, FontAwesome, Ionicons, Fontisto  } from '@expo/vector-icons'; 
+import { MaterialIcons, FontAwesome, Ionicons, Fontisto, Entypo  } from '@expo/vector-icons'; 
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import moment from "moment";
 import Carousel from 'react-native-reanimated-carousel';
@@ -39,6 +39,7 @@ export default function EventDetails({route, navigation}) {
   const [createdOn, setCreatedOn] = useState(null);
   const [images, setImages] = useState([]);
   const width = Dimensions.get('window').width;
+  const [languageName, setLanguageName] = useState(null);
 
   useEffect(() => {
     var params = route.params
@@ -94,6 +95,7 @@ export default function EventDetails({route, navigation}) {
         setProfileImageUrl(params.profileImageUrl)
         setEventDate(params.eventDate)
         setEventTime(params.eventTime)
+        setLanguageName(params.languageName)
         let eventImg = [];
         params.eventImageUrl?.split('|').map((img) => {
           eventImg.push(img)
@@ -109,9 +111,9 @@ export default function EventDetails({route, navigation}) {
         <View key={index}>
             <Image
                 style={{
-                    width: '88%',
-                    borderRadius: 15,
-                    height: 200,
+                  width: '90%',
+                  borderRadius: 0,
+                  height: 400,
                 }}
                 source={{uri: item}
                 }
@@ -160,10 +162,10 @@ export default function EventDetails({route, navigation}) {
             <Carousel
                 loop
                 width={width}
-                height={width / 2}
+                height={350}
                 autoPlay={true}
                 data={images}
-                mode="parallax"
+                mode="advanced-parallax"
                 parallaxScrollingScale={0.9}
                 parallaxScrollingOffset={50}
                 scrollAnimationDuration={1000}
@@ -186,6 +188,7 @@ export default function EventDetails({route, navigation}) {
                   <Paragraph>{description}</Paragraph>
               </View>
               <View style={{margin:8}}>
+                  <Text><Entypo name="language" size={24} color="purple" />  {languageName}</Text>
                   <Paragraph><FontAwesome name="address-card" size={21} color="purple" /> {addressline1}, {addressline2}, {regionName}, {stateName}, {cityName}</Paragraph>
                   <Text><FontAwesome name="phone-square" size={24} color="purple" />  {phone1}, {phone2} </Text>
                   <Text><Fontisto name="date" size={24} color="purple" />  {eventDate}  <Ionicons name="time-sharp" size={24} color="purple" /> {eventTime}</Text>

@@ -33,7 +33,7 @@ export default function ChurchDetails({route, navigation}) {
   const [languageName, setLanguageName] = useState('');
   const [createdOn, setCreatedOn] = useState(null);
   const [images, setImages] = useState([]);
-  const width = Dimensions.get('window').width;
+  const width = Dimensions.get('screen').width;
 
   useEffect(() => {
     var params = route.params
@@ -69,9 +69,9 @@ export default function ChurchDetails({route, navigation}) {
         <View key={index}>
             <Image
                 style={{
-                    width: '88%',
-                    borderRadius: 15,
-                    height: 200,
+                    width: '90%',
+                    borderRadius: 0,
+                    height: 400,
                 }}
                 source={{uri: item}
                 }
@@ -119,11 +119,11 @@ export default function ChurchDetails({route, navigation}) {
             {images?.length > 0 && <View style={{ flex: 1 }}>
             <Carousel
                 loop
-                width={width}
-                height={width / 2}
+                width={width }
+                height={350}
                 autoPlay={true}
                 data={images}
-                mode="parallax"
+                mode="advanced-parallax"
                 parallaxScrollingScale={0.9}
                 parallaxScrollingOffset={50}
                 scrollAnimationDuration={1000}

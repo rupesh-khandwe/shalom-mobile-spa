@@ -2,6 +2,7 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import OnboardingScreen from '../components/OnboardingScreen';
+import NeedHelpScreen from '../components/NeedHelpScreen';
 import LoginScreen from '../components/user-signinup/LoginScreen';
 import RegisterName from '../components/user-signinup/Registration/Name';
 import RegisterEmail from '../components/user-signinup/Registration/Email'
@@ -17,6 +18,7 @@ const AuthStack = () => {
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register-Name" component={RegisterName} />
+      <Stack.Screen name="Need-Help" component={NeedHelpScreen} />
       <Stack.Screen
         name="Register-Email"
         component={RegisterEmail}
