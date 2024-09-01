@@ -22,6 +22,7 @@ const SavePost = (props) => {
         'userName': userName,
         'shalomId': shalomId,
         'shalomComment': shalom,
+        'createdOn': new Date()
     }
 
     useEffect(() =>{
@@ -33,6 +34,7 @@ const SavePost = (props) => {
 
         if(props.name === "comment"){
             if(shalom){
+                console.log("inside comment ", commentData)
                 axios
                 .post(`${REACT_APP_BASE_URL_API}/shalom/save/comment`, 
                     commentData,

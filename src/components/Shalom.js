@@ -60,7 +60,7 @@ export default function Shalom({ navigation }) {
         .catch((err) => console.log(err));
 
         axios
-        .get(`${REACT_APP_BASE_URL_API}/shalom/profilePic?userId=${userId}`, {
+        .get(`${REACT_APP_BASE_URL_API}/shalom/profilePic?userId=${userInfo.userId}`, {
           headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
         })
         .then((res) => {

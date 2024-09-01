@@ -188,6 +188,9 @@ const TabNavigator = ({}) => {
           const id = route.split('/')[1];    
           navigation.navigate('GoLive', { id });
         }
+        if (routeName === 'homescreen') {   
+          navigation.navigate('HomeScreen');
+        }
     }
     Linking.addEventListener('url', handleDeepLink);
     return () => {

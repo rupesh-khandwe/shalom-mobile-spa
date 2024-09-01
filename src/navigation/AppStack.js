@@ -103,7 +103,7 @@ const AppStack = ({}) => {
           ),
         }}
       />
-      <Drawer.Screen
+      {/* <Drawer.Screen
         name="Settings"
         component={SettingsStack}
         options={{
@@ -111,7 +111,7 @@ const AppStack = ({}) => {
             <Ionicons name="settings-outline" size={22} color={color} />
           ),
         }}
-      />
+      /> */}
     </Drawer.Navigator>
   );
 };

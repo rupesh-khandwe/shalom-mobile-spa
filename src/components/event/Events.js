@@ -86,8 +86,8 @@ export default function Events({ navigation, route }) {
           // Filter the masterDataSource
           // Update FilteredDataSource
           const newData = masterDataSource.filter(function (item) {
-            const itemData = item.title+","+item.userRegionName+","+item.userCityName+","+item.createdBy;
-            const textData = text;
+            const itemData = item.userCityName.toString().toLowerCase()+","+item.createdBy.toString().toLowerCase();
+            const textData = text.toString().toLowerCase();
             return itemData.indexOf(textData) > -1;
           });
           setFilteredDataSource(newData);
@@ -324,7 +324,7 @@ const renderListEmptyComponent = () => (
                     searchIcon={{ size: 15 }}
                     onChangeText={searchFilterFunction}
                     onClear={(text) => searchFilterFunction('')}
-                    placeholder="Search events by location, user..."
+                    placeholder="Search events by city or user..."
                     value={search}
                   />         
 

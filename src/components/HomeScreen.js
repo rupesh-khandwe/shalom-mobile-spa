@@ -17,7 +17,7 @@ import { shalomInside } from '../assets/images';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator } from 'react-native-paper';
 import {Avatar} from 'react-native-paper';
-import EventNotifications from './event/EventNotifications';
+import ImgToBase64 from 'react-native-image-base64';
 
 export default function HomeScreen({ navigation }) {
     const {userToken, userInfo, userId, userName}= useContext(AuthContext);
@@ -37,6 +37,7 @@ export default function HomeScreen({ navigation }) {
     const scale = new Animated.Value(1);
     let api = useAxios();
     const [loader, setLoader] = useState(true);
+    const [shareImage, setShareImage] = useState('');
 
     const onRefresh = React.useCallback(() => {
       setRefreshing(true);
@@ -127,25 +128,39 @@ export default function HomeScreen({ navigation }) {
         }
      }
 
-const onShare = async () => {
+const onShare = async (message, imageUrl) => {
     try {
+      imageUrl?getBase64(imageUrl):"";
       const result = await Share.open({
-        message:
-          'Share your favorite shaloms to the world',
+        message: message,
+        url: shareImage
       });
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
           // shared with activity type of result.activityType
+          console.log("shared with activityr", result);
         } else {
           // shared
+          console.log("shared ",result);
         }
       } else if (result.action === Share.dismissedAction) {
         // dismissed
+        console.log("dismissed ",result.action);
       }
     } catch (error) {
-      alert(error.message);
+      console.log(error.message);
     }
   }
+
+  const getBase64 = (image)=> {
+    ImgToBase64.getBase64String(image)
+    .then(base64String => {
+        const mime='image/jpeg'
+        const imageData = `data:${mime};base64,${base64String}`
+        setShareImage(imageData)
+    })
+    .catch(err => console.log(err));
+  };
 
   const onZoomEventFunction = Animated.event(
     [{
@@ -273,7 +288,7 @@ const onShare = async () => {
                       />
                     </Text>
                     <Text style={{paddingLeft:45}} onPress={()=> navigation.replace('Comment', {"userId": userId ,"userName": item.userName, "shalomId": item.shalomId, "shalom": item.shalom, "imageUrl": item.imageUrl, "likeCount": item.likeCount, "likeFlag": item.likeFlag, "profileImageUrl": item.profileImageUrl, "shalomCreatedOn": item.createdOn} )}><FontAwesome name={item.commentCount>0 ? "comments-o": "comments"} size={24} color={item.commentCount>0 ?"purple":"gray"}   /></Text>
-                    <Text style={{paddingLeft:45}} onPress={onShare}><FontAwesome name="share-square" size={24} color="gray"   /></Text>
+                    <Text style={{paddingLeft:45}} onPress={()=>onShare(item.shalom, item.imageUrl?item.imageUrl.split('|')[0]:"")}><FontAwesome name="share-square" size={24} color="gray"   /></Text>
                     {/* item.likeFlag=item.likeFlag===null?true:item.likeFlag===true?false:true; setLikeFlag(item.likeFlag); */}
             </View>
         </Card>

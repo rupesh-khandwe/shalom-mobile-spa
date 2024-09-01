@@ -79,7 +79,7 @@ const LoginScreen = ({navigation, route}) => {
             await GoogleSignin.hasPlayServices();
             const userInfo = await GoogleSignin.signIn();
 
-            console.log(userInfo);
+            console.log("Google signIn == ",userInfo);
             googleLogin(userInfo);
         } catch (error) {
             if (error.code === statusCodes.SIGN_IN_CANCELLED) {

@@ -331,7 +331,7 @@ const handleSubmit = () =>{
   const openImagePicker = () => {
     ImagePicker.openPicker({
       multiple: true,
-      maxFiles: 5,
+      maxFiles: 3,
       width: 300,
       height: 400,
       cropping: true,

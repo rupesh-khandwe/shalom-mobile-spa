@@ -13,6 +13,7 @@ import HTMLView from 'react-native-htmlview';
 import {Avatar} from 'react-native-paper';
 import { FONTS } from "../../constants/theme";
 import moment from "moment";
+import Share from 'react-native-share';
 
 const handleHead = ({tintColor}) => <Text style={{color: tintColor}}>H1</Text>
 const Comment = ({route, navigation}) => {
@@ -24,6 +25,7 @@ const Comment = ({route, navigation}) => {
   const [item, setItem] = useState({});
   const [filteredDataSource, setFilteredDataSource] = useState([]);
   const register = route.params;
+  const [shareImage, setShareImage] = useState('');
   useEffect(()=>{
     setItem(route.params);
     //Comments API call
@@ -52,23 +54,27 @@ const Comment = ({route, navigation}) => {
   };
 
 
-  const onShare = async () => {
+  const onShare = async (message, imageUrl) => {
     try {
+      imageUrl?getBase64(imageUrl):"";
       const result = await Share.open({
-        message:
-          'Share your favorite shaloms to the world',
+        message: message,
+        url: shareImage
       });
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
           // shared with activity type of result.activityType
+          console.log("shared with activityr", result);
         } else {
           // shared
+          console.log("shared ",result);
         }
       } else if (result.action === Share.dismissedAction) {
         // dismissed
+        console.log("dismissed ",result.action);
       }
     } catch (error) {
-      alert(error.message);
+      console.log(error.message);
     }
   }
   
@@ -108,21 +114,14 @@ const Comment = ({route, navigation}) => {
       }
 
       const getBase64 = (image)=> {
-        ImgToBase64.getBase64String(image.path)
+        ImgToBase64.getBase64String(image)
         .then(base64String => {
-            const imageData = `data:${image.mime};base64,${base64String}`
-            if("image/jpeg"===image.mime){
-              richText.current?.insertImage(
-                imageData
-              );
-            } else {
-              richText.current?.insertVideo(
-                imageData
-              );
-            }
+            const mime='image/jpeg'
+            const imageData = `data:${mime};base64,${base64String}`
+            setShareImage(imageData)
         })
         .catch(err => console.log(err));
-    };
+      };
    
     const ItemView = ({ item }) => {
       return (
@@ -234,7 +233,7 @@ const Comment = ({route, navigation}) => {
                       />
                     </Text>
                     {/* <Text style={{paddingLeft:45}} onPress={()=> navigation.navigate('Comment', {"userId": userId ,"userName": item.userName, "shalomId": item.shalomId, "shalom": item.shalom, "imageUrl": item.imageUrl, "likeCount": item.likeCount, "likeFlag": item.likeFlag} )}><FontAwesome name={item.commentCount>0 ? "comments-o": "comments"} size={24} color={item.commentCount>0 ?"purple":"gray"}   /></Text> */}
-                    <Text style={{paddingLeft:30}} onPress={onShare}><FontAwesome name="share-square" size={24} color="gray"   /></Text>
+                    <Text style={{paddingLeft:30}} onPress={()=>onShare(item.shalom,item.imageUrl)}><FontAwesome name="share-square" size={24} color="gray"   /></Text>
                     {/* item.likeFlag=item.likeFlag===null?true:item.likeFlag===true?false:true; setLikeFlag(item.likeFlag); */}
             </View>
             <View style={{flexDirection:'row', margin:10}}>

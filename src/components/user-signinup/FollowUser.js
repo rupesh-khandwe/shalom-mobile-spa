@@ -49,8 +49,8 @@ export default function FollowUser({ navigation, route }) {
       const searchFilterFunction = (text) => {
         if (text) {
           const newData = masterDataSource.filter(function (item) {
-            const itemData = item.userName;
-            const textData = text;
+            const itemData = item.userName.toString().toLowerCase();
+            const textData = text.toString().toLowerCase();
             return itemData.indexOf(textData) > -1;
           });
           setFilteredDataSource(newData);

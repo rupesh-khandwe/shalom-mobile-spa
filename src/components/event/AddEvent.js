@@ -172,10 +172,9 @@ export default function AddEvent({route, navigation}) {
       setLanguageName(params.languageName)
       setLanguageEdit(false)
       let eventImg = [];
-      params.eventImageUrl?.split('|').map((img) => {
+      if(params.eventImageUrl?.length > 0) params.eventImageUrl?.split('|').map((img) => {
         eventImg.push(img)
       });
-      console.log("images", eventImg);
       setImages(eventImg);
       //Load state
       getStateList(params.countryId, function(list) {
@@ -296,7 +295,6 @@ const handleSubmit = () =>{
   };
 
   const handleAddEvent = () => {
-    console.log("handleAddEvent ", event_model);
     axios
     .post(`${REACT_APP_BASE_URL_API}/event/add`, 
       event_model,
@@ -362,7 +360,7 @@ const handleSubmit = () =>{
   const openImagePicker = () => {
     ImagePicker.openPicker({
       multiple: true,
-      maxFiles: 5,
+      maxFiles: 3,
       width: 300,
       height: 400,
       cropping: true,
@@ -377,7 +375,6 @@ const handleSubmit = () =>{
             path: image.path,
             data: image.data
       });
-      console.log("image.path  = ",image.path)
       getBase64(image)
       //imageDataList.push(image.data);
     })

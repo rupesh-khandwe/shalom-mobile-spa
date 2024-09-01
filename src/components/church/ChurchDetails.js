@@ -116,7 +116,7 @@ export default function ChurchDetails({route, navigation}) {
                   <Text style={{...FONTS.body5}}>Posted on {moment(createdOn).format("MMMM D")}</Text>
                 </View>
             </View>
-            {images?.length > 0 && <View style={{ flex: 1 }}>
+            {images?.length > 0 && <View style={{ flex: 1, marginTop: 5 }}>
             <Carousel
                 loop
                 width={width }

@@ -71,7 +71,7 @@ export default function EventDetails({route, navigation}) {
           setEventDate(res.data.eventDate)
           setEventTime(res.data.eventTime)
           let eventImg = [];
-          res.data.eventImageUrl?.split('|').map((img) => {
+          if(res.data.eventImageUrl?.length > 0) res.data.eventImageUrl?.split('|').map((img) => {
             eventImg.push(img)
           });
           setImages(eventImg);
@@ -97,7 +97,7 @@ export default function EventDetails({route, navigation}) {
         setEventTime(params.eventTime)
         setLanguageName(params.languageName)
         let eventImg = [];
-        params.eventImageUrl?.split('|').map((img) => {
+        if(params.eventImageUrl?.length > 0) params.eventImageUrl?.split('|').map((img) => {
           eventImg.push(img)
         });
         setImages(eventImg);
@@ -158,20 +158,22 @@ export default function EventDetails({route, navigation}) {
                   <Text style={{...FONTS.body5}}>Posted on {moment(createdOn).format("MMMM D")}</Text>
                 </View>
             </View>
-            {images?.length > 0 && <View style={{ flex: 1 }}>
-            <Carousel
-                loop
-                width={width}
-                height={350}
-                autoPlay={true}
-                data={images}
-                mode="advanced-parallax"
-                parallaxScrollingScale={0.9}
-                parallaxScrollingOffset={50}
-                scrollAnimationDuration={1000}
-                renderItem={_renderItem}
-            />
-        </View>}
+            {images?.length > 0 && 
+              <View style={{ flex: 1, marginTop:5 }}>
+                <Carousel
+                  loop
+                  width={width}
+                  height={350}
+                  autoPlay={true}
+                  data={images}
+                  mode="advanced-parallax"
+                  parallaxScrollingScale={0.9}
+                  parallaxScrollingOffset={50}
+                  scrollAnimationDuration={1000}
+                  renderItem={_renderItem}
+                />
+              </View>
+            }
             <View style={{flexDirection:'row',}}>
                   {/*  Text */}
                   <View style={{justifyContent:'space-around', flex:2/3, margin:5}}>

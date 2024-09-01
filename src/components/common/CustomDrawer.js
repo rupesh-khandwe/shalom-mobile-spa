@@ -3,7 +3,6 @@ import {
   View,
   Text,
   ImageBackground,
-  Image,
   TouchableOpacity,
   StyleSheet
 } from 'react-native';
@@ -20,6 +19,7 @@ import {Avatar} from 'react-native-paper';
 import { REACT_APP_BASE_URL_API } from '@env'
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Share from 'react-native-share';
 
 const CustomDrawer = props => {
   const {logout, userInfo, userToken, userId}= useContext(AuthContext);
@@ -44,6 +44,30 @@ const CustomDrawer = props => {
                .catch((err) => console.log(err));
        });
    }
+
+   const onShare = async () => {
+    try {
+      const result = await Share.open({
+            message: 'I am inviting you to join shalom family :', 
+            url: `https://shalomgolive/homescreen&hl=en`
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+          console.log("shared with activityr", result);
+        } else {
+          // shared
+          console.log("shared ",result);
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+        console.log("dismissed ",result.action);
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
   return (
     <View style={{flex: 1}}>
       <DrawerContentScrollView
@@ -81,7 +105,7 @@ const CustomDrawer = props => {
         </View>
       </DrawerContentScrollView>
       <View style={{padding: 20, borderTopWidth: 1, borderTopColor: '#ccc'}}>
-        <TouchableOpacity onPress={() => {}} style={{paddingVertical: 15}}>
+        <TouchableOpacity onPress={onShare} style={{paddingVertical: 15}}>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Ionicons name="share-social-outline" size={22} />
             <Text

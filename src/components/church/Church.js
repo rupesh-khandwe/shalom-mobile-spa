@@ -99,8 +99,8 @@ export default function Church({ navigation, route }) {
             // Filter the masterDataSource
             // Update FilteredDataSource
             const newData = masterDataSource.filter(function (item) {
-                const itemData = item.createdBy+","+item.addressline1+","+item.userRegionName+","+item.userCityName+","+item.churchName;
-                const textData = text;
+                const itemData = item.createdBy.toString().toLowerCase()+","+item.userRegionName.toString().toLowerCase()+","+item.userCityName.toString().toLowerCase();
+                const textData = text.toString().toLowerCase();
                 if (languageName == null || languageName === 'All') {
                     return itemData.indexOf(textData) > -1;
                 }
@@ -320,7 +320,7 @@ export default function Church({ navigation, route }) {
                 searchIcon={{ size: 20 }}
                 onChangeText={query=> searchFilterFunction(query)}
                 onClear={(text) => searchFilterFunction('')}
-                placeholder="Search by Church, address and user..."
+                placeholder="Search by City, user..."
                 value={search}
               />
       <ScrollView style={{padding: 10}}>
