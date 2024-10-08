@@ -195,7 +195,12 @@ export default function Events({ navigation, route }) {
                      "phone2": item.phone2, "countryName": item.userCountryName, "regionName": item.userRegionName, "stateName": item.userStateName, "cityName": item.userCityName, 
                      "createdOn": item.createdOn, "createdBy" :item.createdBy, "eventImageUrl": item.eventImageUrl, "profileImageUrl": item.profileImageUrl, "languageName": item.languageName}
             )}}>
-           
+            <View style={{flexDirection:'row',}}>
+                  {/*  Text */}
+                  <View style={{justifyContent:'space-around', flex:2/3, margin:5}}>
+                      <Title>{item.categoryName}</Title>
+                  </View>
+              </View>
             <View style={{flexDirection:'row',}}>
                 {/*  Text */}
                 <View style={{justifyContent:'space-around', flex:2/3, margin:5}}>

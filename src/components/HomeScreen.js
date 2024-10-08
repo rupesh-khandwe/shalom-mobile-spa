@@ -35,7 +35,6 @@ export default function HomeScreen({ navigation }) {
     const [profilePic, setProfilePic] = useState('');
     var width = Dimensions.get("window");
     const scale = new Animated.Value(1);
-    let api = useAxios();
     const [loader, setLoader] = useState(true);
     const [shareImage, setShareImage] = useState('');
 
@@ -108,7 +107,7 @@ export default function HomeScreen({ navigation }) {
                         })
                         .catch((err) => console.log(err));
 
-                    console.log("Loaded EventNotifications*************", userId);
+                    //console.log("Loaded EventNotifications*************", userId);
                     axios
                         .get(`${REACT_APP_BASE_URL_API}/event/notification?id=${userId}`, {
                             headers: {'Authorization': "Bearer " + userToken, 'content-type': 'application/json'},
@@ -183,7 +182,7 @@ const onShare = async (message, imageUrl) => {
       const unsubscribe = navigation.addListener('focus', () => {
         // The screen is focused
         // Call any action
-        console.log("Profile screen focused")
+        //console.log("Profile screen focused")
           width = Dimensions.get("window");
         var i=0;
         var asyncDataTimer = setInterval(function() {
@@ -250,23 +249,26 @@ const onShare = async (message, imageUrl) => {
                     />
                 </View>
             }
-            {item.imageUrl ?
-              item.imageUrl.split('|').map((img) => {
+            {
+            item.imageUrl ? item.imageUrl.split('|').map((img) => {
                 return(  
                   <PinchGestureHandler
                     onGestureEvent={onZoomEventFunction}
                     onHandlerStateChange={onZoomStateChangeFunction}
                     key={item.shalomId}
                   >
-                    <Animated.Image
-                      style={{width: '100%', height: 300,resizeMode : 'stretch', transform: [{scale: scale}] }}
-                      source={{uri:img}} 
-                      resizeMode={'contain'}
-                    /> 
-                </PinchGestureHandler>
+                    <Image
+                      style={{
+                        width: '100%',
+                        borderRadius: 0,
+                        height: 350,
+                      }}
+                      source={{uri:img}}
+                    />
+                  </PinchGestureHandler>
                 )
               })
-            : null}
+              : null}
             <View style={{flexDirection:'row', margin:10}}>
 
                     <Text style={{paddingLeft:5}} >{item.likeCount} Like</Text>

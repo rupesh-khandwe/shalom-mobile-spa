@@ -1,4 +1,4 @@
-package com.shalom
+package com.shalommobilespa
 
 import android.app.Application
 import android.content.res.Configuration

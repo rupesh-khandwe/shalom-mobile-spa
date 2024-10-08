@@ -13,7 +13,7 @@
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
   <!-- Define ACCESS_FINE_LOCATION if you will use enableHighAccuracy=true  -->
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-  <queries>
+    <queries>
     <intent>
       <action android:name="android.intent.action.VIEW"/>
       <category android:name="android.intent.category.BROWSABLE"/>
@@ -35,7 +35,7 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="com.shalom"/>
+        <data android:scheme="com.shalommobilespa"/>
        <!-- <data android:scheme="exp+shalom"/>-->
       </intent-filter>
     </activity>

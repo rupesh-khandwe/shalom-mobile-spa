@@ -12,7 +12,7 @@ const EventNotifications = () => {
   const {userToken, userInfo}= useContext(AuthContext);
   const [filteredEventNotifyDataSource, setFilteredEventNotifyDataSource] = useState([]);
   useEffect(() => {
-    console.log("Loaded EventNotifications*************", userInfo.userId);
+    //console.log("Loaded EventNotifications*************", userInfo.userId);
       axios
       .get(`${REACT_APP_BASE_URL_API}/event/notification?id=${userInfo.userId}`, {
         headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},

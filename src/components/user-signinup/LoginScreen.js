@@ -41,9 +41,9 @@ const LoginScreen = ({navigation, route}) => {
     useEffect(() => {
         GoogleSignin.configure({
             webClientId:
-                '722628552321-t1hluouucdv63re40q76ja4eknp92ipj.apps.googleusercontent.com',
+                '795791263698-2fqdvaqfu6q30fa31m2s1rask0pd89fq.apps.googleusercontent.com',
             androidClientId:
-                '722628552321-t1hluouucdv63re40q76ja4eknp92ipj.apps.googleusercontent.com',
+                '795791263698-gepnqjombbuc5ukevdt74pagncodt8es.apps.googleusercontent.com',
             offlineAccess: true,
             forceCodeForRefreshToken: true,
         });
@@ -60,17 +60,17 @@ const LoginScreen = ({navigation, route}) => {
 
   const handleSubmit = () =>{
     if(validateForm()){
-      console.log("Submitted", userName, userPassword);
+     // console.log("Submitted", userName, userPassword);
       setUserName("");
       setUserPassword("");
       setErrors({});
-      console.log(errors+"****"+userName+"***"+userPassword);
+      //console.log(errors+"****"+userName+"***"+userPassword);
       login(userName, userPassword)
     }
   }
 
   const setHideFlag = () =>{
-    console.log(secureText)
+   // console.log(secureText)
     setSecureText(!secureText)
   }
 

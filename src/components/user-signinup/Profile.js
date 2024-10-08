@@ -22,7 +22,7 @@ import {Avatar} from 'react-native-paper';
 import Back from 'react-native-vector-icons/Ionicons';
 
 const Profile = ({route, navigation}) => {
-  const {userInfo, userToken} = useContext(AuthContext);
+  const {userInfo, userToken, profileName} = useContext(AuthContext);
   const layout = useWindowDimensions();
   const [index, setIndex] = useState(0);
   const [userId, setUserId]= useState('');
@@ -52,7 +52,7 @@ const Profile = ({route, navigation}) => {
   }
 
   useEffect(() => {
-  console.log("Profile loaded")
+  console.log("Profile loaded", userName, userInfo.userName, userInfo.firstName)
       var extUserObj =  route.params
       for ( var key in extUserObj) {
          console.log(" key is : "   + key + "   and value for key is   " + extUserObj[key]);
@@ -70,12 +70,12 @@ const Profile = ({route, navigation}) => {
          setShowExternalFlag(true);
          }
       }
-      console.log("route name=",extRoute);
+      //console.log("route name=",extRoute); {!userInfo.firstName && !userInfo.lastName?userInfo.userName:userInfo.firstName+ " "+userInfo.lastName} 
        if(extRoute==="profile"){
-            console.log("Profile Called from Church=",extUserObj);
-            !extUserName?setUserName(userInfo.userName):setUserName(extUserName);
+            console.log("Profile Called from Church=",extUserObj, userInfo.userNam);
+            !extUserName?setUserName(!userInfo.firstName && !userInfo.lastName?userInfo.userName:userInfo.firstName+ " "+userInfo.lastName):setUserName(extUserName);
             const localExternalUser=!extUserId?userInfo.userId:extUserId;
-            console.log("Bearer "+ userToken);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
+            //console.log("Bearer "+ userToken);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
             setUserId(localExternalUser);
             axios
             .get(`${REACT_APP_BASE_URL_API}/shalom/profile?userId=${localExternalUser}`, {
@@ -117,15 +117,15 @@ const Profile = ({route, navigation}) => {
       const unsubscribe = navigation.addListener('focus', () => {
         // The screen is focused
         // Call any action
-        console.log("Profile screen inside listner")
+        console.log("Profile screen inside listner", userInfo.userName)
           var extUserObj =  route.params
          // console.log("Profile screen items=",extUserObj);
 
             console.log(extUserId, " == ", extUserName)
-            !extUserName?setUserName(userInfo.userName):setUserName(extUserName);
+            !extUserName?setUserName(!userInfo.firstName && !userInfo.lastName?userInfo.userName:userInfo.firstName+ " "+userInfo.lastName):setUserName(extUserName);
             const localExternalUser=!extUserId?userInfo.userId:extUserId;
             setUserId(localExternalUser);
-            console.log("Bearer "+ userToken);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
+            //console.log("Bearer "+ userToken);//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
 
             axios
             .get(`${REACT_APP_BASE_URL_API}/shalom/profile?userId=${localExternalUser}`, {
@@ -425,7 +425,7 @@ const Profile = ({route, navigation}) => {
             marginVertical: 8,
           }}
         >
-          {userName}
+          {userName} 
         </Text>
         {/* <Text
           style={{

@@ -24,7 +24,10 @@ export default function Shalom({ navigation }) {
     const video = React.useRef(null);
     const [status, setStatus] = React.useState({});
     var width = Dimensions.get("window");
-    const scale = new Animated.Value(1);
+    //const scale = new Animated.Value(1);
+    const [viewState, setViewState] = React.useState(true);
+    const scale = React.useRef(new Animated.Value(1)).current;
+    const [init, setInit] = React.useState(true);
     const [loader, setLoader] = useState(true);
     const [profilePic, setProfilePic] = useState('');
 
@@ -68,7 +71,31 @@ export default function Shalom({ navigation }) {
             setProfilePic(res.data)
         })
         .catch((err) => console.log(err));
-      }, []);
+
+        if (init) {
+          setInit(false);
+        } else {
+          if (viewState) {
+            Animated.timing(scale, {
+              toValue: 2,
+              duration: 1000,
+              useNativeDriver: true,
+            }).start();
+          } else {
+            Animated.timing(scale, {
+              toValue: 0.5,
+              duration: 700,
+              useNativeDriver: true,
+            }).start();
+          }
+        }
+
+      }, [viewState]);
+
+      const scaleOut = () => {
+        console.log("Scaleout==")
+        setViewState(!viewState);
+      };
 
       const searchFilterFunction = (text) => {
         // Check if searched text is not blank 
@@ -149,17 +176,13 @@ export default function Shalom({ navigation }) {
             {item.imageUrl &&
               item.imageUrl.split('|').map((img) => {
                 return(  
-                  <PinchGestureHandler
-                    onGestureEvent={onZoomEventFunction}
-                    onHandlerStateChange={onZoomStateChangeFunction}
-                    key={item.shalomId}
-                  >
-                    <Animated.Image
-                      style={{width: '100%', height: 300,resizeMode : 'center', transform: [{scale: scale}] }}
+                 <Animated.View style={{ transform: [{ scale }] }}>
+                    <Image
+                     
                       source={{uri:img}} 
-                      resizeMode={'contain'}
+                      onPress={scaleOut}
                     /> 
-                </PinchGestureHandler>
+                 </Animated.View>
                 )
               })
             }

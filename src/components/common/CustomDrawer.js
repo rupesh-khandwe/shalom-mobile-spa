@@ -27,7 +27,8 @@ const CustomDrawer = props => {
   const [profilePic, setProfilePic] = useState('');
 
   useEffect(() => {
-    setUserName(userInfo.userName);
+    //console.log("userInfo.firstName == ", userInfo.firstName)
+    setUserName(!userInfo.userName?userInfo.firstName +" "+ userInfo.lastName:userInfo.userName);
     getAsyncData();
   }, []);
 
@@ -38,7 +39,7 @@ const CustomDrawer = props => {
                      headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
                    })
                .then((res) => {
-                   //console.log(res.data);
+                   console.log(res.data);
                    setProfilePic(res.data)
                })
                .catch((err) => console.log(err));

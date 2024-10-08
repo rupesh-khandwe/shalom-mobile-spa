@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.2.1" type="baseline" client="gradle" dependencies="false" name="AGP (8.2.1)" variant="all" version="8.2.1">
+
+    <issue
+        id="ScopedStorage"
+        message="READ_EXTERNAL_STORAGE is deprecated (and is not granted) when targeting Android 13+. If you need to query or interact with MediaStore or media files on the shared storage, you should instead use one or more new storage permissions: `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO` or `READ_MEDIA_AUDIO`."
+        errorLine1="  &lt;uses-permission android:name=&quot;android.permission.READ_EXTERNAL_STORAGE&quot;/>"
+        errorLine2="                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="9"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="ScopedStorage"
+        message="WRITE_EXTERNAL_STORAGE is deprecated (and is not granted) when targeting Android 13+. If you need to write to shared storage, use the `MediaStore.createWriteRequest` intent."
+        errorLine1="  &lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;/>"
+        errorLine2="                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="13"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="RedundantLabel"
+        message="Redundant label can be removed"
+        errorLine1="    &lt;activity android:name=&quot;.MainActivity&quot; android:label=&quot;@string/app_name&quot; android:configChanges=&quot;keyboard|keyboardHidden|orientation|screenSize|screenLayout|uiMode&quot; android:launchMode=&quot;singleTask&quot; android:windowSoftInputMode=&quot;adjustResize&quot; android:theme=&quot;@style/Theme.App.SplashScreen&quot; android:exported=&quot;true&quot;>"
+        errorLine2="                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="30"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="PermissionImpliesUnsupportedChromeOsHardware"
+        message="Permission exists without corresponding hardware `&lt;uses-feature android:name=&quot;android.hardware.camera&quot; required=&quot;false&quot;>` tag"
+        errorLine1="  &lt;uses-permission android:name=&quot;android.permission.CAMERA&quot; />"
+        errorLine2="   ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="8"
+            column="4"/>
+    </issue>
+
+    <issue
+        id="DataExtractionRules"
+        message="The attribute `android:allowBackup` is deprecated from Android 12 and higher and may be removed in future versions. Consider adding the attribute `android:dataExtractionRules` specifying an `@xml` resource which configures cloud backups and device transfers on Android 12 and higher."
+        errorLine1="  &lt;application android:name=&quot;.MainApplication&quot; android:label=&quot;@string/app_name&quot; android:icon=&quot;@mipmap/ic_launcher&quot; android:roundIcon=&quot;@mipmap/ic_launcher_round&quot; android:allowBackup=&quot;false&quot; android:theme=&quot;@style/AppTheme&quot; android:usesCleartextTraffic=&quot;true&quot;>"
+        errorLine2="                                                                                                                                                                                      ~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="24"
+            column="183"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.integer.react_native_dev_server_port` appears to be unused">
+        <location
+            file="build.gradle"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.mipmap.ic_launcher_bkup` appears to be unused">
+        <location
+            file="src/main/res/mipmap-hdpi/ic_launcher_bkup.png"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.mipmap.ic_launcher_round_bkup` appears to be unused">
+        <location
+            file="src/main/res/mipmap-hdpi/ic_launcher_round_bkup.png"/>
+    </issue>
+
+    <issue
+        id="IconDipSize"
+        message="The image `ic_launcher.png` varies significantly in its density-independent (dip) size across the various density versions: mipmap-hdpi\ic_launcher.png: 48x48 dp (72x72 px), mipmap-mdpi\ic_launcher.png: 72x72 dp (72x72 px), mipmap-xhdpi\ic_launcher.png: 36x36 dp (72x72 px), mipmap-xxhdpi\ic_launcher.png: 24x24 dp (72x72 px), mipmap-xxxhdpi\ic_launcher.png: 18x18 dp (72x72 px)">
+        <location
+            file="src/main/res/mipmap-xxxhdpi/ic_launcher.png"/>
+        <location
+            file="src/main/res/mipmap-xxhdpi/ic_launcher.png"/>
+        <location
+            file="src/main/res/mipmap-xhdpi/ic_launcher.png"/>
+        <location
+            file="src/main/res/mipmap-hdpi/ic_launcher.png"/>
+        <location
+            file="src/main/res/mipmap-mdpi/ic_launcher.png"/>
+    </issue>
+
+    <issue
+        id="IconDipSize"
+        message="The image `ic_launcher_round.png` varies significantly in its density-independent (dip) size across the various density versions: mipmap-hdpi\ic_launcher_round.png: 48x48 dp (72x72 px), mipmap-mdpi\ic_launcher_round.png: 72x72 dp (72x72 px), mipmap-xhdpi\ic_launcher_round.png: 36x36 dp (72x72 px), mipmap-xxhdpi\ic_launcher_round.png: 24x24 dp (72x72 px), mipmap-xxxhdpi\ic_launcher_round.png: 18x18 dp (72x72 px)">
+        <location
+            file="src/main/res/mipmap-xxxhdpi/ic_launcher_round.png"/>
+        <location
+            file="src/main/res/mipmap-xxhdpi/ic_launcher_round.png"/>
+        <location
+            file="src/main/res/mipmap-xhdpi/ic_launcher_round.png"/>
+        <location
+            file="src/main/res/mipmap-hdpi/ic_launcher_round.png"/>
+        <location
+            file="src/main/res/mipmap-mdpi/ic_launcher_round.png"/>
+    </issue>
+
+    <issue
+        id="IconDuplicates"
+        message="The following unrelated icon files have identical contents: ic_launcher.png, ic_launcher_round.png, ic_launcher.png, ic_launcher_round.png, ic_launcher.png, ic_launcher_round.png, ic_launcher.png, ic_launcher_round.png, ic_launcher.png, ic_launcher_round.png">
+        <location
+            file="src/main/res/mipmap-xxxhdpi/ic_launcher_round.png"/>
+        <location
+            file="src/main/res/mipmap-xxxhdpi/ic_launcher.png"/>
+        <location
+            file="src/main/res/mipmap-xxhdpi/ic_launcher_round.png"/>
+        <location
+            file="src/main/res/mipmap-xxhdpi/ic_launcher.png"/>
+        <location
+            file="src/main/res/mipmap-xhdpi/ic_launcher_round.png"/>
+        <location
+            file="src/main/res/mipmap-xhdpi/ic_launcher.png"/>
+        <location
+            file="src/main/res/mipmap-mdpi/ic_launcher_round.png"/>
+        <location
+            file="src/main/res/mipmap-mdpi/ic_launcher.png"/>
+        <location
+            file="src/main/res/mipmap-hdpi/ic_launcher_round.png"/>
+        <location
+            file="src/main/res/mipmap-hdpi/ic_launcher.png"/>
+    </issue>
+
+</issues>

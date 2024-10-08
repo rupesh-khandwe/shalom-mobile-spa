@@ -6,11 +6,11 @@
       "**/*"
     ],
     "ios": {
-      "bundleIdentifier": "com.shalom",
+      "bundleIdentifier": "com.shalommobilespa",
       "buildNumber": "1.0.0"
     },
     "android": {
-      "package": "com.shalom",
+      "package": "com.shalommobilespa",
       "versionCode": 2
     },
     "extra": {

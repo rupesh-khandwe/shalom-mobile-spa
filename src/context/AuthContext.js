@@ -26,6 +26,7 @@ export const AuthProvider = ({children}) => {
         postUserParam.firstName = postUserParam.givenName;
         postUserParam.lastName = postUserParam.familyName;
         postUserParam.userName = postUserParam.email;
+        postUserParam.imageUrl = postUserParam.photo;
         axios
             .post(`${REACT_APP_USER_PROFILE}/register`, postUserParam)
             .then((res) => {
@@ -49,9 +50,9 @@ export const AuthProvider = ({children}) => {
         .then((res) => {
             let userInfo = res.data;
             console.log(JSON.stringify(userInfo));
-            console.log("AuthContext login userInfo",userInfo);
-            console.log("AuthContext login serInfo.userId",userInfo.userId);
-            console.log("AuthContext login serInfo.userName",userInfo.userName);
+           // console.log("AuthContext login userInfo",userInfo);
+           // console.log("AuthContext login serInfo.userId",userInfo.userId);
+           // console.log("AuthContext login serInfo.userName",userInfo.userName);
             setCredentials(userInfo, null)
             setUserToken(userInfo.accessToken);
             setUserInfo(userInfo);
@@ -84,13 +85,13 @@ export const AuthProvider = ({children}) => {
 
      const isLoggedIn = async()=>{
         try {
-            console.log("isLoggedIn***")
+           // console.log("isLoggedIn***")
             setIsLoading(true);
             let userInfo = await AsyncStorage.getItem('userInfo');
             let userToken = await AsyncStorage.getItem('userToken');
             userInfo = JSON.parse(userInfo);
-            console.log("isLoggedIn userInfo***",userInfo)
-            console.log("isLoggedIn userToken***",userToken)
+           // console.log("isLoggedIn userInfo***",userInfo)
+            //console.log("isLoggedIn userToken***",userToken)
             if(userInfo){
                 setUserToken(userToken);
                 setUserInfo(userInfo);
@@ -159,9 +160,9 @@ export const AuthProvider = ({children}) => {
       }
       
       function isTokenExpired (token) {
-        console.log("token to decode== ",token)
+       // console.log("token to decode== ",token)
         const user = jwt_decode(token)
-        console.log("decoded user== ",user)
+       // console.log("decoded user== ",user)
         const isExpired = dayjs.unix(user.exp).diff(dayjs()) < 1;
         console.log("isExpired== ",isExpired)
        // var decoded = jwtDecode(token)
@@ -212,7 +213,7 @@ export const AuthProvider = ({children}) => {
 
 
     return (
-        <AuthContext.Provider value={{login, logout, isLoading, userToken, userInfo, userId, userName,editorData, shalom, shalomId, getCredentials, googleLogin}}>
+        <AuthContext.Provider value={{login, logout, isLoading, userToken, userInfo, userId, userName, editorData, shalom, shalomId, getCredentials, googleLogin}}>
             {children}
         </AuthContext.Provider>
     );
