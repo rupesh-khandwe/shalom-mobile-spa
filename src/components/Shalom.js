@@ -67,7 +67,7 @@ export default function Shalom({ navigation }) {
           headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
-            console.log(res.data);
+            //console.log(res.data);
             setProfilePic(res.data)
         })
         .catch((err) => console.log(err));
@@ -172,20 +172,28 @@ export default function Shalom({ navigation }) {
                         {/* <Button title={status.isLooping ? "Set to not loop" : "Set to loop"} onPress={() => video.current.setIsLoopingAsync(!status.isLooping)} /> */}
                     </View>
                 </View>
-            }
-            {item.imageUrl &&
-              item.imageUrl.split('|').map((img) => {
+            } 
+            {
+            item.imageUrl ? item.imageUrl.split('|').map((img) => {
                 return(  
-                 <Animated.View style={{ transform: [{ scale }] }}>
+                  <PinchGestureHandler
+                    onGestureEvent={onZoomEventFunction}
+                    onHandlerStateChange={onZoomStateChangeFunction}
+                    key={item.shalomId}
+                  >
                     <Image
-                     
-                      source={{uri:img}} 
-                      onPress={scaleOut}
-                    /> 
-                 </Animated.View>
+                      style={{
+                        width: '100%',
+                        borderRadius: 0,
+                        height: 350,
+                        paddingBottom: 60
+                      }}
+                      source={{uri:img}}
+                    />
+                  </PinchGestureHandler>
                 )
               })
-            }
+              : null}
         </Card>
         ); 
     };

@@ -12,35 +12,17 @@ import {
 
 import InputField from '../../common/InputField';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import GoogleSVG from '../../../assets/images/misc/GoogleSVG';
-import FacebookSVG from '../../../assets/images/misc/FacebookSVG';
-import TwitterSVG from '../../../assets/images/misc/TwitterSVG';
 import CustomButton from '../../common/CustomButton';
 import { icon } from '../../../assets/images';
-import {Dropdown} from 'react-native-element-dropdown';
-import axios from 'axios';
 import {REACT_APP_LOCATION_API, REACT_APP_USER_PROFILE} from '@env'
-import PhoneInput from "react-native-phone-number-input";
-import { FontAwesome, AntDesign } from '@expo/vector-icons'; 
-import { LoginManager, GraphRequest, GraphRequestManager } from "react-native-fbsdk";
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
-import BackHistory from '../../common/BackHistory';
 
 export default function Email({route, navigation}) {
 
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [isFocus, setIsFocus] = useState(false);
-  const [formFields, setFormFields] = useState({
-    email: '',
-    firstName: ''
-  });
   const [errors, setErrors] = useState({});
-  const [secureText, setSecureText] = useState(true);
-  const [confirmSecureText, setConfirmSecureText] = useState(true);
 
   useEffect(() => {
 

@@ -11,35 +11,18 @@ import {
 } from 'react-native';
 
 import InputField from '../../common/InputField';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import GoogleSVG from '../../../assets/images/misc/GoogleSVG';
-import FacebookSVG from '../../../assets/images/misc/FacebookSVG';
-import TwitterSVG from '../../../assets/images/misc/TwitterSVG';
 import CustomButton from '../../common/CustomButton';
 import { icon } from '../../../assets/images';
-import {Dropdown} from 'react-native-element-dropdown';
-import axios from 'axios';
-import {REACT_APP_LOCATION_API, REACT_APP_USER_PROFILE} from '@env'
-import PhoneInput from "react-native-phone-number-input";
-import { FontAwesome, AntDesign } from '@expo/vector-icons'; 
-import { LoginManager, GraphRequest, GraphRequestManager } from "react-native-fbsdk";
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
-import GetLocation from 'react-native-get-location'
-import { showMessage, hideMessage  } from "react-native-flash-message";
+import {REACT_APP_LOCATION_API} from '@env'
+import { showMessage  } from "react-native-flash-message";
 
 export default function RegisterScreen({route, navigation}) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [isFocus, setIsFocus] = useState(true);
-  const [formFields, setFormFields] = useState({
-    email: '',
-    firstName: ''
-  });
   const [errors, setErrors] = useState({});
-  const [secureText, setSecureText] = useState(true);
-  const [confirmSecureText, setConfirmSecureText] = useState(true);
   let registerError = route.params;
 
   useEffect(() => {
@@ -53,8 +36,6 @@ export default function RegisterScreen({route, navigation}) {
       Keyboard.dismiss();
       let errors = {};
       const requireFieldMsg = " Required field*";
-      const regexPhone = /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/i;
-      let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
       if(!firstName) errors.firstName = requireFieldMsg;
       if(!lastName) errors.lastName = requireFieldMsg;
   

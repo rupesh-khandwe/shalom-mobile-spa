@@ -60,7 +60,7 @@ export default function AddEvent({route, navigation}) {
   const [createdBy, setCreatedBy] = useState('');
   const [isFocus, setIsFocus] = useState(false);
   const [date, setDate] = useState(new Date(1598051730000));
-  const [dateString, setDateString] = useState('Date of Birth');
+  const [dateString, setDateString] = useState('');
   const [eventDate, setEventDate] = useState('');
   const [eventTime, setEventTime] = useState('');
   const [mode, setMode] = useState('date');
@@ -83,7 +83,7 @@ export default function AddEvent({route, navigation}) {
     'categoryId': categoryId,
     'title': title,
     'description': description,
-    'eventDate': eventDate,
+    'eventDate': dateString,
     'eventTime': eventTime,
     'phone1': phone1,
     'phone2': phone2,
@@ -102,7 +102,8 @@ export default function AddEvent({route, navigation}) {
 
   useEffect(() => {
     setUserId(userInfo.userId);
-    setCreatedBy(userInfo.userName);
+    //setCreatedBy(userInfo.userName);
+    setCreatedBy(!userInfo.firstName && !userInfo.lastName?userInfo.userName:userInfo.firstName+ " "+userInfo.lastName)
     handleState(countryId);
     var params = route.params
     console.log("route.params",params);
@@ -303,7 +304,7 @@ const handleSubmit = () =>{
     .then((res) => {
         navigation.replace('Event', "success");
     })
-    .catch((err) => console.log(`Login error ${err}`)); 
+    .catch((err) => console.log(`Add event error ${err}`)); 
   };
 
   const onChange = (event, selectedDate) => {
@@ -311,9 +312,11 @@ const handleSubmit = () =>{
     const year = selectedDate.getFullYear();
     const month = selectedDate.getMonth()+1; 
     const day= selectedDate.getDate();
-    const dateString = `${day}-${month}-${year}`;
+    const dateString = `${month}-${day}-${year}`;
+    console.log("Event dateString = ",dateString)
+    console.log("Event currentDate = ",currentDate)
     setShow(false);
-    setDateString(dateString);
+    setDateString(currentDate);
     setDate(currentDate);
     var [eventDate, eventTime] = currentDate.toLocaleString().split(',');
     setEventDate(eventDate);
@@ -598,16 +601,17 @@ const handleSubmit = () =>{
             error={errors.eventTime}
           /></View>
       </TouchableOpacity>
-          {show && (<DateTimePicker
-            testID="dateTimePicker"
-            minimumDate={new Date()}
-            value={date}
-            mode={mode}
-            is24Hour={true}
-            onChange={onChange}
-            display='spinner'
-          />
-          )}
+      
+      {show && (<DateTimePicker
+        testID="dateTimePicker"
+        minimumDate={new Date()}
+        value={date}
+        mode={mode}
+        is24Hour={true}
+        onChange={onChange}
+        display='spinner'
+      />
+      )}
 
         <InputField
           label={'Phone-1*'}

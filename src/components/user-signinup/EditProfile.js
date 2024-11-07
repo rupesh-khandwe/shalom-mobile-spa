@@ -242,7 +242,6 @@ export default function EditProfile({navigation}) {
         // );
     })
     .catch((err) => 
-      //console.log(`Login error ${err}`)
       showMessage({
         message: "Failed to save, please try-again.",
         type: "info",

@@ -27,8 +27,8 @@ const CustomDrawer = props => {
   const [profilePic, setProfilePic] = useState('');
 
   useEffect(() => {
-    //console.log("userInfo.firstName == ", userInfo.firstName)
-    setUserName(!userInfo.userName?userInfo.firstName +" "+ userInfo.lastName:userInfo.userName);
+    console.log("userInfo.firstName == ", userInfo.firstName)
+    setUserName(!userInfo.firstName && !userInfo.lastName?userInfo.userName:userInfo.firstName+ " "+userInfo.lastName);
     getAsyncData();
   }, []);
 
@@ -50,7 +50,7 @@ const CustomDrawer = props => {
     try {
       const result = await Share.open({
             message: 'I am inviting you to join shalom family :', 
-            url: `https://shalomgolive/homescreen&hl=en`
+            url: `https://play.google.com/store/apps/details?id=com.shalommobilespa`
       });
       if (result.action === Share.sharedAction) {
         if (result.activityType) {

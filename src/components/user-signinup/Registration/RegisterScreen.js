@@ -315,7 +315,7 @@ const _responseInfoCallBack = async(error, result) =>{
           "success"
         );
     })
-    .catch((err) => console.log(`Login error ${err}`)); 
+    .catch((err) => console.log(`Registration error ${err}`)); 
   };
 
  {/* DOB code in future if needed */}

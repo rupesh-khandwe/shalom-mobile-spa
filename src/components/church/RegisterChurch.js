@@ -96,7 +96,8 @@ export default function RegisterChurch({route,navigation}) {
     var params = route.params
     console.log("route.params",params);
     setUserId(userInfo.userId);
-    setCreatedBy(userInfo.userName);
+    //setCreatedBy(userInfo.userName);
+    setCreatedBy(!userInfo.firstName && !userInfo.lastName?userInfo.userName:userInfo.firstName+ " "+userInfo.lastName)
     !params && setCreatedOn(moment.utc().toISOString());
     //console.log("updating church for existing",params.churchId,params.userId ,params.churchName,  params.addressline1,  params.addressline2, params.phone1,  params.phone2,  params.countryId,  params.regionId, params.stateId,  params.cityId, params.churchWebsiteUrl);
     console.log("Current date ", moment(new Date()).format("YYYY-MM-DD'T'HH:mm:ss.SSS"));

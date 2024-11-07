@@ -22,7 +22,8 @@ export const AuthProvider = ({children}) => {
     const googleLogin = (userInfo) => {
         setIsGoogleSignin(true);
 
-        let postUserParam = userInfo.user;
+        let postUserParam = userInfo.data.user;
+        console.log("google signin user details ", postUserParam);
         postUserParam.firstName = postUserParam.givenName;
         postUserParam.lastName = postUserParam.familyName;
         postUserParam.userName = postUserParam.email;
@@ -31,11 +32,11 @@ export const AuthProvider = ({children}) => {
             .post(`${REACT_APP_USER_PROFILE}/register`, postUserParam)
             .then((res) => {
                 let resUserInfo = res.data;
-                setUserToken(userInfo.idToken);
+                setUserToken(userInfo.data.idToken);
                 setUserInfo(resUserInfo);
                 setUserId(resUserInfo.userId);
-                setUserName(userInfo.email);
-                setCredentials(resUserInfo, userInfo.idToken);
+                setUserName(userInfo.data.user.email);
+                setCredentials(resUserInfo, userInfo.data.idToken);
             })
             .catch((err) => console.log(`Login error ${err}`));
     }
@@ -118,7 +119,7 @@ export const AuthProvider = ({children}) => {
             token
         })
         .then((res) => res.json)
-        .catch((err) => console.log(`Login error ${err}`)); 
+        .catch((err) => console.log(`Refresh token error ${err}`)); 
       }
       
       async function getVerifiedKeys (keys) {

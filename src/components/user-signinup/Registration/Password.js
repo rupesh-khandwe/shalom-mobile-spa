@@ -128,7 +128,7 @@ export default function RegisterScreen({route, navigation}) {
         login(userName, password)
     })
     .catch((err) => 
-      console.log(`Login error ${err}`),
+      console.log(`Password error ${err}`),
       navigation.replace('Register-Name', "fail")
     ); 
   };

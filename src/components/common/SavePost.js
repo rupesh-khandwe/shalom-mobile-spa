@@ -27,7 +27,9 @@ const SavePost = (props) => {
 
     useEffect(() =>{
         setUserId(userInfo.userId);
+        console.log("Shalom post==", userInfo.userName, userInfo.firstName)
         setUserName(userInfo.userName);
+        setUserName(!userInfo.firstName && !userInfo.lastName?userInfo.userName:userInfo.firstName+ " "+userInfo.lastName)
     });
 
     const saveAction = () => {
@@ -43,7 +45,7 @@ const SavePost = (props) => {
                 .then((res) => {
                     navigation.replace("Home");
                 })
-                .catch((err) => console.log(`Login error ${err}`)); 
+                .catch((err) => console.log(`Shalom post error ${err}`)); 
             } else {
                 showMessage({
                     message: "Empty comments cant be saved.",
@@ -64,7 +66,7 @@ const SavePost = (props) => {
                 .then((res) => {
                     navigation.replace("Shalom");
                 })
-                .catch((err) => console.log(`Login error ${err}`)); 
+                .catch((err) => console.log(`Shalom post error ${err}`)); 
             } else {
                 showMessage({
                     message: "Empty posts cant be saved.",

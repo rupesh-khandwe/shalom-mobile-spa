@@ -81,7 +81,6 @@ export default function FollowUser({ navigation, route }) {
             })
         })
         .catch((err) => 
-          //console.log(`Login error ${err}`)
           showMessage({
             message: "Failed to save, please try-again.",
             type: "info",

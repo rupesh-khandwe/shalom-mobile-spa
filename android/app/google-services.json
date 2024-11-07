@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "494269236356",
+    "project_id": "shalom-a-believers-hub",
+    "storage_bucket": "shalom-a-believers-hub.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:494269236356:android:1178b6f2257f3c818feed1",
+        "android_client_info": {
+          "package_name": "com.shalommobilespa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "494269236356-k6euvl79cpo2stsmflrqf8o6i2mn738k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shalommobilespa",
+            "certificate_hash": "beae44d77f5e12c23eb36d9a687a44c707aa4c33"
+          }
+        },
+        {
+          "client_id": "494269236356-iopl5mdss5hjcv94deq89egm2c18ifb6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXG1Pw5h2kCUSaHqgdjbrYTmaV0xZTqqA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "494269236356-iopl5mdss5hjcv94deq89egm2c18ifb6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "494269236356-940orjoesofpq7sp5sq8kuru9k6e35c9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.believers.shalom.shalom"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

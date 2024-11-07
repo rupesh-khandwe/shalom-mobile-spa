@@ -41,9 +41,7 @@ const LoginScreen = ({navigation, route}) => {
     useEffect(() => {
         GoogleSignin.configure({
             webClientId:
-                '795791263698-2fqdvaqfu6q30fa31m2s1rask0pd89fq.apps.googleusercontent.com',
-            androidClientId:
-                '795791263698-gepnqjombbuc5ukevdt74pagncodt8es.apps.googleusercontent.com',
+                '494269236356-iopl5mdss5hjcv94deq89egm2c18ifb6.apps.googleusercontent.com',
             offlineAccess: true,
             forceCodeForRefreshToken: true,
         });
@@ -60,7 +58,7 @@ const LoginScreen = ({navigation, route}) => {
 
   const handleSubmit = () =>{
     if(validateForm()){
-     // console.log("Submitted", userName, userPassword);
+      console.log("Submitted", userName, userPassword);
       setUserName("");
       setUserPassword("");
       setErrors({});
@@ -76,10 +74,11 @@ const LoginScreen = ({navigation, route}) => {
 
     const signIn = async () => {
         try {
+            console.log("Google signIn call start== ");  
             await GoogleSignin.hasPlayServices();
             const userInfo = await GoogleSignin.signIn();
 
-            console.log("Google signIn == ",userInfo);
+            console.log("Google signIn == ",JSON.stringify(userInfo));
             googleLogin(userInfo);
         } catch (error) {
             if (error.code === statusCodes.SIGN_IN_CANCELLED) {

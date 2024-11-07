@@ -48,7 +48,7 @@ export default function HomeScreen({ navigation }) {
               headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
             })
             .then((res) => {
-                //console.log(res.data)
+                //console.log("shalomsWithLikeComment == ",res.data)
                 setFilteredDataSource(res.data);
             })
             .catch((err) => console.log(err));
@@ -59,6 +59,14 @@ export default function HomeScreen({ navigation }) {
             .then((res) => {
                 //console.log(res.data);
                 setProfilePic(res.data)
+            })
+            .catch((err) => console.log(err));
+            axios
+            .get(`${REACT_APP_BASE_URL_API}/event/notification?id=${userId}`, {
+                headers: {'Authorization': "Bearer " + userToken, 'content-type': 'application/json'},
+            })
+            .then((res) => {
+                setFilteredEventNotifyDataSource(res.data);
             })
             .catch((err) => console.log(err));
       })

@@ -32,7 +32,7 @@ export default function Church({ navigation, route }) {
     const [isFocus, setIsFocus] = useState(false);
     const [errors, setErrors] = useState({});
 
-    const register = route.params;
+    const register = route.params?route.params:"fail";
     let api = useAxios()
     const [loader, setLoader] = useState(true);
     const Divider = () => <View style={styles.divider} />;
@@ -253,6 +253,20 @@ export default function Church({ navigation, route }) {
     );
   };
 
+  const churchState = () =>{
+      if(register==="success"){
+        showMessage({
+      message: "Church has been registered successfully!",
+      type: "info",
+      hideOnPress: true,
+      backgroundColor: "purple",
+      })
+      register==="fail";
+      
+    }else{
+      hideMessage()
+    }
+  }
 
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -269,12 +283,10 @@ export default function Church({ navigation, route }) {
           <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium', fontWeight: 'bold', color: 'purple'}}>
             Church
           </Text>
-          <Text>{register==="success"?showMessage({
-            message: "Church has been registered successfully!",
-            type: "info",
-            hideOnPress: true,
-            backgroundColor: "purple",
-          }):""}</Text>
+          <Text>
+          {churchState}
+              
+          </Text>
           <TouchableOpacity onPress={() => navigation.replace('Register-church')}>
             <MaterialIcons name="post-add" size={35} color="purple" />
           </TouchableOpacity>

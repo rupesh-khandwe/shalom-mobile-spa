@@ -190,7 +190,6 @@ const Profile = ({route, navigation}) => {
         })
     })
     .catch((err) => 
-      //console.log(`Login error ${err}`)
       showMessage({
         message: "Failed to save, please try-again.",
         type: "info",
@@ -222,7 +221,7 @@ const Profile = ({route, navigation}) => {
         })
     })
     .catch((err) => 
-      console.log(`Login error ${err}`),
+      console.log(`Shalom following error ${err}`),
       showMessage({
         message: "Failed to save, please try-again.",
         type: "info",
@@ -350,7 +349,7 @@ const Profile = ({route, navigation}) => {
               style: styles.flashMessage
             })
       })
-      .catch((err) => console.log(`Login error ${err}`)
+      .catch((err) => console.log(`Profilepic upload error ${err}`)
       );
 
     });
