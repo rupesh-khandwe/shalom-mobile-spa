@@ -19,11 +19,13 @@ import axios from 'axios';
 import { showMessage  } from "react-native-flash-message";
 import InputField from './common/InputField';
 import PhonePePaymentSDK from 'react-native-phonepe-pg';
+import RazorpayCheckout from 'react-native-razorpay';
 import CustomButton from './common/CustomButton';
 import Base64 from 'react-native-base64';
 import sha256 from 'sha256';
 import { AuthContext } from '../context/AuthContext';
-import {REACT_APP_BASE_URL_API} from '@env'
+import {REACT_APP_BASE_URL_API, RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, COMPANY_NAME, COMPANY_EMAIL} from '@env'
+import { shalom } from '../assets/images';
 
 export default function DonateScreen() {
   const [env, setEnv] = useState("SANDBOX");
@@ -33,19 +35,24 @@ export default function DonateScreen() {
   const [userId, setUserId] = useState('');
   const [mobileNumber, setMobileNumber] = useState();
   const [amount, setAmount] = useState();
+  const [currency, setCurrency] = useState();
   const [phonepeResCode, setPhonepeResCode] = useState(true);
+  const [razorpayPaymentId, setRazorpayPaymentId] = useState();
   const [errors, setErrors] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
   const {userToken, userInfo}= useContext(AuthContext);
+  const [createdBy, setCreatedBy] = useState('');
   const donationObj = {
     "userId": userId,
     "phone": mobileNumber,
-    "amount": amount
+    "amount": amount,
+    "currency": currency,
+    "razorpayPaymentId": razorpayPaymentId
   }
 
   useEffect(() => {
       setUserId(userInfo.userId);
-
+      setCreatedBy(!userInfo.firstName && !userInfo.lastName?userInfo.userName:userInfo.firstName+ " "+userInfo.lastName)
   }, []);
 
   const validateForm = () =>{
@@ -75,45 +82,29 @@ export default function DonateScreen() {
     if(validateForm()){
       console.log("Submitted");
       setErrors({});
-      console.log(errors+"****");
+      //console.log(RAZORPAY_KEY_ID+"****");
+      setCurrency('INR');
+      var options = {
+        description: 'Shalom Donation',
+        image: shalom,
+        currency: 'INR',
+        key: RAZORPAY_KEY_ID,
+        amount: (amount * 100),
+        name: COMPANY_NAME,
+        order_id: '',//Replace this with an order_id created using Orders API.
+        prefill: {
+          email: COMPANY_EMAIL,
+          contact: mobileNumber,
+          name: createdBy
+        },
+        theme: {color: '#AD40AF'}
+      }
 
-      PhonePePaymentSDK.init(env, merchantId, appId, enableLogging).then(resp => {
-
-          console.log("response ..",resp)
-          const requestBody = {
-            merchantId: merchantId,
-            merchantTransactionId:generateTransactionId(),
-            amount: (amount * 100),
-            mobileNumber: mobileNumber,
-            callbackUrl: "",
-            paymentInstrument: {
-              type:"PAY_PAGE"
-            }
-          }
-
-          const salt_key = "96434309-7796-489d-8924-ab56988a6076";
-          const salt_index = 1;
-          const payload = JSON.stringify(requestBody);
-          const payload_main = Base64.encode(payload);
-          const url = payload_main+"/pg/v1/pay"+salt_key;
-          const checksum = sha256(url)+"###"+salt_index;
-          console.log("requestBody == ", requestBody);
-          console.log("payload == ", payload);
-          console.log("payload_main == ", payload_main);
-          console.log("url == ", url);
-          console.log("checksum == ", checksum);
-          PhonePePaymentSDK.startTransaction(
-            payload_main,
-            checksum,
-            null,
-            null
-          ).then(resp=>{
-            console.log("response === ", resp)
-            if(resp.status==="SUCCESS")
-              setPhonepeResCode(false)
-              console.log("resp.status=SUCCESS",mobileNumber, amount);
-              setUserId(userInfo.userId)
-              axios
+      RazorpayCheckout.open(options).then((data) => {
+        // handle success
+        alert(`Success: ${data.razorpay_payment_id}`);
+        setRazorpayPaymentId(data.razorpay_payment_id);
+         axios
               .post(`${REACT_APP_BASE_URL_API}/shalom/donate`, 
                 donationObj,
                   {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
@@ -122,9 +113,59 @@ export default function DonateScreen() {
                   console.log("Persisted donation...")
               })
               .catch((err) => console.log(`Failed to persist donation ${err}`)); 
-          }).catch(err => console.log(err));
-        }
-      ).catch(err => console.log(err));
+      }).catch((error) => {
+        // handle failure
+        alert(`Error: ${error.code} | ${error.description}`);
+      });
+
+      // PhonePePaymentSDK.init(env, merchantId, appId, enableLogging).then(resp => {
+
+      //     console.log("response ..",resp)
+      //     const requestBody = {
+      //       merchantId: merchantId,
+      //       merchantTransactionId:generateTransactionId(),
+      //       amount: (amount * 100),
+      //       mobileNumber: mobileNumber,
+      //       callbackUrl: "",
+      //       paymentInstrument: {
+      //         type:"PAY_PAGE"
+      //       }
+      //     }
+
+      //     const salt_key = "96434309-7796-489d-8924-ab56988a6076";
+      //     const salt_index = 1;
+      //     const payload = JSON.stringify(requestBody);
+      //     const payload_main = Base64.encode(payload);
+      //     const url = payload_main+"/pg/v1/pay"+salt_key;
+      //     const checksum = sha256(url)+"###"+salt_index;
+      //     console.log("requestBody == ", requestBody);
+      //     console.log("payload == ", payload);
+      //     console.log("payload_main == ", payload_main);
+      //     console.log("url == ", url);
+      //     console.log("checksum == ", checksum);
+      //     PhonePePaymentSDK.startTransaction(
+      //       payload_main,
+      //       checksum,
+      //       null,
+      //       null
+      //     ).then(resp=>{
+      //       console.log("response === ", resp)
+      //       if(resp.status==="SUCCESS")
+      //         setPhonepeResCode(false)
+      //         console.log("resp.status=SUCCESS",mobileNumber, amount);
+      //         setUserId(userInfo.userId)
+      //         axios
+      //         .post(`${REACT_APP_BASE_URL_API}/shalom/donate`, 
+      //           donationObj,
+      //             {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
+      //         })
+      //         .then((res) => {
+      //             console.log("Persisted donation...")
+      //         })
+      //         .catch((err) => console.log(`Failed to persist donation ${err}`)); 
+      //     }).catch(err => console.log(err));
+      //   }
+      // ).catch(err => console.log(err));
     }
   }
 
@@ -147,20 +188,20 @@ export default function DonateScreen() {
         {phonepeResCode && <View style={styles.centeredView}>
             <View style={styles.modalView}>
               <Text style={styles.modalText}>Dear Shalomer's,{'\n'}{'\n'}
-                Shalom is a free service and a mean to connect to GOD, brought to you by <Text style={{ fontSize: 18, fontWeight: 'bold', color:'purple'}}>"Shalom - A Believer’s Hub"</Text>.{'\n'}{'\n'}
+                Shalom is a free service and a mean to connect to GOD, brought to you by <Text style={{ fontSize: 18, fontWeight: 'bold', color:'purple'}}>{COMPANY_NAME}</Text>.{'\n'}{'\n'}
                 
                 If you're blessed by this service and would like to support our ministry, we invite you to partner with us. {'\n'}{'\n'}{'\n'}
 
-                {/*Click on Donate button and support this ministry to serve better. {'\n'}{'\n'}*/}
-                Please use below account details to support this ministry to serve better. {'\n'}{'\n'}
+                Click on Donate button and support this ministry to serve better. {'\n'}{'\n'}
+                {/* Please use below account details to support this ministry to serve better. {'\n'}{'\n'}
                 A/C Name:<Text style={{ fontSize: 18, fontWeight: 'bold', color:'purple'}}> Shalom - A Believer’s Hub</Text>{'\n'}{'\n'}
                 A/C #: <Text style={{ fontSize: 18, fontWeight: 'bold', color:'purple'}}>5 5 9 7 3 6 8 4 5 5</Text>{'\n'}{'\n'}
-                IFSC: <Text style={{ fontSize: 18, fontWeight: 'bold', color:'purple'}}>CBI N0 283975 </Text>{'\n'}{'\n'}
+                IFSC: <Text style={{ fontSize: 18, fontWeight: 'bold', color:'purple'}}>CBI N0 283975 </Text>{'\n'}{'\n'} */}
                 May God bless you as you decided to partner with us!</Text>
             </View>
         </View>}
 
-        {/* {!phonepeResCode && <View style={styles.centeredView}>
+         {!phonepeResCode && <View style={styles.centeredView}>
             <View style={styles.modalView}>
               <Text style={styles.modalSuccessText}>Dear Shalomer!{'\n'}{'\n'}
                 On behalf of entire Shalom group, we want to extend our sincerest gratitude for your recent gift. Without the support of congregants like you, we wouldn’t be able to spread God’s word and touch the lives of everyone in our community. {'\n'}{'\n'}
@@ -212,7 +253,7 @@ export default function DonateScreen() {
           error={errors.amount}
         />
         }
-       {phonepeResCode && <CustomButton label={'Donate'} onPress={handleSubmit} /> } */}
+       {phonepeResCode && <CustomButton label={'Donate'} onPress={handleSubmit} /> } 
 
         <View
           style={{
@@ -235,7 +276,7 @@ export default function DonateScreen() {
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
                 <Text style={styles.modalText}>Dear Shalomers,{'\n'}{'\n'}
-                  Shalom is a free service brought to you by <Text style={{ fontSize: 18, fontWeight: 'bold', color:'purple'}}>"Shalom - A Believer’s Hub"</Text>.{'\n'}{'\n'}
+                  Shalom is a free service brought to you by <Text style={{ fontSize: 18, fontWeight: 'bold', color:'purple'}}>{COMPANY_NAME}</Text>.{'\n'}{'\n'}
                   
                   <Text style={{ fontSize: 18, fontWeight: 'bold'}}>Our Vision-</Text>{'\n'}
                   <Text style={{ fontSize: 15 }}>{`\u25CF `}  Help Christian believers find a church near them anywhere in the world.</Text>{'\n'}

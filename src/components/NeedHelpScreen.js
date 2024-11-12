@@ -3,14 +3,14 @@ import { SafeAreaView, View, Text, StyleSheet, Image, Linking, TouchableOpacity 
 
 import { icon, shalom } from '../assets/images';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {COMPANY_NAME, COMPANY_EMAIL} from '@env'
 
 const NeedHelpScreen = ({navigation}) => {
 
-const emailId = 'believers.shalom@gmail.com';
 const emailSubject = 'Query regarding Shalom - A believers app';
 const emailDesc = 'General query';
 const onPressEmailClick = () => {
-    Linking.openURL('mailto:'+emailId+'?subject='+emailSubject+'&body='+emailDesc)
+    Linking.openURL('mailto:'+COMPANY_EMAIL+'?subject='+emailSubject+'&body='+emailDesc)
  }
 
   return (
@@ -39,7 +39,7 @@ const onPressEmailClick = () => {
       <View style={styles.centeredView}>
             <View style={styles.modalView}>
               <Text style={styles.modalText}>Need HELP!!{'\n'}{'\n'}
-                Shalom is a free service and a mean to connect to GOD, brought to you by <Text style={{ fontSize: 18, fontWeight: 'bold', color:'purple'}}>"Shalom - A Believer’s Hub"</Text>.{'\n'}{'\n'}
+                Shalom is a free service and a mean to connect to GOD, brought to you by <Text style={{ fontSize: 18, fontWeight: 'bold', color:'purple'}}>{COMPANY_NAME}</Text>.{'\n'}{'\n'}
                 Please click on below email address
                 for any queries regarding Sign-up or challenges you face during Shalom journey.  
               </Text> 
@@ -66,7 +66,7 @@ const onPressEmailClick = () => {
             fontWeight: 'bold',
             fontFamily: 'Roboto-MediumItalic',
           }}>
-          {emailId}
+          {COMPANY_EMAIL}
         </Text>
         <MaterialIcons name="arrow-forward-ios" size={22} color="#fff" />
       </TouchableOpacity>

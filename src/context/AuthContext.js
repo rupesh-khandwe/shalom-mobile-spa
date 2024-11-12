@@ -12,6 +12,7 @@ export const AuthProvider = ({children}) => {
     const [isGoogleSignin, setIsGoogleSignin] = useState(false);
     const [userToken, setUserToken] = useState(null);
     const [userInfo, setUserInfo] = useState({});
+    const [postUserInfo, setPostUserInfo] = useState({});
     const [userId, setUserId] = useState(null);
     const [userName, setUserName] = useState(null);
     const [shalom, setShalom] = useState(null);
@@ -23,6 +24,7 @@ export const AuthProvider = ({children}) => {
         setIsGoogleSignin(true);
 
         let postUserParam = userInfo.data.user;
+        setPostUserInfo(userInfo)
         console.log("google signin user details ", postUserParam);
         postUserParam.firstName = postUserParam.givenName;
         postUserParam.lastName = postUserParam.familyName;
@@ -108,9 +110,11 @@ export const AuthProvider = ({children}) => {
                 setTimeout(() => {
                   // do something here 1 sec after current has changed
                   isLoggedIn();
-                          console.log("isLoggedIn2=",userInfo)
-
-                }, 2000);
+                          console.log("isLoggedIn2=",userInfo, userToken)
+                          if(!userInfo) {
+                            console.log("post LoggedIn =",postUserInfo)
+                          }                                  
+                }, 1000);
      }, []);
 
      async function getAccessUsingRefresh (token) {
