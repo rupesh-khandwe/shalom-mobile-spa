@@ -1,75 +1,87 @@
 import { NavigationContainer } from '@react-navigation/native';
-import React, { useContext, useEffect, useState } from 'react'
-import {View , ActivityIndicator, Linking, AppState } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { View, ActivityIndicator, Linking, AppState } from 'react-native';
 import AuthStack from './AuthStack';
 import { AuthContext } from '../context/AuthContext';
 import AppStack from './AppStack';
+import { DeviceInfo } from 'react-native-device-info'; // Import for version check
 
 export default function AppNav() {
-    const {isLoading, userToken} = useContext(AuthContext);
+  const { isLoading, userToken } = useContext(AuthContext);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
 
-    /* useEffect(() => {
-        const handleDeepLink = ({ url }) => {
-            const route = url.replace(/.*?:\/\//g, '');
-            console.log("url: ",url)
-            console.log("route: ",route)
-
-            const routeName = route.split('/')[0];
-            console.log("routeName: ",routeName)
-
-            if (routeName === 'golive') {
-              const id = route.split('/')[1];
-              console.log("id: ",id)
-            }
-        }
-
-        const listner = Linking.addEventListener('url', handleDeepLink);
-
-        return () => {
-          listner.remove();
-        };
-
-      }, []); */
-
-    /**
-     * Linking Configuration
-     */
-    const linking = {
-        // Prefixes accepted by the navigation container, should match the added schemes
-        prefixes: ["shalomgolive://"],  // , "https://shalomgolive/"
-        // Route config to map uri paths to screens
-        config: {
-        // Initial route name to be added to the stack before any further navigation,
-        // should match one of the available screens
-            initialRouteName: "Home",
-            screens: {
-                // myapp://home -> HomeScreen
-                Home: {
-                    screens: {
-                    // myapp://details/1 -> DetailsScreen with param id: 1
-                        GoLive: "golive/:id"
-                    }
-                }
-            },
-        },
-        async getInitialURL() {
-            return Linking.getInitialURL();
-        },
+  useEffect(() => {
+    const checkForUpdate = async () => {
+      // backend API that returns the latest version
+      const response = await fetch('http://shalom-api.us-east-1.elasticbeanstalk.com/bible/v1/latest-version');
+      const latestVersion = await response.json();
+      const currentVersion = await DeviceInfo.getVersion();
+      if (currentVersion !== latestVersion.version) {
+        setUpdateAvailable(true);
+      }
     };
+    checkForUpdate();
+  }, []);
 
-
-    if(isLoading){
-        return (
-        <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
-            <ActivityIndicator size={'large'}/>
-        </View>
-        ); 
-    }
+  if (isLoading) {
     return (
-        <NavigationContainer linking={linking}>
-            { userToken !== null ? <AppStack /> :  <AuthStack />}
-           
-        </NavigationContainer>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size={'large'} />
+      </View>
     );
+  }
 
+  return (
+    <NavigationContainer linking={linking}>
+      {userToken !== null ? <AppStack /> : <AuthStack />}
+      {updateAvailable && (
+        <FlashMessage // Replace with your preferred notification component
+          message="A new version is available. Please update to the latest version."
+          type="info"
+          duration={5000}
+        />
+      )}
+    </NavigationContainer>
+  );
 }
+
+/**
+  * Linking Configuration
+  */
+const linking = {
+  // Prefixes accepted by the navigation container, should match the added schemes
+  prefixes: ["shalomgolive://"],  // , "https://shalomgolive/"
+  // Route config to map uri paths to screens
+  config: {
+    // Initial route name to be added to the stack before any further navigation,
+    // should match one of the available screens
+    initialRouteName: "Home",
+    screens: {
+      // myapp://home -> HomeScreen
+      Home: {
+        screens: {
+          // myapp://details/1 -> DetailsScreen with param id: 1
+          GoLive: "golive/:id"
+        }
+      }
+    },
+  },
+  async getInitialURL() {
+    return Linking.getInitialURL();
+  },
+};
+
+
+if (isLoading) {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size={'large'} />
+    </View>
+  );
+}
+return (
+  <NavigationContainer linking={linking}>
+    {userToken !== null ? <AppStack /> : <AuthStack />}
+
+  </NavigationContainer>
+);
