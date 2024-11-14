@@ -1,10 +1,10 @@
 import { NavigationContainer } from '@react-navigation/native';
 import React, { useContext, useEffect, useState } from 'react';
-import { View, ActivityIndicator, Linking, AppState } from 'react-native';
-import AuthStack from './AuthStack';
+import { ActivityIndicator, Linking, View } from 'react-native';
+import { DeviceInfo } from 'react-native-device-info'; // Import for version check
 import { AuthContext } from '../context/AuthContext';
 import AppStack from './AppStack';
-import { DeviceInfo } from 'react-native-device-info'; // Import for version check
+import AuthStack from './AuthStack';
 
 export default function AppNav() {
   const { isLoading, userToken } = useContext(AuthContext);
@@ -13,7 +13,7 @@ export default function AppNav() {
   useEffect(() => {
     const checkForUpdate = async () => {
       // backend API that returns the latest version
-      const response = await fetch('http://shalom-api.us-east-1.elasticbeanstalk.com/bible/v1/latest-version');
+      const response = await fetch('http://shalom-api.us-east-1.elasticbeanstalk.com/version/v1');
       const latestVersion = await response.json();
       const currentVersion = await DeviceInfo.getVersion();
       if (currentVersion !== latestVersion.version) {
