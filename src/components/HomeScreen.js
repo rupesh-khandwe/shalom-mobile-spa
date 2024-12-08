@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { ScrollView, SafeAreaView, Text, StyleSheet, View, FlatList,TouchableOpacity, RefreshControl, Dimensions, Animated, Image} from 'react-native';
+import { ScrollView, SafeAreaView, Text, StyleSheet, View, FlatList,TouchableOpacity, RefreshControl, Dimensions, Image} from 'react-native';
 //import { ScrollView } from 'react-native-virtualized-view'
 import Share from 'react-native-share';
 import axios from 'axios';
@@ -18,9 +18,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator } from 'react-native-paper';
 import {Avatar} from 'react-native-paper';
 import ImgToBase64 from 'react-native-image-base64';
+import * as Keychain from 'react-native-keychain';
+import Carousel from 'react-native-reanimated-carousel';
 
 export default function HomeScreen({ navigation }) {
-    const {userToken, userInfo, userId, userName}= useContext(AuthContext);
+    const {userToken, userInfo, userId, userName, logout}= useContext(AuthContext);
     const SEARCH_BY_KEY = "eventByUserId?key=";
     const [search, setSearch] = useState('');
     const [filteredDataSource, setFilteredDataSource] = useState([]);
@@ -33,10 +35,10 @@ export default function HomeScreen({ navigation }) {
     const [localUserName, setLocalUserName]= useState('');
     const [refreshing, setRefreshing] = useState(false);
     const [profilePic, setProfilePic] = useState('');
-    var width = Dimensions.get("window");
-    const scale = new Animated.Value(1);
     const [loader, setLoader] = useState(true);
     const [shareImage, setShareImage] = useState('');
+    const WindowWidth = Dimensions.get('window').width
+    const height = Dimensions.get('window').height
 
     const onRefresh = React.useCallback(() => {
       setRefreshing(true);
@@ -51,7 +53,10 @@ export default function HomeScreen({ navigation }) {
                 //console.log("shalomsWithLikeComment == ",res.data)
                 setFilteredDataSource(res.data);
             })
-            .catch((err) => console.log(err));
+            .catch((err) => {
+              console.log(err, err.message, err.response?error.response.data:error.response.status);
+              logout();
+            });
             axios
                 .get(`${REACT_APP_BASE_URL_API}/shalom/profilePic?userId=${userId}`, {
                   headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
@@ -60,7 +65,7 @@ export default function HomeScreen({ navigation }) {
                 //console.log(res.data);
                 setProfilePic(res.data)
             })
-            .catch((err) => console.log(err));
+            .catch((err) => console.log(err, err.message, err.response?error.response.data:error.response.status));
             axios
             .get(`${REACT_APP_BASE_URL_API}/event/notification?id=${userId}`, {
                 headers: {'Authorization': "Bearer " + userToken, 'content-type': 'application/json'},
@@ -68,7 +73,7 @@ export default function HomeScreen({ navigation }) {
             .then((res) => {
                 setFilteredEventNotifyDataSource(res.data);
             })
-            .catch((err) => console.log(err));
+            .catch((err) => console.log(err, err.message, err.response?error.response.data:error.response.status));
       })
         setRefreshing(false);
       }, 2000);
@@ -99,11 +104,18 @@ export default function HomeScreen({ navigation }) {
                             headers: {'Authorization': "Bearer " + userToken, 'content-type': 'application/json'},
                         })
                         .then((res) => {
-                            //console.log(res.data);
+                            console.log(res.data);
                             setLoader(false);
                             setFilteredDataSource(res.data);
                         })
-                        .catch((err) => console.log(err));
+                        .catch((err) => {
+                          console.log("in events error 1 =",err);
+                          console.log("in events error 2 =", err.response?err.response.data:err.response.status)
+                          if(err.response.status==500){
+                            console.log("err.response.status =",err.response.status);
+                            logout();
+                          }
+                        });
 
                     axios
                         .get(`${REACT_APP_BASE_URL_API}/shalom/profilePic?userId=${userId}`, {
@@ -113,7 +125,15 @@ export default function HomeScreen({ navigation }) {
                             //console.log(res.data);
                             setProfilePic(res.data)
                         })
-                        .catch((err) => console.log(err));
+                        .catch((err) => 
+                          {
+                            console.log("in events error 1 =",err);
+                            console.log("in events error 2 =", err.response?err.response.data:err.response.status)
+                            if(err.response.status==500){
+                              console.log("err.response.status =",err.response.status);
+                              logout();
+                            }
+                          });
 
                     //console.log("Loaded EventNotifications*************", userId);
                     axios
@@ -123,7 +143,9 @@ export default function HomeScreen({ navigation }) {
                         .then((res) => {
                             setFilteredEventNotifyDataSource(res.data);
                         })
-                        .catch((err) => console.log(err));
+                        .catch((err) => console.log(err, err.message, err.response?error.response.data:error.response.status));
+                } else {
+                  console.log("Home screen getAsyncData FAILED****", userId);
                 }
             });
 
@@ -169,22 +191,78 @@ const onShare = async (message, imageUrl) => {
     .catch(err => console.log(err));
   };
 
-  const onZoomEventFunction = Animated.event(
-    [{
-      nativeEvent: {scale : scale}
-    }],
-    {
-      useNativeDriver: true
+  const getAsync = async()=>{
+    const credentials = await Keychain.getGenericPassword();
+    if (credentials) {
+      console.log('Credentials successfully loaded for user ' + credentials.username);
+      console.log('Credentials successfully loaded for user ' + credentials.password);
+
+      axios
+      .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${credentials.username}`, {
+          headers: {'Authorization': "Bearer " + credentials.password, 'content-type': 'application/json'},
+      })
+      .then((res) => {
+          console.log(res.data);
+          setLoader(false);
+          setFilteredDataSource(res.data);
+      })
+      .catch((err) => {
+        console.log("in shalomsWithLikeComment error 1 =",err);
+        console.log("in shalomsWithLikeComment error 2 =", err.response?err.response.data:err.response.status)
+        if(err.response.status==500){
+          console.log("err.response.status =",err.response.status);
+          logout();
+        }
+      });
+
+      axios
+      .get(`${REACT_APP_BASE_URL_API}/shalom/profilePic?userId=${credentials.username}`, {
+          headers: {'Authorization': "Bearer " + credentials.password, 'content-type': 'application/json'},
+      })
+      .then((res) => {
+          //console.log(res.data);
+          setProfilePic(res.data)
+      })
+      .catch((err) => 
+        {
+          console.log("in events error 1 =",err);
+          console.log("in events error 2 =", err.response?err.response.data:err.response.status)
+          if(err.response.status==500){
+            console.log("err.response.status =",err.response.status);
+            logout();
+          }
+        });
+
+        //console.log("Loaded EventNotifications*************", userId);
+        axios
+          .get(`${REACT_APP_BASE_URL_API}/event/notification?id=${credentials.username}`, {
+              headers: {'Authorization': "Bearer " + credentials.password, 'content-type': 'application/json'},
+          })
+          .then((res) => {
+              setFilteredEventNotifyDataSource(res.data);
+          })
+          .catch((err) => console.log(err, err.message, err.response?error.response.data:error.response.status));
+
+
+        }
     }
-  )
-  const onZoomStateChangeFunction=(event) =>{
-    if(event.nativeEvent.oldState == State.ACTIVE){
-      Animated.spring(scale, {
-        toValue: 1,
-        useNativeDriver: true
-      }).start()
+
+    const renderItem = ({item, index}) =>{
+      console.log("renderItem***", item, index)
+      return (
+          <View key={index}>
+              <Image
+                  style={{
+                    width: '100%',
+                    borderRadius: 0,
+                    height: 400,
+                  }}
+                  source={{uri: item}
+                  }
+                />
+          </View>
+      )
     }
-  }
 
     useEffect(() => {
       const unsubscribe = navigation.addListener('focus', () => {
@@ -202,6 +280,10 @@ const onShare = async (message, imageUrl) => {
                 if (i++ > 10) {
                     clearInterval(asyncDataTimer);
                 }
+            }).catch((err) => {
+              console.log("in home screen error 1 =",err);
+              console.log("in home screen 2 =", err.response?err.response.data:err.response.status)
+              getAsync();
             });
         }, 500)
 
@@ -210,6 +292,12 @@ const onShare = async (message, imageUrl) => {
             return unsubscribe;
     }, []);
 
+      // Transform the string into an array
+    // const data = ({item}) => {
+    //   const imgArr = [];
+    //   item.split('|').map((img) => 
+    // }
+ 
     const ItemView = ({ item }) => {
         return (
         <Card style={{marginTop:10, borderColor:'purple', borderRadius:10, borderBottomWidth:3}}>
@@ -258,25 +346,21 @@ const onShare = async (message, imageUrl) => {
                 </View>
             }
             {
-            item.imageUrl ? item.imageUrl.split('|').map((img) => {
-                return(  
-                  <PinchGestureHandler
-                    onGestureEvent={onZoomEventFunction}
-                    onHandlerStateChange={onZoomStateChangeFunction}
-                    key={item.shalomId}
-                  >
-                    <Image
-                      style={{
-                        width: '100%',
-                        borderRadius: 0,
-                        height: 350,
-                      }}
-                      source={{uri:img}}
-                    />
-                  </PinchGestureHandler>
-                )
-              })
-              : null}
+                          <View style={{ flex: 1, marginTop:5 }}>
+                          <Carousel
+                            loop
+                            width={WindowWidth}
+                            height={350}
+                            autoPlay={true}
+                            data={item.imageList}
+                            mode="advanced-parallax"
+                            parallaxScrollingScale={0.9}
+                            parallaxScrollingOffset={50}
+                            scrollAnimationDuration={1000}
+                            renderItem={renderItem}
+                          />
+                        </View>
+            }
             <View style={{flexDirection:'row', margin:10}}>
 
                     <Text style={{paddingLeft:5}} >{item.likeCount} Like</Text>
@@ -322,7 +406,7 @@ const onShare = async (message, imageUrl) => {
  const renderListEmptyComponent = () => (
       <View style={styles.emptyListContainer}>
           <Text style={styles.noShalomsFound}>
-              No Availabe Shalom's for you Yet!
+              No available Shalom's for you Yet!
           </Text>
         <Text style={styles.noShalomsFound}>
             Press the search icon <Ionicons name="search-circle-sharp" size={35} color="purple" /> above to follow the one you know or click on the icon <MaterialCommunityIcons name="home-group-plus" size={35} color="purple"   /> below to post a new shalom.

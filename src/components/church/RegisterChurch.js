@@ -27,6 +27,7 @@ import { imageUpload } from '../../assets/images';
 import Carousel from 'react-native-reanimated-carousel';
 import ImgToBase64 from 'react-native-image-base64';
 import {getCountryList, getStateList} from "../common/Utils";
+import * as Keychain from 'react-native-keychain';
 
 export default function RegisterChurch({route,navigation}) {
   const defaultCountryId = 78; //India
@@ -90,6 +91,45 @@ export default function RegisterChurch({route,navigation}) {
     'languageId': languageId
   }
 
+  const getAsyncLang = async()=>{
+    try {
+      // Retreive the credentials
+      const credentials = await Keychain.getGenericPassword();
+      if (credentials) {
+        console.log('Credentials successfully loaded for user ' + credentials.username);
+        console.log('Credentials successfully loaded for user ' + credentials.password);
+       // console.log('AsynStore user token ' + userToken);
+       axios
+       .get(`${REACT_APP_BASE_URL_API}/church/language`, {
+           headers: { 'Authorization': "Bearer "+ credentials.password, 'content-type': 'application/json'},
+       })
+       .then((res) => {
+         var count = Object.keys(res.data).length;
+         let languageArray = [];
+         for (var i = 0; i < count; i++) {
+           languageArray.push({
+             value: res.data[i].languageId,
+             label: res.data[i].languageName,
+           });
+         }
+         setLanguageData(languageArray);
+       })
+      .catch((err) => {
+        console.log("in regi church error 1 =",err);
+        console.log("in regi church error 2 =", err.response?err.response.data:err.response.status)
+        if(err.response.status==500){
+          console.log("err.response.status =",err.response.status);
+          logout();
+        }
+      });
+
+      } else {
+        console.log('No credentials stored')
+      }
+    } catch (error) {
+      console.log('Keychain couldn\'t be accessed!', error);
+    }
+  }
 
   useEffect(() => {
     //const updateChurch = route.params;
@@ -104,23 +144,7 @@ export default function RegisterChurch({route,navigation}) {
     console.log("Current date1 ", moment.utc().toISOString())
     console.log("Registration launched"+REACT_APP_LOCATION_API);
 
-    axios
-    .get(`${REACT_APP_BASE_URL_API}/church/language`, {
-        headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
-    })
-    .then((res) => {
-      var count = Object.keys(res.data).length;
-      let languageArray = [];
-      for (var i = 0; i < count; i++) {
-        languageArray.push({
-          value: res.data[i].languageId,
-          label: res.data[i].languageName,
-        });
-      }
-      setLanguageData(languageArray);
-    })
-    .catch((err) => console.log(err));
-
+   getAsyncLang();
 
     handleState(defaultCountryId);
     getCountryList(function(list) {
@@ -285,24 +309,51 @@ const handleSubmit = () =>{
       });
   };
 
+  const saveAsync = async()=>{
+    try {
+      // Retreive the credentials
+      const credentials = await Keychain.getGenericPassword();
+      if (credentials) {
+        console.log('Credentials successfully loaded for user ' + credentials.username);
+        console.log('Credentials successfully loaded for user ' + credentials.password);
+       // console.log('AsynStore user token ' + userToken);
+       axios
+       .post(`${REACT_APP_BASE_URL_API}/church/register`, 
+         church_model,
+         {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
+         })
+       .then((res) => {
+         navigation.replace('Church', 
+         "success"
+       );
+       })
+      .catch((err) => {
+        console.log("in regi church error 3 =",err);
+        console.log("in regi church error 4 =", err.response?err.response.data:err.response.status)
+        if(err.response.status==500){
+          console.log("err.response.status =",err.response.status);
+          logout();
+        } else {
+          showMessage({
+            message: "Unable to register church, please try again.",
+            type: "info",
+            hideOnPress: true,
+            backgroundColor: "red",
+          })
+        }
+      });
+
+      } else {
+        console.log('No credentials stored')
+      }
+    } catch (error) {
+      console.log('Keychain couldn\'t be accessed!', error);
+    }
+  }
+
   const handleRegister = () => {
     console.log(handleRegister);
-    axios
-    .post(`${REACT_APP_BASE_URL_API}/church/register`, 
-      church_model,
-      {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
-      })
-    .then((res) => {
-      navigation.replace('Church', 
-      "success"
-    );
-    })
-    .catch((err) => showMessage({
-      message: "Unable to register church, please try again.",
-      type: "info",
-      hideOnPress: true,
-      backgroundColor: "red",
-    })); 
+    saveAsync();
   };
 
   const regionOnSearchLoad = (item) =>{

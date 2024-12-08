@@ -43,7 +43,7 @@ const LoginScreen = ({navigation, route}) => {
             webClientId:
                 '494269236356-iopl5mdss5hjcv94deq89egm2c18ifb6.apps.googleusercontent.com',
             offlineAccess: true,
-            forceCodeForRefreshToken: true,
+            //forceCodeForRefreshToken: true,
         });
     });
   const validateForm = () =>{
@@ -76,6 +76,17 @@ const LoginScreen = ({navigation, route}) => {
         try {
             console.log("Google signIn call start== ");  
             await GoogleSignin.hasPlayServices();
+            // const oldUser = await GoogleSignin.getCurrentUser();
+            // console.log("old access token =", oldUser?.idToken);
+            // if (oldUser?.idToken) {
+            //   await GoogleSignin.clearCachedAccessToken(user.idToken).catch(err => console.log('error in clear cached access token', err));
+            // }
+    
+            // const token = await GoogleSignin.getTokens();
+            // actionCreator('set_accessToken', token.idToken);
+    
+            // console.log('neww token', token.idToken);
+
             const userInfo = await GoogleSignin.signIn();
 
             console.log("Google signIn == ",JSON.stringify(userInfo));

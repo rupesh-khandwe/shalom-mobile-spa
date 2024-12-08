@@ -57,6 +57,9 @@ export default function RegisterScreen({route, navigation}) {
     }
   }
 
+  const clear = ()=>{
+    registerError = "";
+  }
 
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
@@ -66,7 +69,7 @@ export default function RegisterScreen({route, navigation}) {
                 hideOnPress: true,
                 autoHide: false,
                 backgroundColor: "red",
-              }):""}
+              }):clear}
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{paddingHorizontal: 25}}>

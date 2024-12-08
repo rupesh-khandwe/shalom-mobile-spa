@@ -17,6 +17,7 @@ import {Avatar} from 'react-native-paper';
 import {Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider} from 'react-native-popup-menu';
 import AntDesign from "@expo/vector-icons/AntDesign";
 import {Dropdown} from "react-native-element-dropdown";
+import * as Keychain from 'react-native-keychain';
 
 export default function Church({ navigation, route }) {
 
@@ -37,30 +38,42 @@ export default function Church({ navigation, route }) {
     const [loader, setLoader] = useState(true);
     const Divider = () => <View style={styles.divider} />;
 
-    useEffect(() => {
-        console.log(REACT_APP_BASE_URL_API,"Church rendered");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
-
-        axios
-            .get(`${REACT_APP_BASE_URL_API}/church/language`, {
-                headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
-            })
-            .then((res) => {
-                var count = Object.keys(res.data).length;
-                let languageArray = [];
-                languageArray.push({ label : 'All', value: null});
-                for (var i = 0; i < count; i++) {
-                    languageArray.push({
-                        value: res.data[i].languageId,
-                        label: res.data[i].languageName,
-                    });
-                }
-                setLanguageData(languageArray);
-            })
-            .catch((err) => console.log(err));
+    const getAsync = async()=>{
+      try {
+        // Retreive the credentials
+        const credentials = await Keychain.getGenericPassword();
+        if (credentials) {
+          console.log('Credentials successfully loaded for user ' + credentials.username);
+          console.log('Credentials successfully loaded for user ' + credentials.password);
+         // console.log('AsynStore user token ' + userToken);
+         axios
+         .get(`${REACT_APP_BASE_URL_API}/church/language`, {
+             headers: { 'Authorization': "Bearer "+ credentials.password, 'content-type': 'application/json'},
+         })
+         .then((res) => {
+             var count = Object.keys(res.data).length;
+             let languageArray = [];
+             languageArray.push({ label : 'All', value: null});
+             for (var i = 0; i < count; i++) {
+                 languageArray.push({
+                     value: res.data[i].languageId,
+                     label: res.data[i].languageName,
+                 });
+             }
+             setLanguageData(languageArray);
+         })
+        .catch((err) => {
+          console.log("in church error 1 =",err);
+          console.log("in church error 2 =", err.response?err.response.data:err.response.status)
+          if(err.response.status==500){
+            console.log("err.response.status =",err.response.status);
+            logout();
+          }
+        });
 
         axios
         .get(`${REACT_APP_BASE_URL_API}/church/searchByKey?key=Bengaluru`, {
-          headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
+          headers: { 'Authorization': "Bearer "+credentials.password, 'content-type': 'application/json'},
         })
         .then((res) => {
             //console.log(res.data)
@@ -68,7 +81,19 @@ export default function Church({ navigation, route }) {
             setFilteredDataSource(res.data);
             setMasterDataSource(res.data);
         })
-        .catch((err) => console.log(err));
+        .catch((err) => console.log(err, err.response?err.response.data:err.response.status));
+
+        } else {
+          console.log('No credentials stored')
+        }
+      } catch (error) {
+        console.log('Keychain couldn\'t be accessed!', error);
+      }
+    }
+
+    useEffect(() => {
+        console.log(REACT_APP_BASE_URL_API,"Church rendered");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
+        getAsync();
       }, []);
 
       const getFilteredDataSource = async() => {

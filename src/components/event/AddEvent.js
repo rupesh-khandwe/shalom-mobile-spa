@@ -29,6 +29,7 @@ import { imageUpload } from '../../assets/images';
 import Carousel from 'react-native-reanimated-carousel';
 import ImgToBase64 from 'react-native-image-base64';
 import {getCountryList, getStateList} from '../common/Utils';
+import * as Keychain from 'react-native-keychain';
 
 export default function AddEvent({route, navigation}) {
   const defaultCountryId = 78; //India
@@ -100,6 +101,63 @@ export default function AddEvent({route, navigation}) {
     'languageId': languageId
   }
 
+  const getAsyncData = async()=>{
+    try {
+      // Retreive the credentials
+      const credentials = await Keychain.getGenericPassword();
+      if (credentials) {
+        console.log('Credentials successfully loaded for user ' + credentials.username);
+        console.log('Credentials successfully loaded for user ' + credentials.password);
+       // console.log('AsynStore user token ' + userToken);
+       axios
+       .get(`${REACT_APP_BASE_URL_API}/event/category`, {
+           headers: { 'Authorization': "Bearer "+ credentials.password, 'content-type': 'application/json'},
+       })
+       .then((res) => {
+         var count = Object.keys(res.data).length;
+         let categoryArray = [];
+         for (var i = 0; i < count; i++) {
+           categoryArray.push({
+             value: res.data[i].categoryId,
+             label: res.data[i].categoryName,
+           });
+         }
+         setCategoryData(categoryArray);
+       })
+      .catch((err) => {
+        console.log("in add events error 1 =",err);
+        console.log("in add events error 2 =", err.response?err.response.data:err.response.status)
+        if(err.response.status==500){
+          console.log("err.response.status =",err.response.status);
+          logout();
+        }
+      });
+
+      axios
+      .get(`${REACT_APP_BASE_URL_API}/church/language`, {
+          headers: { 'Authorization': "Bearer "+ credentials.password, 'content-type': 'application/json'},
+      })
+      .then((res) => {
+        var count = Object.keys(res.data).length;
+        let languageArray = [];
+        for (var i = 0; i < count; i++) {
+          languageArray.push({
+            value: res.data[i].languageId,
+            label: res.data[i].languageName,
+          });
+        }
+        setLanguageData(languageArray);
+      })
+      .catch((err) => console.log(err, err.response?error.response.data:error.response.status));
+
+      } else {
+        console.log('No credentials stored')
+      }
+    } catch (error) {
+      console.log('Keychain couldn\'t be accessed!', error);
+    }
+  }
+
   useEffect(() => {
     setUserId(userInfo.userId);
     //setCreatedBy(userInfo.userName);
@@ -109,40 +167,8 @@ export default function AddEvent({route, navigation}) {
     console.log("route.params",params);
     !params && setCreatedOn(moment.utc().toISOString());
     console.log("Registration launched");
-    axios
-    .get(`${REACT_APP_BASE_URL_API}/event/category`, {
-        headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
-    })
-    .then((res) => {
-      var count = Object.keys(res.data).length;
-      let categoryArray = [];
-      for (var i = 0; i < count; i++) {
-        categoryArray.push({
-          value: res.data[i].categoryId,
-          label: res.data[i].categoryName,
-        });
-      }
-      setCategoryData(categoryArray);
-    })
-    .catch((err) => console.log(err));
-
-    axios
-    .get(`${REACT_APP_BASE_URL_API}/church/language`, {
-        headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
-    })
-    .then((res) => {
-      var count = Object.keys(res.data).length;
-      let languageArray = [];
-      for (var i = 0; i < count; i++) {
-        languageArray.push({
-          value: res.data[i].languageId,
-          label: res.data[i].languageName,
-        });
-      }
-      setLanguageData(languageArray);
-    })
-    .catch((err) => console.log(err));
-
+    
+    getAsyncData();
     getCountryList(function(list) {
       setCountryData(list);
     });
@@ -295,16 +321,40 @@ const handleSubmit = () =>{
       });
   };
 
+  const saveEventAsync = async()=>{
+    try {
+      // Retreive the credentials
+      const credentials = await Keychain.getGenericPassword();
+      if (credentials) {
+        console.log('Credentials successfully loaded for user ' + credentials.username);
+        console.log('Credentials successfully loaded for user ' + credentials.password);
+       // console.log('AsynStore user token ' + userToken);
+       axios
+       .post(`${REACT_APP_BASE_URL_API}/event/add`, 
+         event_model,
+         {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ credentials.password},
+         })
+       .then((res) => {
+           navigation.replace('Event', "success");
+       })
+      .catch((err) => {
+        console.log("in events save error 1 =",err);
+        console.log("in events save error 2 =", err.response?err.response.data:err.response.status)
+        if(err.response.status==500){
+          console.log("err.response.status =",err.response.status);
+          logout();
+        }
+      });
+      } else {
+        console.log('No credentials stored')
+      }
+    } catch (error) {
+      console.log('Keychain couldn\'t be accessed!', error);
+    }
+  };
+
   const handleAddEvent = () => {
-    axios
-    .post(`${REACT_APP_BASE_URL_API}/event/add`, 
-      event_model,
-      {headers: { 'content-type': 'application/json', 'Authorization': "Bearer "+ userToken},
-      })
-    .then((res) => {
-        navigation.replace('Event', "success");
-    })
-    .catch((err) => console.log(`Add event error ${err}`)); 
+   saveEventAsync();
   };
 
   const onChange = (event, selectedDate) => {

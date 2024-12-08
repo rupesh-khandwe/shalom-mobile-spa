@@ -17,9 +17,10 @@ import {Avatar} from 'react-native-paper';
 import {Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider} from 'react-native-popup-menu';
 import {Dropdown} from "react-native-element-dropdown";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import * as Keychain from 'react-native-keychain';
 
 export default function Events({ navigation, route }) {
-    const {userToken, userInfo}= useContext(AuthContext);
+    const {userToken, userInfo, logout}= useContext(AuthContext);
     const SEARCH_BY_KEY = "eventByUserId?key=";
     const [search, setSearch] = useState('');
     const [languageId, setLanguageId] = useState(null);
@@ -33,12 +34,17 @@ export default function Events({ navigation, route }) {
     const Divider = () => <View style={styles.divider} />;
     const [errors, setErrors] = useState({});
 
-    useEffect(() => {
-        console.log("Events launched");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
-
-        axios
+     const getAsync = async()=>{
+      try {
+        // Retreive the credentials
+        const credentials = await Keychain.getGenericPassword();
+        if (credentials) {
+          console.log('Credentials successfully loaded for user ' + credentials.username);
+          console.log('Credentials successfully loaded for user ' + credentials.password);
+         // console.log('AsynStore user token ' + userToken);
+       axios
         .get(`${REACT_APP_BASE_URL_API}/church/language`, {
-            headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
+            headers: { 'Authorization': "Bearer "+ credentials.password, 'content-type': 'application/json'},
         })
         .then((res) => {
             var count = Object.keys(res.data).length;
@@ -52,18 +58,38 @@ export default function Events({ navigation, route }) {
             }
             setLanguageData(languageArray);
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          console.log("in events error 1 =",err);
+          console.log("in events error 2 =", err.response?err.response.data:err.response.status)
+          if(err.response.status==500){
+            console.log("err.response.status =",err.response.status);
+            logout();
+          }
+        });
 
         axios
-        .get(`${REACT_APP_BASE_URL_API}/event/user?id=${userInfo.userId}`, {
-          headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
+        .get(`${REACT_APP_BASE_URL_API}/event/user?id=${credentials.username}`, {
+          headers: { 'Authorization': "Bearer "+credentials.password, 'content-type': 'application/json'},
         })
         .then((res) => {
             setLoader(false);
             setFilteredDataSource(res.data);
             setMasterDataSource(res.data);
         })
-        .catch((err) => console.log(err));
+        .catch((err) => console.log(err, err.response?error.response.data:error.response.status));
+
+        } else {
+          console.log('No credentials stored')
+        }
+      } catch (error) {
+        console.log('Keychain couldn\'t be accessed!', error);
+      }
+
+     };
+
+    useEffect(() => {
+        console.log("Events launched");//+(filteredDataSource!=null)?"Bengaluru":filteredDataSource
+        getAsync();
       }, []);
 
       const searchWithLanguageFunction = (languageName) => {
@@ -249,7 +275,7 @@ export default function Events({ navigation, route }) {
 const renderListEmptyComponent = () => (
     <View style={styles.emptyListContainer}>
         <Text style={styles.noShalomsFound}>
-            No Availabe Event's for you Yet!
+            No available Event's for you Yet!
         </Text>
       <Text style={styles.noShalomsFound}>
           Press the search icon <Ionicons name="search-circle-sharp" size={35} color="purple" /> above to follow the one you know or click on the icon <MaterialIcons name="post-add" size={35} color="purple" /> above to add a new event.

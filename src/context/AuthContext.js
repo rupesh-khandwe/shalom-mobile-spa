@@ -5,6 +5,7 @@ import { REACT_APP_USER_PROFILE } from '@env'
 import jwt_decode from "jwt-decode";
 import dayjs from 'dayjs'
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import * as Keychain from "react-native-keychain";
 
 export const AuthContext = createContext();
 export const AuthProvider = ({children}) => {
@@ -188,10 +189,13 @@ export const AuthProvider = ({children}) => {
           console.log("userId=", keys.userId.toString())
           console.log("userName or email=", keys.userName || keys.email)
           console.log("idToken=", keys.accessToken || idToken)
+          const username = keys.userId.toString();
+          const password = keys.accessToken || idToken;
           await AsyncStorage.setItem('userToken', keys.accessToken || idToken)
           await AsyncStorage.setItem('userId', keys.userId.toString())
           await AsyncStorage.setItem('userName', keys.userName || keys.email)
           await AsyncStorage.setItem('userInfo', JSON.stringify(keys))
+          await Keychain.setGenericPassword(username, password)
         } catch (e) {
           console.log(e)
         }
