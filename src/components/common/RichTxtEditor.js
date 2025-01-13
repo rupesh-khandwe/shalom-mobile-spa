@@ -14,8 +14,10 @@ const RichTxtEditor = ({route}) => {
     const pickImage =()=> {
         ImagePicker.openPicker({
           width: 300,
-          height: 300,
-          cropping: true,
+          height: 400,
+          cropping: false,
+          compressImageMaxWidth: 400,
+          compressImageQuality: 0.8,
         }).then((image) => {
             console.log("Imagemime", image); 
             getBase64(image)

@@ -39,12 +39,13 @@ export default function EventDetails({route, navigation}) {
   const [createdOn, setCreatedOn] = useState(null);
   const [images, setImages] = useState([]);
   const width = Dimensions.get('window').width;
+  const ratio = width/341; //341 is actual image width
   const [languageName, setLanguageName] = useState(null);
 
   useEffect(() => {
     var params = route.params
     !params && setCreatedOn(moment.utc().toISOString());
-    console.log("Registration launched");
+    console.log("Event details launched");
 
     if(params && params.eventId){
       if(params.route==="notify"){
@@ -111,9 +112,9 @@ export default function EventDetails({route, navigation}) {
         <View key={index}>
             <Image
                 style={{
-                  width: '90%',
-                  borderRadius: 0,
-                  height: 400,
+                  width: width,
+                  height: 362 * ratio,
+                  resizeMode: "contain"
                 }}
                 source={{uri: item}
                 }
@@ -158,12 +159,12 @@ export default function EventDetails({route, navigation}) {
                   <Text style={{...FONTS.body5}}>Posted on {moment(createdOn).format("MMMM D")}</Text>
                 </View>
             </View>
-            {images?.length > 0 && 
+            {images != null && images.length > 0 && images[0] !=null  && 
               <View style={{ flex: 1, marginTop:5 }}>
                 <Carousel
                   loop
                   width={width}
-                  height={350}
+                  height={362 * ratio}
                   autoPlay={true}
                   data={images}
                   mode="advanced-parallax"

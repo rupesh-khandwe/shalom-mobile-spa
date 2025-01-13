@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -11,49 +11,78 @@ import {
 } from 'react-native';
 
 import CustomButton from '../../common/CustomButton';
+import { AuthContext } from '../../../context/AuthContext';
 import { icon } from '../../../assets/images';
-import axios from 'axios';
-import {REACT_APP_LOCATION_API, REACT_APP_USER_PROFILE} from '@env'
 import PhoneInput from "react-native-phone-number-input";
+import EncryptedStorage from 'react-native-encrypted-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { GoogleSignin, statusCodes, GoogleSigninButton } from '@react-native-google-signin/google-signin';
 
 export default function Mobile({route, navigation}) {
-  const [email, setEmail] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+
   const [phone1, setPhone1] = useState('');
-  const [isFocus, setIsFocus] = useState(false);
   const [errors, setErrors] = useState({});
-  const [secureText, setSecureText] = useState(true);
-  const [confirmSecureText, setConfirmSecureText] = useState(true);
+  const {googleLogin}= useContext(AuthContext);
 
   useEffect(() => {
 
-    console.log("Registration launched"+REACT_APP_LOCATION_API);
-
-    var extUserObj =  route.params
-    for ( var key in extUserObj) {
-       console.log(" key is : "   + key + "   and value for key is   " + extUserObj[key]);
-       if(key==="firstName")
-        setFirstName(extUserObj[key])
-       if(key==="lastName")
-        setLastName(extUserObj[key])
-       if(key==="email")
-        setEmail(extUserObj[key])
-    }
-       console.log("firstName ", firstName);
-       console.log("firstName ", lastName);
-       console.log("email ", email);
-
+    console.log("Mobile launched");
+    retrieveUserSession();
+    GoogleSignin.configure({
+      webClientId:
+          '494269236356-iopl5mdss5hjcv94deq89egm2c18ifb6.apps.googleusercontent.com',
+      offlineAccess: true,
+      //forceCodeForRefreshToken: true,
+  });
   }, []);
 
- 
+  useFocusEffect(
+    React.useCallback(() => {
+      // This will be called when the screen comes into focus, 
+      // including when navigating back to it
+     retrieveUserSession();
+     GoogleSignin.configure({
+      webClientId:
+          '494269236356-iopl5mdss5hjcv94deq89egm2c18ifb6.apps.googleusercontent.com',
+      offlineAccess: true,
+      //forceCodeForRefreshToken: true,
+  });
+      return () => {
+        // This will be called when the screen goes out of focus
+        console.log('Screen blurred');
+      };
+    }, [])
+  );
+
+  async function retrieveUserSession() {
+    try {   
+        const registerMobile = await EncryptedStorage.getItem("register_mobile");
+        console.log("  registerMobile value for key is   " + registerMobile?JSON.parse(registerMobile).phone1:"");
+        setPhone1(registerMobile?JSON.parse(registerMobile).phone1:"");
+        if (registerMobile !== undefined) {
+
+        }
+    } catch (error) {
+        // There was an error on the native side
+    }
+}
+
+  async function storeUserSession(formValues) {
+    try {
+        await EncryptedStorage.setItem(
+            "register_mobile",
+            JSON.stringify(formValues)
+        );
+    } catch (error) {
+        // There was an error on the native side
+    }
+}
 
   const validateForm = () =>{
       Keyboard.dismiss();
       let errors = {};
-      const requireFieldMsg = " Required field*";
       const regexPhone = /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/i;
-      let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
+      console.log("phone= ", phone1)
       if(!phone1){
         errors.phone1 = "Please enter phone";
       } else if(!regexPhone.test(phone1)){
@@ -65,19 +94,38 @@ export default function Mobile({route, navigation}) {
 
   const handleSubmit = () =>{
     if(validateForm()){
-      setPhone1("");
-      setEmail("");
-      setFirstName("");
-      setLastName("");
       setErrors({});
-      navigation.push("Register-Password", {
-        "firstName": firstName,
-        "lastName": lastName,
-        "email": email,
+      const formValues = {
         "phone1": phone1
-      })
+      }
+      storeUserSession(formValues);
+      //setFormData(formValues);
+      navigation.push("Register-Password")
     }
   }
+
+  const signIn = async () => {
+    try {
+        console.log("Google signIn call start== ");  
+        await GoogleSignin.hasPlayServices();
+        const userInfo = await GoogleSignin.signIn();
+
+        console.log("Google signIn == ",JSON.stringify(userInfo));
+        googleLogin(userInfo);
+    } catch (error) {
+        if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+            console.log('User cancelled the login flow');
+        } else if (error.code === statusCodes.IN_PROGRESS) {
+            console.log('Signing in');
+        } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+            console.log('Play services not available');
+        } else {
+            console.log('Some other error happened');
+            console.log(error.message);
+            console.log(error.code);
+        }
+    }
+}
 
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
@@ -93,21 +141,6 @@ export default function Mobile({route, navigation}) {
           />
         </View>
 
-       {/*  <Text
-          style={{
-            fontFamily: 'Roboto-Medium',
-            fontSize: 28,
-            fontWeight: '500',
-            color: '#333',
-            marginBottom: 30,
-          }}>
-          What's your phone number?
-        </Text> */}
-
-      
-
-       
-
       <PhoneInput
             defaultValue={phone1}
             defaultCode="IN"
@@ -120,6 +153,7 @@ export default function Mobile({route, navigation}) {
             }}
             containerStyle={styles.phoneInput}
             placeholder="Phone*"
+            autoFocus={true}
             error={errors.phone1}
           />
         {
@@ -138,6 +172,25 @@ export default function Mobile({route, navigation}) {
             <Text style={{color: '#AD40AF', fontWeight: '700'}}> Login</Text>
           </TouchableOpacity>
         </View>
+
+     <View style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+      }}>
+         <Text>Or</Text>
+      </View>
+        <View style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          marginBottom: 30,
+      }}>
+          <GoogleSigninButton
+              style={{width: 192, height: 48, marginTop: 30}}
+              size={GoogleSigninButton.Size.Wide}
+              color={GoogleSigninButton.Color.Dark}
+              onPress={signIn}
+          />
+      </View>
       </ScrollView>
     </SafeAreaView>
   );

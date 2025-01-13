@@ -33,12 +33,13 @@ export default function ChurchDetails({route, navigation}) {
   const [languageName, setLanguageName] = useState('');
   const [createdOn, setCreatedOn] = useState(null);
   const [images, setImages] = useState([]);
-  const width = Dimensions.get('screen').width;
+  const width = Dimensions.get('window').width;
+  const ratio = width/341; //341 is actual image width
 
   useEffect(() => {
     var params = route.params
     !params && setCreatedOn(moment.utc().toISOString());
-    console.log("Registration launched");
+    console.log("Church details launched");
 
     if(params && params.userId){
       setUserId(params.userId)
@@ -58,6 +59,7 @@ export default function ChurchDetails({route, navigation}) {
       setLanguageName(params.languageName)
       let churchImg = [];
       params.churchImageUrl?.split('|').map((img) => {
+        console.log("img==", img);
         churchImg.push(img)
       });
       setImages(churchImg);
@@ -65,14 +67,15 @@ export default function ChurchDetails({route, navigation}) {
   }, []);
 
   const _renderItem = ({item, index}) =>{
+    console.log("Image == ", item);
     return (
         <View key={index}>
             <Image
                 style={{
-                    width: '90%',
-                    borderRadius: 0,
-                    height: 400,
+                  width: width,
+                  height: 362 * ratio,
                 }}
+                resizeMode="contain" 
                 source={{uri: item}
                 }
               />
@@ -116,20 +119,21 @@ export default function ChurchDetails({route, navigation}) {
                   <Text style={{...FONTS.body5}}>Posted on {moment(createdOn).format("MMMM D")}</Text>
                 </View>
             </View>
-            {images?.length > 0 && <View style={{ flex: 1, marginTop: 5 }}>
-            <Carousel
-                loop
-                width={width }
-                height={350}
-                autoPlay={true}
-                data={images}
-                mode="advanced-parallax"
-                parallaxScrollingScale={0.9}
-                parallaxScrollingOffset={50}
-                scrollAnimationDuration={1000}
-                renderItem={_renderItem}
-            />
-        </View>}
+            {images != null && images.length > 0 && images[0] !=null &&  
+            <View style={{ flex: 1, marginTop: 5 }}>
+              <Carousel
+                  loop
+                  width={width}
+                  height={362 * ratio}
+                  autoPlay={true}
+                  data={images}
+                  mode="advanced-parallax"
+                  parallaxScrollingScale={0.9}
+                  parallaxScrollingOffset={50}
+                  scrollAnimationDuration={1000}
+                  renderItem={_renderItem}
+              />
+            </View>}
         <View style={{flexDirection:'row',}}>
                 {/*  Text */}
                 <View style={{justifyContent:'space-around', flex:2/3, margin:10}}>
@@ -140,7 +144,7 @@ export default function ChurchDetails({route, navigation}) {
                 <Text><Entypo name="language" size={24} color="purple" />  {languageName}</Text>
                 <Paragraph> <MaterialCommunityIcons name="details" size={20} color="purple" style={{marginRight: 5}}/>  {aboutChurch}</Paragraph>
                 <Text><MaterialIcons name="language" size={24} color="purple" />  {churchWebsiteUrl}</Text>
-                <Paragraph><FontAwesome name="address-card" size={21} color="purple" /> {addressline1}, {addressline2}, {regionName}, {cityName}, {stateName}</Paragraph>
+                <Paragraph><FontAwesome name="address-card" size={21} color="purple" /> {addressline1}, {addressline2}, {cityName}, {stateName}</Paragraph>
 {/*                 <Text><Ionicons name="time-sharp" size={24} color="purple" /> {churchTime}</Text> */}
                 <Text><FontAwesome name="phone-square" size={24} color="purple" /> {phone1}, {phone2}</Text>
             </View>

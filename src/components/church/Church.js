@@ -43,8 +43,8 @@ export default function Church({ navigation, route }) {
         // Retreive the credentials
         const credentials = await Keychain.getGenericPassword();
         if (credentials) {
-          console.log('Credentials successfully loaded for user ' + credentials.username);
-          console.log('Credentials successfully loaded for user ' + credentials.password);
+         // console.log('Credentials successfully loaded for user ' + credentials.username);
+         // console.log('Credentials successfully loaded for user ' + credentials.password);
          // console.log('AsynStore user token ' + userToken);
          axios
          .get(`${REACT_APP_BASE_URL_API}/church/language`, {
@@ -76,7 +76,7 @@ export default function Church({ navigation, route }) {
           headers: { 'Authorization': "Bearer "+credentials.password, 'content-type': 'application/json'},
         })
         .then((res) => {
-            //console.log(res.data)
+           // console.log(res.data)
             setLoader(false);
             setFilteredDataSource(res.data);
             setMasterDataSource(res.data);
@@ -124,7 +124,7 @@ export default function Church({ navigation, route }) {
             // Filter the masterDataSource
             // Update FilteredDataSource
             const newData = masterDataSource.filter(function (item) {
-                const itemData = item.createdBy.toString().toLowerCase()+","+item.userRegionName.toString().toLowerCase()+","+item.userCityName.toString().toLowerCase();
+                const itemData = item.createdBy.toString().toLowerCase()+","+","+item.userCityName.toString().toLowerCase();
                 const textData = text.toString().toLowerCase();
                 if (languageName == null || languageName === 'All') {
                     return itemData.indexOf(textData) > -1;
@@ -247,7 +247,7 @@ export default function Church({ navigation, route }) {
               <Text><Entypo name="language" size={24} color="purple" />  {item.languageName}</Text>
               <Paragraph> <MaterialCommunityIcons name="details" size={20} color="purple" style={{marginRight: 5}}/>  {item.aboutChurch}</Paragraph>
                
-                <Paragraph><FontAwesome name="address-card" size={21} color="purple" /> {item.addressLine1}, {item.addressLine2}, {item.userRegionName}, {item.userCityName}, {item.userStateName}, {item.userCountryName}</Paragraph>
+                <Paragraph><FontAwesome name="address-card" size={21} color="purple" /> {item.addressLine1}, {item.addressLine2}, {item.userCityName}, {item.userStateName}, {item.userCountryName}</Paragraph>
 {/*                 <Text><Ionicons name="time-sharp" size={24} color="purple" /> {item.churchTime}</Text> */}
                 <Text><FontAwesome name="phone-square" size={24} color="purple" /> {item.phone1}, {item.phone2}</Text>
             </View>

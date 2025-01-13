@@ -10,8 +10,6 @@ import { FontAwesome, AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/
 import { Video, ResizeMode } from 'expo-av';
 import { AuthContext } from '../context/AuthContext';
 import { REACT_APP_BASE_URL_API } from '@env'
-import { PinchGestureHandler, State } from 'react-native-gesture-handler';
-import useAxios from './common/useAxios';
 import moment from "moment";
 import { shalomInside } from '../assets/images';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -20,6 +18,10 @@ import {Avatar} from 'react-native-paper';
 import ImgToBase64 from 'react-native-image-base64';
 import * as Keychain from 'react-native-keychain';
 import Carousel from 'react-native-reanimated-carousel';
+import {
+  configureReanimatedLogger,
+  ReanimatedLogLevel,
+} from 'react-native-reanimated';
 
 export default function HomeScreen({ navigation }) {
     const {userToken, userInfo, userId, userName, logout}= useContext(AuthContext);
@@ -39,12 +41,17 @@ export default function HomeScreen({ navigation }) {
     const [shareImage, setShareImage] = useState('');
     const WindowWidth = Dimensions.get('window').width
     const height = Dimensions.get('window').height
+    const ratio = WindowWidth/341; //341 is actual image width
+    configureReanimatedLogger({
+      level: ReanimatedLogLevel.warn,
+      strict: false, // Reanimated runs in strict mode by default
+    });
 
     const onRefresh = React.useCallback(() => {
       setRefreshing(true);
       setTimeout(() => {
       AsyncStorage.getItem('userId').then((userId)=>{
-          console.log("On refresh Home screen ",userId);
+          //console.log("On refresh Home screen ",userId);
             axios
             .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${userId}`, {
               headers: { 'Authorization': "Bearer "+userToken, 'content-type': 'application/json'},
@@ -87,7 +94,7 @@ export default function HomeScreen({ navigation }) {
             headers: { 'Authorization': "Bearer "+ userToken, 'content-type': 'application/json'},
         })
         .then((res) => {
-            //console.log(res.data);
+            console.log(res.data);
             setFilteredDataSource(res.data);
         })
         .catch((err) => console.log(err)); 
@@ -104,12 +111,12 @@ export default function HomeScreen({ navigation }) {
                             headers: {'Authorization': "Bearer " + userToken, 'content-type': 'application/json'},
                         })
                         .then((res) => {
-                            console.log(res.data);
+                            //console.log(res.data);
                             setLoader(false);
                             setFilteredDataSource(res.data);
                         })
                         .catch((err) => {
-                          console.log("in events error 1 =",err);
+                          //console.log("in events error 1 =",err);
                           console.log("in events error 2 =", err.response?err.response.data:err.response.status)
                           if(err.response.status==500){
                             console.log("err.response.status =",err.response.status);
@@ -127,7 +134,7 @@ export default function HomeScreen({ navigation }) {
                         })
                         .catch((err) => 
                           {
-                            console.log("in events error 1 =",err);
+                            //console.log("in events error 1 =",err);
                             console.log("in events error 2 =", err.response?err.response.data:err.response.status)
                             if(err.response.status==500){
                               console.log("err.response.status =",err.response.status);
@@ -194,8 +201,8 @@ const onShare = async (message, imageUrl) => {
   const getAsync = async()=>{
     const credentials = await Keychain.getGenericPassword();
     if (credentials) {
-      console.log('Credentials successfully loaded for user ' + credentials.username);
-      console.log('Credentials successfully loaded for user ' + credentials.password);
+      //console.log('Credentials successfully loaded for user ' + credentials.username);
+     // console.log('Credentials successfully loaded for user ' + credentials.password);
 
       axios
       .get(`${REACT_APP_BASE_URL_API}/shalom/shalomsWithLikeComment?userId=${credentials.username}`, {
@@ -248,14 +255,13 @@ const onShare = async (message, imageUrl) => {
     }
 
     const renderItem = ({item, index}) =>{
-      console.log("renderItem***", item, index)
       return (
           <View key={index}>
               <Image
                   style={{
-                    width: '100%',
-                    borderRadius: 0,
-                    height: 400,
+                    width: WindowWidth,
+                    height: 362 * ratio,
+                    resizeMode: "contain"
                   }}
                   source={{uri: item}
                   }
@@ -345,12 +351,12 @@ const onShare = async (message, imageUrl) => {
                     />
                 </View>
             }
-            {
+            {item.imageList != null && item.imageList.length > 0 && item.imageList[0] !=null &&
                           <View style={{ flex: 1, marginTop:5 }}>
                           <Carousel
                             loop
                             width={WindowWidth}
-                            height={350}
+                            height={362 * ratio}
                             autoPlay={true}
                             data={item.imageList}
                             mode="advanced-parallax"

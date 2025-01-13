@@ -6,6 +6,7 @@ import jwt_decode from "jwt-decode";
 import dayjs from 'dayjs'
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import * as Keychain from "react-native-keychain";
+import { showMessage  } from "react-native-flash-message";
 
 export const AuthContext = createContext();
 export const AuthProvider = ({children}) => {
@@ -32,7 +33,7 @@ export const AuthProvider = ({children}) => {
         postUserParam.userName = postUserParam.email;
         postUserParam.imageUrl = postUserParam.photo;
         axios
-            .post(`${REACT_APP_USER_PROFILE}/register`, postUserParam)
+            .post(`${REACT_APP_USER_PROFILE}/gregister`, postUserParam)
             .then((res) => {
                 let resUserInfo = res.data;
                 setUserToken(userInfo.data.idToken);
@@ -62,7 +63,33 @@ export const AuthProvider = ({children}) => {
             setUserInfo(userInfo);
             setUserId(userInfo.userId);
         })
-        .catch((err) => console.log(`Login error ${err}`)); 
+        .catch((err) => {
+          console.log(`Login error ${err}`);
+          if(err.response.status===403){
+            console.log("err.response.status =",err.response.status);
+            showMessage({
+              message: "Invalid email or password, please enter valid credentials or login through Gmail.",
+              type: "info",
+              hideOnPress: true,
+              backgroundColor: "red",
+            })
+          } else if(err.response.status===409) {
+            console.log("err.response.status =",err.response.status);
+            showMessage({
+              message: "Unable to login, please email us @ believers.shalom@gmail.com",
+              type: "info",
+              hideOnPress: true,
+              backgroundColor: "red",
+            })
+          } else {
+            showMessage({
+              message: "Unable to login, please email us @ believers.shalom@gmail.com",
+              type: "info",
+              hideOnPress: true,
+              backgroundColor: "red",
+            })
+          }
+        }); 
         setIsLoading(false);
      }
 

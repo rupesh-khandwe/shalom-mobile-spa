@@ -30,14 +30,7 @@ const LoginScreen = ({navigation, route}) => {
   const register = route.params;
   const [errors, setErrors] = useState({});
   const [secureText, setSecureText] = useState(true);
-  const [loaded, setLoaded] = useState(false);
-  const [userGoogleInfo, setUserGoogleInfo] = useState('');
-  const [userInfo, setUserInfo] = useState(null);
-  const [token, setToken] = useState("");
-/*  const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: "11084367898-ksku5j6u19pbkpbhk7bg5tk8lot9jbug.apps.googleusercontent.com",
-    iosClientId: "11084367898-dqa37c1dkj9m41slg6l69b9gejo97k3h.apps.googleusercontent.com"
-  })*/
+
     useEffect(() => {
         GoogleSignin.configure({
             webClientId:

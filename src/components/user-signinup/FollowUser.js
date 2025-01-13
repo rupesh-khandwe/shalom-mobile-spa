@@ -63,7 +63,7 @@ export default function FollowUser({ navigation, route }) {
     
       const followUser = (followerId, followName)=>{
         followPayload.followId=followerId;
-      //  console.log(followPayload);
+      console.log(followPayload);
         axios
         .put(`${REACT_APP_BASE_URL_API}/shalom/saveFollow`,
             followPayload,

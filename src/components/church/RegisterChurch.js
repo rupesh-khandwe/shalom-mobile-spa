@@ -68,6 +68,7 @@ export default function RegisterChurch({route,navigation}) {
   const [languageName, setLanguageName] = useState(null);
   const [languageData, setLanguageData] = useState([]);
   const width = Dimensions.get('window').width;
+  const ratio = width/341; //341 is actual image width
   let imageList = [];
   let imageDataList = [];
   const church_model = {
@@ -96,8 +97,8 @@ export default function RegisterChurch({route,navigation}) {
       // Retreive the credentials
       const credentials = await Keychain.getGenericPassword();
       if (credentials) {
-        console.log('Credentials successfully loaded for user ' + credentials.username);
-        console.log('Credentials successfully loaded for user ' + credentials.password);
+      //  console.log('Credentials successfully loaded for user ' + credentials.username);
+      //  console.log('Credentials successfully loaded for user ' + credentials.password);
        // console.log('AsynStore user token ' + userToken);
        axios
        .get(`${REACT_APP_BASE_URL_API}/church/language`, {
@@ -133,6 +134,7 @@ export default function RegisterChurch({route,navigation}) {
 
   useEffect(() => {
     //const updateChurch = route.params;
+    console.log("Register church launch");
     var params = route.params
     console.log("route.params",params);
     setUserId(userInfo.userId);
@@ -142,7 +144,7 @@ export default function RegisterChurch({route,navigation}) {
     //console.log("updating church for existing",params.churchId,params.userId ,params.churchName,  params.addressline1,  params.addressline2, params.phone1,  params.phone2,  params.countryId,  params.regionId, params.stateId,  params.cityId, params.churchWebsiteUrl);
     console.log("Current date ", moment(new Date()).format("YYYY-MM-DD'T'HH:mm:ss.SSS"));
     console.log("Current date1 ", moment.utc().toISOString())
-    console.log("Registration launched"+REACT_APP_LOCATION_API);
+    console.log("Register church launched"+REACT_APP_LOCATION_API);
 
    getAsyncLang();
 
@@ -209,7 +211,7 @@ export default function RegisterChurch({route,navigation}) {
     if(!countryId) errors.countryId = "Please select country";
     if(!stateId) errors.stateId = "Please select state";
     if(!cityId) errors.cityId = "Please select city";
-    if(!regionId) errors.regionId = "Please select region";
+    //if(!regionId) errors.regionId = "Please select region";
     setErrors(errors);
     return Object.keys(errors).length === 0;
 }
@@ -314,8 +316,8 @@ const handleSubmit = () =>{
       // Retreive the credentials
       const credentials = await Keychain.getGenericPassword();
       if (credentials) {
-        console.log('Credentials successfully loaded for user ' + credentials.username);
-        console.log('Credentials successfully loaded for user ' + credentials.password);
+       // console.log('Credentials successfully loaded for user ' + credentials.username);
+       // console.log('Credentials successfully loaded for user ' + credentials.password);
        // console.log('AsynStore user token ' + userToken);
        axios
        .post(`${REACT_APP_BASE_URL_API}/church/register`, 
@@ -386,11 +388,14 @@ const handleSubmit = () =>{
       maxFiles: 3,
       width: 300,
       height: 400,
-      cropping: true,
+      cropping: false,
+      compressImageMaxWidth: 400,
+      compressImageQuality: 0.8,
       waitAnimationEnd: false,
       forceJpg: true,
       mediaType: 'photo',
-      includeBase64: true
+      includeBase64: true,
+      aspectRatio: { width: 16, height: 20 }
     })
     .then(res => {
       res.map(image=>{
@@ -415,7 +420,8 @@ const handleSubmit = () =>{
                 style={{
                     width: '90%',
                     borderRadius: 0,
-                    height: 400,
+                    height: 600,
+                    
                 }}
                 source={{uri: item?item.path?item.path:item:""}
                 }
@@ -537,7 +543,7 @@ const handleSubmit = () =>{
                   <Carousel
                       loop
                       width={width}
-                      height={350}
+                      height={600}
                       autoPlay={true}
                       data={images}
                       mode="advanced-parallax"
@@ -771,7 +777,7 @@ const handleSubmit = () =>{
           onBlur={() => setIsFocus(false)}
           onChange={item => {
             setCityId(item.value);
-            handleRegion(item.value);
+            //handleRegion(item.value);
             setIsFocus(false);
           }}
           renderLeftIcon={() => (
@@ -788,7 +794,7 @@ const handleSubmit = () =>{
             errors.cityId ? (<Text style={styles.errorText}>{errors.cityId}</Text>):null
           }
 
-      {!regionEdit && 
+      {/* {!regionEdit && 
         <View
         style={{
           flexDirection: "row",
@@ -847,7 +853,7 @@ const handleSubmit = () =>{
           />}
           {
             errors.regionId ? (<Text style={styles.errorText}>{errors.regionId}</Text>):null
-          }
+          } */}
 
         <CustomButton label={churchId?'Update':'Register'} onPress={handleSubmit} />
 

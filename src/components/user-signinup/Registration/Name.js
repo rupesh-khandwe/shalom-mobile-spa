@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -15,22 +15,53 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import CustomButton from '../../common/CustomButton';
 import { icon } from '../../../assets/images';
-import {REACT_APP_LOCATION_API} from '@env'
-import { showMessage  } from "react-native-flash-message";
+import { useFocusEffect } from '@react-navigation/native';
+import EncryptedStorage from 'react-native-encrypted-storage';
+import { GoogleSignin, statusCodes, GoogleSigninButton } from '@react-native-google-signin/google-signin';
+import { AuthContext } from '../../../context/AuthContext';
 
 export default function RegisterScreen({route, navigation}) {
+  const {googleLogin}= useContext(AuthContext);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [isFocus, setIsFocus] = useState(true);
   const [errors, setErrors] = useState({});
-  let registerError = route.params;
 
   useEffect(() => {
 
-    console.log("Registration launched"+REACT_APP_LOCATION_API);
-
-
+    console.log("Registration launched");
+    GoogleSignin.configure({
+      webClientId:
+          '494269236356-iopl5mdss5hjcv94deq89egm2c18ifb6.apps.googleusercontent.com',
+      offlineAccess: true,
+      //forceCodeForRefreshToken: true,
+  });
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // This will be called when the screen comes into focus, 
+      // including when navigating back to it
+      return () => {
+        // This will be called when the screen goes out of focus
+        console.log('Screen blurred');
+      };
+    }, [])
+  );
+
+  async function storeUserSession(formValues) {
+    try {
+      console.log('Screen Name store', formValues);
+        await EncryptedStorage.setItem(
+            "register_name",
+            JSON.stringify(formValues)
+        );
+        console.log("Congrats! You've just stored your first value!");
+        // Congrats! You've just stored your first value!
+    } catch (error) {
+        // There was an error on the native side
+    }
+}
 
   const validateForm = () =>{
       Keyboard.dismiss();
@@ -49,27 +80,47 @@ export default function RegisterScreen({route, navigation}) {
       setFirstName("");
       setLastName("");
       setErrors({});
-      console.log(errors+"****");
-      navigation.push("Register-Email", {
+      const formValues = {
         "firstName": firstName,
         "lastName": lastName
-      })
+      }
+      storeUserSession(formValues);
+      navigation.push("Register-Email");
     }
   }
 
-  const clear = ()=>{
-    registerError = "";
-  }
+  const signIn = async () => {
+    try {
+        console.log("Google signIn call start== ");  
+        await GoogleSignin.hasPlayServices();
+        const userInfo = await GoogleSignin.signIn();
+
+        console.log("Google signIn == ",JSON.stringify(userInfo));
+        googleLogin(userInfo);
+    } catch (error) {
+        if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+            console.log('User cancelled the login flow');
+        } else if (error.code === statusCodes.IN_PROGRESS) {
+            console.log('Signing in');
+        } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+            console.log('Play services not available');
+        } else {
+            console.log('Some other error happened');
+            console.log(error.message);
+            console.log(error.code);
+        }
+    }
+}
 
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
-                 {isFocus && registerError==="fail"?showMessage({
+                 {/* {isFocus && registerError==="fail"?showMessage({
                 message: "Provided e-mail address is already in-use, please use different e-mail.",
                 type: "info",
                 hideOnPress: true,
                 autoHide: false,
                 backgroundColor: "red",
-              }):clear}
+              }):clear} */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{paddingHorizontal: 25}}>
@@ -119,12 +170,7 @@ export default function RegisterScreen({route, navigation}) {
           error={errors.lastName}
         />
   
-       {/*  <CustomButton label={'Register'} onPress={handleSubmit} /> */}
-{/*         <CustomButton label={'Next'} onPress={() => navigation.push("Register-Email", {
-                    "firstName": firstName,
-                    "lastName": lastName
-                  })} /> */}
-            <CustomButton label={'Next'} onPress={handleSubmit} /> 
+          <CustomButton label={'Next'} onPress={handleSubmit} /> 
         <View
           style={{
             flexDirection: 'row',
@@ -136,6 +182,24 @@ export default function RegisterScreen({route, navigation}) {
             <Text style={{color: '#AD40AF', fontWeight: '700'}}> Login</Text>
           </TouchableOpacity>
         </View>
+        <View style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+      }}>
+         <Text>Or</Text>
+      </View>
+        <View style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          marginBottom: 30,
+      }}>
+          <GoogleSigninButton
+              style={{width: 192, height: 48, marginTop: 30}}
+              size={GoogleSigninButton.Size.Wide}
+              color={GoogleSigninButton.Color.Dark}
+              onPress={signIn}
+          />
+      </View>
       </ScrollView>
     </SafeAreaView>
   );

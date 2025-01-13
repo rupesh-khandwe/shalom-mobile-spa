@@ -39,8 +39,8 @@ export default function Events({ navigation, route }) {
         // Retreive the credentials
         const credentials = await Keychain.getGenericPassword();
         if (credentials) {
-          console.log('Credentials successfully loaded for user ' + credentials.username);
-          console.log('Credentials successfully loaded for user ' + credentials.password);
+         // console.log('Credentials successfully loaded for user ' + credentials.username);
+         // console.log('Credentials successfully loaded for user ' + credentials.password);
          // console.log('AsynStore user token ' + userToken);
        axios
         .get(`${REACT_APP_BASE_URL_API}/church/language`, {

@@ -106,8 +106,8 @@ export default function AddEvent({route, navigation}) {
       // Retreive the credentials
       const credentials = await Keychain.getGenericPassword();
       if (credentials) {
-        console.log('Credentials successfully loaded for user ' + credentials.username);
-        console.log('Credentials successfully loaded for user ' + credentials.password);
+       // console.log('Credentials successfully loaded for user ' + credentials.username);
+       // console.log('Credentials successfully loaded for user ' + credentials.password);
        // console.log('AsynStore user token ' + userToken);
        axios
        .get(`${REACT_APP_BASE_URL_API}/event/category`, {
@@ -166,7 +166,7 @@ export default function AddEvent({route, navigation}) {
     var params = route.params
     console.log("route.params",params);
     !params && setCreatedOn(moment.utc().toISOString());
-    console.log("Registration launched");
+    console.log("Events launched");
     
     getAsyncData();
     getCountryList(function(list) {
@@ -326,8 +326,8 @@ const handleSubmit = () =>{
       // Retreive the credentials
       const credentials = await Keychain.getGenericPassword();
       if (credentials) {
-        console.log('Credentials successfully loaded for user ' + credentials.username);
-        console.log('Credentials successfully loaded for user ' + credentials.password);
+       // console.log('Credentials successfully loaded for user ' + credentials.username);
+       // console.log('Credentials successfully loaded for user ' + credentials.password);
        // console.log('AsynStore user token ' + userToken);
        axios
        .post(`${REACT_APP_BASE_URL_API}/event/add`, 
@@ -444,7 +444,7 @@ const handleSubmit = () =>{
                 style={{
                   width: '90%',
                   borderRadius: 0,
-                  height: 400,
+                  height: 600,
                 }}
                 source={{uri: item?item.path?item.path:item:""}
                 }
@@ -587,7 +587,7 @@ const handleSubmit = () =>{
                     <Carousel
                         loop
                         width={width}
-                        height={350}
+                        height={600}
                         autoPlay={true}
                         data={images}
                         mode="advanced-parallax"

@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -15,32 +15,75 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import CustomButton from '../../common/CustomButton';
 import { icon } from '../../../assets/images';
-import {REACT_APP_LOCATION_API, REACT_APP_USER_PROFILE} from '@env'
+import { useFocusEffect } from '@react-navigation/native';
+import EncryptedStorage from 'react-native-encrypted-storage';
+import { GoogleSignin, statusCodes, GoogleSigninButton } from '@react-native-google-signin/google-signin';
+import { AuthContext } from '../../../context/AuthContext';
 
 export default function Email({route, navigation}) {
 
   const [email, setEmail] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
   const [errors, setErrors] = useState({});
+  const {googleLogin}= useContext(AuthContext);
 
   useEffect(() => {
 
-    console.log("Registration launched"+REACT_APP_LOCATION_API);
-
-    var extNameObj =  route.params
-    for ( var key in extNameObj) {
-       console.log(" key is : "   + key + "   and value for key is   " + extNameObj[key]);
-       if(key==="firstName")
-        setFirstName(extNameObj[key])
-       if(key==="lastName")
-        setLastName(extNameObj[key])
-    }
-       console.log("firstName " + firstName);
-       console.log("firstName " + lastName);
+    console.log("Email launched");
+    GoogleSignin.configure({
+      webClientId:
+          '494269236356-iopl5mdss5hjcv94deq89egm2c18ifb6.apps.googleusercontent.com',
+      offlineAccess: true,
+      //forceCodeForRefreshToken: true,
+  });
 
   }, []);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      // This will be called when the screen comes into focus, 
+      // including when navigating back to it
+     // console.log('Screen focused', formData);
+     GoogleSignin.configure({
+      webClientId:
+          '494269236356-iopl5mdss5hjcv94deq89egm2c18ifb6.apps.googleusercontent.com',
+      offlineAccess: true,
+      //forceCodeForRefreshToken: true,
+  });
+     retrieveUserSession();
+
+      return () => {
+        // This will be called when the screen goes out of focus
+        console.log('Screen blurred');
+      };
+    }, [])
+  );
+
+  async function retrieveUserSession() {
+    try {   
+        const registerEmail = await EncryptedStorage.getItem("register_email");
+        console.log("  registerEmail value for key is   " + registerEmail?JSON.parse(registerEmail).email:"");
+        setEmail(registerEmail?JSON.parse(registerEmail).email:"");
+        if (registerEmail !== undefined) {
+
+        }
+    } catch (error) {
+        // There was an error on the native side
+    }
+}
+
+  async function storeUserSession(formValues) {
+    try {
+        await EncryptedStorage.setItem(
+            "register_email",
+            JSON.stringify(formValues)
+        );
+        console.log("Congrats! You've just stored your Email value!");
+        // Congrats! You've just stored your first value!
+    } catch (error) {
+        // There was an error on the native side
+    }
+  }
+  
   const validateForm = () =>{
       Keyboard.dismiss();
       let errors = {};
@@ -59,16 +102,38 @@ export default function Email({route, navigation}) {
   const handleSubmit = () =>{
     if(validateForm()){
       setEmail("");
-      setFirstName("");
-      setLastName("");
       setErrors({});
-      navigation.push("Register-Mobile", {
-        "firstName": firstName,
-        "lastName": lastName,
+      const formValues = {
         "email": email
-      })
+      }
+      storeUserSession(formValues);
+      //setFormData(formValues);
+      navigation.push("Register-Mobile")
     }
   }
+
+  const signIn = async () => {
+    try {
+        console.log("Google signIn call start== ");  
+        await GoogleSignin.hasPlayServices();
+        const userInfo = await GoogleSignin.signIn();
+
+        console.log("Google signIn == ",JSON.stringify(userInfo));
+        googleLogin(userInfo);
+    } catch (error) {
+        if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+            console.log('User cancelled the login flow');
+        } else if (error.code === statusCodes.IN_PROGRESS) {
+            console.log('Signing in');
+        } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+            console.log('Play services not available');
+        } else {
+            console.log('Some other error happened');
+            console.log(error.message);
+            console.log(error.code);
+        }
+    }
+}
 
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
@@ -128,6 +193,24 @@ export default function Email({route, navigation}) {
             <Text style={{color: '#AD40AF', fontWeight: '700'}}> Login</Text>
           </TouchableOpacity>
         </View>
+        <View style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+      }}>
+         <Text>Or</Text>
+      </View>
+        <View style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          marginBottom: 30,
+      }}>
+          <GoogleSigninButton
+              style={{width: 192, height: 48, marginTop: 30}}
+              size={GoogleSigninButton.Size.Wide}
+              color={GoogleSigninButton.Color.Dark}
+              onPress={signIn}
+          />
+      </View>
       </ScrollView>
     </SafeAreaView>
   );
